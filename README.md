@@ -1,319 +1,312 @@
-<<<<<<< HEAD
-# TechSapo Hugging Face Integration
+# TechSapo - IT Infrastructure Support Tool with AI Orchestration
 
-Enterprise-grade Infrastructure Support Tool with Multi-Tier LLM Orchestrator and Japanese embedding models integration.
+Enterprise-grade IT Infrastructure Support Tool featuring **Wall-Bounce Analysis** with Multi-LLM orchestration, comprehensive Prometheus monitoring, and Japanese AI integration.
 
-## 🚀 Features
+## 🎯 Core Architecture
 
-### Core Capabilities
-- **Japanese Embedding Models**: 5 specialized models for Japanese text processing
-- **Multi-Model Analysis**: Compare and analyze results from multiple models
-- **Text Generation**: Advanced inference with conversation management
-- **Cost Tracking**: Real-time budget monitoring and cost optimization
-- **Enterprise Security**: Comprehensive error handling and validation
+### Wall-Bounce Analysis System (必須壁打ち)
+すべてのクエリで複数LLMによる協調分析を実行する革新的システム
+- **必須要件**: 最低2つのLLMによる分析
+- **合意形成**: 複数の回答から最適解を導出
+- **品質保証**: ハルシネーション検証とエスカレーション機能
 
-### Supported Models
-- `cl-tohoku/bert-base-japanese-v3` - BERT base model (Tohoku University)
-- `sonoisa/sentence-bert-base-ja-mean-tokens-v2` - Sentence-BERT for Japanese
-- `colorfulscoop/sbert-base-ja` - Sentence-BERT (ColorfulScoop)
-- `rinna/japanese-roberta-base` - RoBERTa base model (rinna)
-- `tohoku-nlp/bert-base-japanese-v2` - BERT base v2 (Tohoku NLP)
+### Multi-LLM Orchestration
+- **Tier 1**: Claude Code (総司令官・ルーティング)
+- **Tier 2**: Gemini 2.5 Pro + GPT-5 (基本処理)
+- **Tier 3**: Claude Sonnet4 (プレミアム分析)
+- **Tier 4**: OpenRouter Ensemble (補助分析)
+- **Tier 5**: Claude Opus4.1 (緊急時専用)
+
+## 🚀 Key Features
+
+### 🤖 AI-Powered Analysis
+- **壁打ち分析**: 複数LLMによる協調分析で高品質な回答生成
+- **IT障害解析**: システムログとエラー出力の自動分析
+- **RAG検索**: GoogleDrive統合による個人データ活用
+- **3段階品質**: Basic/Premium/Critical対応
+
+### 📊 Comprehensive Monitoring
+- **Prometheus統合**: 20+ カスタムメトリクス
+- **Grafana可視化**: Executive/Operations/Development ダッシュボード
+- **3段階アラート**: P0(即座)/P1(15分)/P2(1時間)対応
+- **コスト監視**: リアルタイム予算追跡($70/月)
+
+### 🔐 Enterprise Security
+- **セキュリティメトリクス**: 認証・レート制限・入力検証
+- **GDPR/HIPAA準拠**: 機密情報マスキング
+- **監査ログ**: MySQL全活動記録
+- **SSL/TLS**: Let's Encrypt自動更新
+
+### 🏗️ Production Infrastructure
+- **Docker完全対応**: フルコンテナ化
+- **SSL証明書自動更新**: 90日サイクル
+- **ゼロダウンタイム**: Nginx + PM2
+- **高可用性**: Prometheus HA + Grafana clustering
 
 ## 📋 Prerequisites
 
 - Node.js 18.0.0 or higher
-- npm or yarn package manager
-- Hugging Face API key
-- (Optional) Redis for caching
-- (Optional) MySQL for audit logging
+- Docker & Docker Compose (または Podman)
+- API Keys: OpenAI, Google (Gemini), Claude, OpenRouter
+- (Optional) Redis, MySQL for production
 
-## 🛠 Installation
+## 🛠 Quick Start
 
-### 1. Clone Repository
+### 1. Repository Setup
 ```bash
-git clone <repository-url>
+git clone https://github.com/wombat2006/techsapo.git
 cd techsapo
-```
-
-### 2. Install Dependencies
-```bash
 npm install
 ```
 
-### 3. Environment Configuration
+### 2. Environment Configuration
 ```bash
 cp .env.example .env
+# Edit .env with your API keys
 ```
 
-Edit `.env` file with your configuration:
-```env
-# Hugging Face Configuration
-HUGGINGFACE_API_KEY=your_huggingface_api_key_here
-HUGGINGFACE_BASE_URL=https://api-inference.huggingface.co
-
-# Server Configuration
-PORT=4000
-NODE_ENV=development
-
-# Optional: Redis Configuration (Upstash)
-UPSTASH_REDIS_URL=your_upstash_redis_url_here
-UPSTASH_REDIS_TOKEN=your_upstash_redis_token_here
-
-# Optional: Database Configuration (MySQL)
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD=
-MYSQL_DATABASE=techsapo
-
-# Cost Management
-MONTHLY_BUDGET_LIMIT=70
-COST_ALERT_THRESHOLD=0.8
-```
-
-### 4. Build Project
+### 3. Build and Start
 ```bash
+# Complete monitoring stack startup
+./scripts/start-monitoring.sh
+
+# Or manual startup
 npm run build
-```
-
-### 5. Start Server
-```bash
-# Development
-npm run dev
-
-# Production
 npm start
-
-# Using PM2
-pm2 start ecosystem.config.js
 ```
 
-## 📚 API Endpoints
+## 🎯 Core Endpoints
 
-### Health & System
-- `GET /health` - Health check
-- `GET /info` - System information
-- `GET /models` - Available models
-- `GET /api/docs` - API documentation
-
-### Embeddings
-- `POST /embeddings` - Generate embeddings
-- `POST /embeddings/analyze` - Multi-model analysis
-- `POST /embeddings/recommend` - Get model recommendation
-
-### Text Generation
-- `POST /generate` - Generate text inference
-- `POST /conversation/continue` - Continue conversation
-- `GET /conversation/:id` - Get conversation history
-
-### Cost Management
-- `GET /cost/summary` - Cost summary
-- `GET /cost/alerts` - Budget alerts
-- `GET /cost/report/daily` - Daily report
-- `POST /cost/predict` - Predict cost
-
-## 💡 Usage Examples
-
-### Generate Embeddings
+### Wall-Bounce Analysis
 ```bash
-curl -X POST http://localhost:4000/embeddings \
+# Basic IT support
+curl -X POST http://localhost:4000/api/v1/generate \
   -H "Content-Type: application/json" \
-  -H "x-user-id: user123" \
   -d '{
-    "text": "システムエラーが発生しました",
-    "model": "cl-tohoku/bert-base-japanese-v3"
+    "prompt": "Dockerコンテナが起動しない問題を解決したい",
+    "task_type": "basic",
+    "user_id": "engineer-001"
+  }'
+
+# Premium analysis (3 LLMs)
+curl -X POST http://localhost:4000/api/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Kubernetesクラスタのネットワーク問題を分析",
+    "task_type": "premium"
+  }'
+
+# Critical emergency response (4 LLMs)
+curl -X POST http://localhost:4000/api/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "本番データベース全停止の緊急復旧",
+    "task_type": "critical"
   }'
 ```
 
-### Multi-Model Analysis
+### Log Analysis
 ```bash
-curl -X POST http://localhost:4000/embeddings/analyze \
+curl -X POST http://localhost:4000/api/v1/analyze-logs \
   -H "Content-Type: application/json" \
-  -H "x-user-id: user123" \
   -d '{
-    "text": "データベース接続エラー",
-    "options": {
-      "compareModels": true,
-      "includeMetadata": true
-    }
+    "user_command": "systemctl start mysql",
+    "error_output": "Job for mysql.service failed. Connection refused on port 3306",
+    "system_context": "Ubuntu 20.04, MySQL 8.0"
   }'
 ```
 
-### Text Generation
+### RAG Search
 ```bash
-curl -X POST http://localhost:4000/generate \
-  -H "Content-Type: application/json" \
-  -H "x-user-id: user123" \
-  -d '{
-    "inputs": "PostgreSQLの接続エラーを解決する方法を教えてください",
-    "taskType": "premium",
-    "parameters": {
-      "max_new_tokens": 512,
-      "temperature": 0.7
-    }
-  }'
-```
-
-### Cost Prediction
-```bash
-curl -X POST http://localhost:4000/cost/predict \
+curl -X POST http://localhost:4000/api/v1/rag/search \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "cl-tohoku/bert-base-japanese-v3",
-    "estimatedInputTokens": 100,
-    "taskType": "basic"
+    "query": "過去のサーバー移行手順書を検索",
+    "user_drive_folder_id": "1BxYz..."
   }'
 ```
-
-## 🏗 Architecture
-
-### Multi-Tier LLM Orchestrator
-- **Tier 1**: Claude Code (Total Commander & Router)
-- **Tier 2**: Gemini 2.5 Flash + Claude Haiku 3.5 (Basic queries)
-- **Tier 3**: Claude Sonnet 4 (Complex analysis)
-- **Tier 4**: GPT-5 (High-quality responses)
-- **Tier 5**: Claude Opus 4.1 (Critical situations)
-
-### Services Architecture
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│  Express App    │────│ HuggingFace      │────│ Embedding       │
-│                 │    │ Client           │    │ Service         │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                        │                       │
-         │              ┌──────────────────┐    ┌─────────────────┐
-         │──────────────│ Inference        │────│ Cost Tracking   │
-         │              │ Service          │    │ Service         │
-         │              └──────────────────┘    └─────────────────┘
-         │
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ Error Handler   │────│ Validation       │────│ Rate Limiter    │
-│                 │    │ Middleware       │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-```
-
-## 🔧 Configuration
-
-### Task Types
-- `basic`: Standard processing (default models)
-- `premium`: Enhanced processing (tier escalation)
-- `critical`: Maximum quality (top-tier models)
-
-### Model Selection Strategy
-- **Short text** (<100 chars): Sentence-optimized models
-- **Long text** (>1000 chars): Document-optimized models  
-- **Technical terms**: Specialized technical models
-- **Critical tasks**: Highest quality models
-
-### Cost Management
-- Real-time usage tracking
-- Budget alerts at configurable thresholds
-- Model cost prediction
-- Daily/monthly reporting
 
 ## 📊 Monitoring & Observability
 
-### Logging
-- Structured JSON logging with Winston
-- Request/response logging
-- Error tracking with stack traces
-- Performance metrics
+### Access Points
+- **Application**: http://localhost:4000
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3000 (admin/techsapo2024!)
+- **AlertManager**: http://localhost:9093
+- **Metrics**: http://localhost:4000/metrics
 
-### Health Checks
-- Hugging Face API connectivity
-- Memory usage monitoring
-- Response time tracking
-- Cost budget monitoring
+### Key Metrics
+```prometheus
+# Wall-bounce analysis success rate
+techsapo:wallbounce_success_rate
 
-### Metrics
-- Request count by model
-- Average response time
-- Cost per request
-- Error rates by endpoint
+# Average confidence score (5min)
+techsapo:wallbounce_avg_confidence_5m
 
-## 🚢 Deployment
+# LLM provider performance
+techsapo:llm_success_rate_by_provider{provider="Gemini"}
 
-### Docker Support
-```dockerfile
-# Dockerfile included for containerization
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist ./dist
-EXPOSE 4000
-CMD ["node", "dist/index.js"]
+# Daily cost tracking
+sum(increase(techsapo_wallbounce_cost_usd[24h]))
+
+# HTTP P95 response time
+techsapo:http_p95_response_time
 ```
 
-### PM2 Production
-```bash
-# Install PM2 globally
-npm install -g pm2
+### Alert Examples
+- **Critical**: 壁打ち合意信頼度 < 0.7 (5分間)
+- **Warning**: 平均応答時間 > 5秒 (5分間)
+- **Info**: 日次リクエスト数 > 平常時150%
 
-# Start with ecosystem config
+## 🏗️ Architecture Overview
+
+```
+┌─────────────────┐    ┌──────────────┐    ┌─────────────┐
+│   TechSapo App  │───▶│  Prometheus  │───▶│   Grafana   │
+│   (Port 4000)   │    │  (Port 9090) │    │ (Port 3000) │
+│   Wall-Bounce   │    │   Metrics    │    │ Dashboards  │
+└─────────────────┘    └──────────────┘    └─────────────┘
+         │                       │
+         ▼                       ▼
+┌─────────────────┐    ┌──────────────┐    ┌─────────────┐
+│  Multi-LLM      │    │ AlertManager │    │ Node        │
+│  Orchestrator   │    │ (Port 9093)  │    │ Exporter    │
+│  ┌─────────────┐│    │ Notifications│    │ (Port 9100) │
+│  │Gemini 2.5Pro││    └──────────────┘    └─────────────┘
+│  │GPT-5        ││
+│  │Claude Sonnet││         ┌──────────────┐
+│  │OpenRouter   ││         │ Redis Cache  │
+│  └─────────────┘│         │ (Port 6379)  │
+└─────────────────┘         └──────────────┘
+```
+
+## 📈 Deployment Options
+
+### Docker Production Stack
+```bash
+# Complete monitoring environment
+docker-compose -f docker/docker-compose.monitoring.yml up -d
+
+# Production deployment
+docker-compose -f docker/production/docker-compose.prod.yml up -d
+```
+
+### SSL Certificate Management
+```bash
+# Install auto-renewal (90-day cycle)
+./scripts/install-renewal-cron.sh
+
+# Manual renewal
+./scripts/renew-certificates.sh
+```
+
+### PM2 Process Management
+```bash
 pm2 start ecosystem.config.js
-
-# Monitor
 pm2 monit
-
-# View logs
-pm2 logs techsapo-huggingface
+pm2 logs techsapo
 ```
 
-### Environment Variables
-All configuration through environment variables for 12-factor app compliance.
+## 🔐 Security Features
 
-## 🔐 Security
+- **Authentication**: OpenAI API key validation middleware
+- **Input Sanitization**: XSS/SQL injection protection
+- **Rate Limiting**: Configurable per-endpoint limits  
+- **Data Privacy**: PII masking and GDPR compliance
+- **Audit Logging**: Complete activity tracking
+- **SSL/TLS**: Auto-renewed certificates
 
-### Features
-- Helmet.js security headers
-- CORS configuration
-- Input sanitization
-- Rate limiting
-- Request validation
-- Error masking in production
+## 💰 Cost Management
 
-### Best Practices
-- API key protection
-- No sensitive data logging
-- Secure error responses
-- Content Security Policy
+- **Monthly Budget**: $70 (configurable)
+- **Real-time Tracking**: Per-request cost monitoring
+- **Automatic Alerts**: 80% budget threshold
+- **Provider Optimization**: Cost-efficiency analysis
+- **Usage Prediction**: ML-based forecasting
 
-## 🧪 Testing
+## 🧪 Testing & Quality
 
 ```bash
-# Run tests
+# Run comprehensive tests
 npm test
 
-# Run with coverage
-npm run test:coverage
+# Test with coverage
+npm run test:coverage  
+
+# Punycode replacement tests
+npm test tests/punycode-replacement.test.ts
 
 # Integration tests
 npm run test:integration
 ```
 
+## 📚 Documentation
+
+- **[Monitoring Setup](./MONITORING_SETUP.md)**: Complete Prometheus monitoring guide
+- **[Prometheus Design](./docs/prometheus-monitoring-design.md)**: Detailed metrics architecture
+- **[RAG Setup Guide](./docs/RAG_SETUP_GUIDE.md)**: GoogleDrive integration
+- **[CLAUDE.md](./CLAUDE.md)**: System configuration and requirements
+
+## 🔧 Configuration Files
+
+```
+├── docker/
+│   ├── docker-compose.monitoring.yml    # Complete monitoring stack
+│   ├── prometheus/                       # Prometheus configuration
+│   ├── grafana/                         # Grafana dashboards
+│   └── production/                      # Production deployment
+├── src/
+│   ├── services/wall-bounce-analyzer.ts # Core analysis engine
+│   ├── metrics/prometheus-client.ts     # Custom metrics
+│   └── wall-bounce-server.ts           # Main application server
+└── scripts/
+    ├── start-monitoring.sh              # Monitoring stack startup
+    └── renew-certificates.sh            # SSL certificate management
+```
+
+## 🌟 Production Features
+
+### High Availability
+- **Multi-instance**: PM2 cluster mode
+- **Load Balancing**: Nginx upstream configuration
+- **Health Checks**: Automated failover
+- **Graceful Shutdown**: Zero-downtime restarts
+
+### Monitoring & Alerting
+- **Multi-channel Notifications**: Email, Slack, SMS
+- **Escalation Policies**: P0/P1/P2 priority handling
+- **SLA Monitoring**: 99.9% uptime tracking
+- **Performance Optimization**: Automated scaling decisions
+
+### Data Management
+- **Backup Strategy**: Automated daily backups
+- **Disaster Recovery**: Cross-region replication
+- **Data Retention**: 15 days detailed, 90 days aggregated
+- **Privacy Compliance**: GDPR/HIPAA ready
+
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+3. Follow wall-bounce analysis patterns
+4. Add comprehensive monitoring metrics
+5. Include tests and documentation
+6. Submit Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - Enterprise usage permitted. See [LICENSE](LICENSE) for details.
 
 ## 📞 Support
 
-- Documentation: [API Docs](http://localhost:4000/api/docs)
-- Issues: [GitHub Issues](https://github.com/your-repo/techsapo/issues)
-- Email: support@techsapo.com
+- **Documentation**: Complete setup guides included
+- **Issues**: [GitHub Issues](https://github.com/wombat2006/techsapo/issues)
+- **Monitoring**: Built-in health checks and alerts
+- **Community**: Japanese language support
 
 ---
 
-**🌟 Enterprise-Grade LLM Orchestrator - Production Ready!**
-=======
-# techsapo
-Technical support tool for IT engineers
->>>>>>> 57119253bf79f503c74695b389e3347c4863e6ab
+**🎯 Enterprise-Grade IT Infrastructure Support Tool**
+**壁打ち分析システム - Production Ready!**
+
+*Powered by Multi-LLM Orchestration with Comprehensive Prometheus Monitoring*

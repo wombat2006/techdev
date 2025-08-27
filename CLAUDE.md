@@ -58,10 +58,14 @@ curl -X POST http://localhost:4000/generate \
 - **壁打ち徹底**: 単一LLM処理禁止、常にパラレル複数LLM処理
 - **統合ロジック**: 各LLM回答を品質評価・統合して最終回答生成
 - **エスカレーション**: 不十分な回答は上位Tierへ自動昇格
+- **監視必須**: すべてのメトリクスをPrometheus収集・Grafana可視化
+- **品質保証**: 信頼度0.7未満は自動エラーアラート発生
 
 ## 🚀 Deployment Ready
 - **環境変数**: 全API key外部設定対応
-- **Docker**: フルコンテナ化サポート
+- **Docker**: フルコンテナ化サポート + 監視スタック完備
 - **PM2**: プロセス自動復旧・スケーリング
-- **SSL**: 本番HTTPS証明書統合
+- **SSL**: 本番HTTPS証明書統合 + 90日自動更新
+- **監視スタック**: Prometheus + Grafana + AlertManager完全統合
+- **一発起動**: `./scripts/start-monitoring.sh` で全環境起動
 - CLAUDE.mdは更新のたびに必ず日付と時刻をを付与したファイル名でバックアップを取得すること
