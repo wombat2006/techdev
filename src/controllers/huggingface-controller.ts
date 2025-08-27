@@ -32,7 +32,7 @@ export class HuggingFaceController {
     
     res.status(isConnected ? 200 : 503).json({
       status: isConnected ? 'healthy' : 'unhealthy',
-      service: 'huggingface-integration',
+      service: 'techsapo-integration',
       timestamp: new Date().toISOString(),
       version: '1.0.0'
     });

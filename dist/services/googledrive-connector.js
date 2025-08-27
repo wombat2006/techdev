@@ -1,0 +1,382 @@
+"use strict";
+/**
+ * GoogleDrive Connector for RAG System
+ * セキュアなドキュメント取得とOpenAI Vector Store統合
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GoogleDriveRAGConnector = void 0;
+const googleapis_1 = require("googleapis");
+const google_auth_library_1 = require("google-auth-library");
+const openai_1 = __importDefault(require("openai"));
+const fs_1 = require("fs");
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs/promises"));
+const logger_1 = require("../utils/logger");
+class GoogleDriveRAGConnector {
+    googleDriveConfig;
+    openaiConfig;
+    drive;
+    openai;
+    oauth2Client;
+    constructor(googleDriveConfig, openaiConfig) {
+        this.googleDriveConfig = googleDriveConfig;
+        this.openaiConfig = openaiConfig;
+        // Google OAuth2 Client設定
+        this.oauth2Client = new google_auth_library_1.OAuth2Client(googleDriveConfig.clientId, googleDriveConfig.clientSecret, googleDriveConfig.redirectUri);
+        this.oauth2Client.setCredentials({
+            refresh_token: googleDriveConfig.refreshToken
+        });
+        // Google Drive API初期化
+        this.drive = googleapis_1.google.drive({ version: 'v3', auth: this.oauth2Client });
+        // OpenAI Client初期化
+        this.openai = new openai_1.default({
+            apiKey: openaiConfig.apiKey,
+            organization: openaiConfig.organization
+        });
+    }
+    /**
+     * 🔍 GoogleDriveからドキュメント一覧取得
+     */
+    async listDocuments(folderId, mimeTypes = [
+        'application/pdf',
+        'application/vnd.google-apps.document',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+        'text/csv'
+    ]) {
+        try {
+            logger_1.logger.info('📋 GoogleDriveドキュメント一覧取得開始', { folderId, mimeTypes });
+            const query = [
+                folderId ? `'${folderId}' in parents` : null,
+                `mimeType in ('${mimeTypes.join("','")}')`,
+                'trashed = false'
+            ].filter(Boolean).join(' and ');
+            const response = await this.drive.files.list({
+                q: query,
+                fields: 'files(id,name,mimeType,size,modifiedTime,webViewLink)',
+                orderBy: 'modifiedTime desc',
+                pageSize: 100
+            });
+            const documents = response.data.files.map((file) => ({
+                id: file.id,
+                name: file.name,
+                mimeType: file.mimeType,
+                size: parseInt(file.size || '0'),
+                modifiedTime: file.modifiedTime,
+                webViewLink: file.webViewLink
+            }));
+            logger_1.logger.info('✅ GoogleDriveドキュメント取得完了', { count: documents.length });
+            return documents;
+        }
+        catch (error) {
+            logger_1.logger.error('❌ GoogleDriveドキュメント取得エラー', { error: error instanceof Error ? error.message : 'Unknown error' });
+            throw error;
+        }
+    }
+    /**
+     * 📄 GoogleDriveからドキュメント内容取得
+     */
+    async downloadDocument(documentId) {
+        try {
+            logger_1.logger.info('⬇️ GoogleDriveドキュメントダウンロード開始', { documentId });
+            // ファイル情報取得
+            const fileResponse = await this.drive.files.get({
+                fileId: documentId,
+                fields: 'id,name,mimeType,size,modifiedTime,webViewLink'
+            });
+            const metadata = {
+                id: fileResponse.data.id,
+                name: fileResponse.data.name,
+                mimeType: fileResponse.data.mimeType,
+                size: parseInt(fileResponse.data.size || '0'),
+                modifiedTime: fileResponse.data.modifiedTime,
+                webViewLink: fileResponse.data.webViewLink
+            };
+            let content = '';
+            // MIMEタイプに応じたコンテンツ取得
+            if (metadata.mimeType === 'application/vnd.google-apps.document') {
+                // Google Docsをプレーンテキストでエクスポート
+                const exportResponse = await this.drive.files.export({
+                    fileId: documentId,
+                    mimeType: 'text/plain'
+                });
+                content = exportResponse.data;
+            }
+            else {
+                // その他のファイルを直接ダウンロード
+                const downloadResponse = await this.drive.files.get({
+                    fileId: documentId,
+                    alt: 'media'
+                });
+                content = downloadResponse.data;
+            }
+            logger_1.logger.info('✅ ドキュメントダウンロード完了', {
+                name: metadata.name,
+                contentLength: content.length
+            });
+            return {
+                id: documentId,
+                name: metadata.name,
+                content,
+                metadata
+            };
+        }
+        catch (error) {
+            logger_1.logger.error('❌ ドキュメントダウンロードエラー', {
+                documentId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            throw error;
+        }
+    }
+    /**
+     * 🗂️ OpenAI Vector Storeの作成または取得
+     */
+    async getOrCreateVectorStore(name) {
+        try {
+            logger_1.logger.info('🗂️ Vector Store確認開始', { name });
+            // 既存のVector Store検索
+            const vectorStores = await this.openai.beta.vectorStores.list();
+            const existingStore = vectorStores.data.find((store) => store.name === name);
+            if (existingStore) {
+                logger_1.logger.info('✅ 既存Vector Store使用', { id: existingStore.id, name });
+                return existingStore.id;
+            }
+            // 新規Vector Store作成
+            const newStore = await this.openai.beta.vectorStores.create({
+                name,
+                expires_after: {
+                    anchor: 'last_active_at',
+                    days: 90 // 90日間非アクティブで自動削除
+                }
+            });
+            logger_1.logger.info('✅ Vector Store作成完了', { id: newStore.id, name });
+            return newStore.id;
+        }
+        catch (error) {
+            logger_1.logger.error('❌ Vector Store作成エラー', { name, error: error instanceof Error ? error.message : 'Unknown error' });
+            throw error;
+        }
+    }
+    /**
+     * 📚 ドキュメントをVector Storeに追加
+     */
+    async addDocumentToVectorStore(vectorStoreId, document) {
+        try {
+            logger_1.logger.info('📚 Vector Storeにドキュメント追加開始', {
+                vectorStoreId,
+                documentName: document.name
+            });
+            // 一時ファイル作成
+            const tempDir = '/tmp/googledrive-rag';
+            await fs.mkdir(tempDir, { recursive: true });
+            const tempFilePath = path.join(tempDir, `${document.id}.txt`);
+            await fs.writeFile(tempFilePath, document.content, 'utf-8');
+            try {
+                // OpenAI Files APIにアップロード
+                const fileStream = (0, fs_1.createReadStream)(tempFilePath);
+                const file = await this.openai.files.create({
+                    file: fileStream,
+                    purpose: 'assistants'
+                });
+                // Vector Storeにファイル追加
+                await this.openai.beta.vectorStores.files.create(vectorStoreId, {
+                    file_id: file.id
+                });
+                // 一時ファイル削除
+                await fs.unlink(tempFilePath);
+                logger_1.logger.info('✅ Vector Storeにドキュメント追加完了', {
+                    fileId: file.id,
+                    documentName: document.name
+                });
+                return file.id;
+            }
+            catch (uploadError) {
+                // エラー時も一時ファイル削除
+                await fs.unlink(tempFilePath).catch(() => { });
+                throw uploadError;
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('❌ Vector Storeドキュメント追加エラー', {
+                vectorStoreId,
+                documentName: document.name,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            throw error;
+        }
+    }
+    /**
+     * 🔄 GoogleDriveフォルダ全体をRAG化
+     */
+    async syncFolderToRAG(folderId, vectorStoreName, batchSize = 5) {
+        try {
+            logger_1.logger.info('🔄 GoogleDriveフォルダRAG同期開始', {
+                folderId,
+                vectorStoreName,
+                batchSize
+            });
+            // Vector Store準備
+            const vectorStoreId = await this.getOrCreateVectorStore(vectorStoreName);
+            // ドキュメント一覧取得
+            const documents = await this.listDocuments(folderId);
+            const processedDocuments = [];
+            let processedCount = 0;
+            let failedCount = 0;
+            // バッチ処理でドキュメント処理
+            for (let i = 0; i < documents.length; i += batchSize) {
+                const batch = documents.slice(i, i + batchSize);
+                logger_1.logger.info('📦 バッチ処理開始', {
+                    batchNumber: Math.floor(i / batchSize) + 1,
+                    batchSize: batch.length,
+                    totalDocuments: documents.length
+                });
+                await Promise.allSettled(batch.map(async (docMeta) => {
+                    try {
+                        // ドキュメントダウンロード
+                        const document = await this.downloadDocument(docMeta.id);
+                        // Vector Storeに追加
+                        const vectorStoreFileId = await this.addDocumentToVectorStore(vectorStoreId, document);
+                        document.vectorStoreFileId = vectorStoreFileId;
+                        processedDocuments.push(document);
+                        processedCount++;
+                        logger_1.logger.info('✅ ドキュメント処理完了', {
+                            name: document.name,
+                            vectorStoreFileId
+                        });
+                    }
+                    catch (error) {
+                        failedCount++;
+                        logger_1.logger.error('❌ ドキュメント処理失敗', {
+                            id: docMeta.id,
+                            name: docMeta.name,
+                            error: error instanceof Error ? error.message : 'Unknown error'
+                        });
+                    }
+                }));
+                // バッチ間隔調整（レート制限対策）
+                if (i + batchSize < documents.length) {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            }
+            logger_1.logger.info('🎉 GoogleDriveフォルダRAG同期完了', {
+                vectorStoreId,
+                processedCount,
+                failedCount,
+                totalDocuments: documents.length
+            });
+            return {
+                vectorStoreId,
+                processedCount,
+                failedCount,
+                processedDocuments
+            };
+        }
+        catch (error) {
+            logger_1.logger.error('❌ GoogleDriveフォルダRAG同期エラー', {
+                folderId,
+                vectorStoreName,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            throw error;
+        }
+    }
+    /**
+     * 🔍 RAG検索実行
+     */
+    async searchRAG(query, vectorStoreId, maxResults = 5) {
+        try {
+            logger_1.logger.info('🔍 RAG検索実行開始', { query, vectorStoreId, maxResults });
+            // OpenAI Assistant作成（一時的）
+            const assistant = await this.openai.beta.assistants.create({
+                name: 'GoogleDrive RAG Assistant',
+                instructions: `You are a helpful assistant that answers questions based on documents from GoogleDrive. 
+        Always provide detailed answers in Japanese and cite the source documents when possible.`,
+                model: 'gpt-4-turbo',
+                tools: [{ type: 'file_search' }],
+                tool_resources: {
+                    file_search: {
+                        vector_store_ids: [vectorStoreId]
+                    }
+                }
+            });
+            try {
+                // スレッド作成
+                const thread = await this.openai.beta.threads.create();
+                // メッセージ追加
+                await this.openai.beta.threads.messages.create(thread.id, {
+                    role: 'user',
+                    content: query
+                });
+                // 実行
+                const run = await this.openai.beta.threads.runs.createAndPoll(thread.id, {
+                    assistant_id: assistant.id
+                });
+                // 結果取得
+                const messages = await this.openai.beta.threads.messages.list(thread.id);
+                const results = messages.data
+                    .filter(msg => msg.role === 'assistant')
+                    .map(msg => ({
+                    content: msg.content[0]?.type === 'text' ? msg.content[0].text.value : '',
+                    annotations: msg.content[0]?.type === 'text' ? msg.content[0].text.annotations : []
+                }));
+                logger_1.logger.info('✅ RAG検索完了', {
+                    query,
+                    resultCount: results.length,
+                    usage: run.usage
+                });
+                return {
+                    results,
+                    usage: run.usage
+                };
+            }
+            finally {
+                // Assistant削除（リソース節約）
+                await this.openai.beta.assistants.del(assistant.id);
+            }
+        }
+        catch (error) {
+            logger_1.logger.error('❌ RAG検索エラー', { query, vectorStoreId, error: error instanceof Error ? error.message : 'Unknown error' });
+            throw error;
+        }
+    }
+}
+exports.GoogleDriveRAGConnector = GoogleDriveRAGConnector;
+exports.default = GoogleDriveRAGConnector;
+//# sourceMappingURL=googledrive-connector.js.map

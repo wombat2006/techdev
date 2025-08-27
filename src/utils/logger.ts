@@ -17,7 +17,7 @@ export const logger = createLogger({
       ? combine(colorize(), customFormat)
       : json()
   ),
-  defaultMeta: { service: 'techsapo-huggingface' },
+  defaultMeta: { service: 'techsapo' },
   transports: [
     new transports.Console({
       format: config.server.nodeEnv === 'development' 

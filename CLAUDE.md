@@ -64,3 +64,4 @@ curl -X POST http://localhost:4000/generate \
 - **Docker**: フルコンテナ化サポート
 - **PM2**: プロセス自動復旧・スケーリング
 - **SSL**: 本番HTTPS証明書統合
+- CLAUDE.mdは更新のたびに必ず日付と時刻をを付与したファイル名でバックアップを取得すること

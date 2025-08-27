@@ -10,6 +10,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const environment_1 = require("./config/environment");
 const redis_service_1 = require("./services/redis-service");
 const session_manager_1 = require("./services/session-manager");
+const rag_endpoint_1 = __importDefault(require("./routes/rag-endpoint"));
 function createServer() {
     const app = (0, express_1.default)();
     // Security middleware
@@ -18,6 +19,8 @@ function createServer() {
     // Body parsing
     app.use(express_1.default.json());
     app.use(express_1.default.urlencoded({ extended: true }));
+    // RAG API routes
+    app.use('/api/v1/rag', rag_endpoint_1.default);
     // Health check endpoints
     app.get('/health', (req, res) => {
         res.json({

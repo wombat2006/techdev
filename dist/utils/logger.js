@@ -16,7 +16,7 @@ exports.logger = createLogger({
     format: combine(errors({ stack: true }), timestamp(), environment_1.config.server.nodeEnv === 'development'
         ? combine(colorize(), customFormat)
         : json()),
-    defaultMeta: { service: 'techsapo-huggingface' },
+    defaultMeta: { service: 'techsapo' },
     transports: [
         new transports.Console({
             format: environment_1.config.server.nodeEnv === 'development'

@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { config } from './config/environment';
 import { getRedisService } from './services/redis-service';
 import { getSessionManager } from './services/session-manager';
+import ragEndpoints from './routes/rag-endpoint';
 
 export function createServer() {
   const app = express();
@@ -15,6 +16,9 @@ export function createServer() {
   // Body parsing
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // RAG API routes
+  app.use('/api/v1/rag', ragEndpoints);
 
   // Health check endpoints
   app.get('/health', (req, res) => {
