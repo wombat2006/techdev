@@ -1,0 +1,210 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TechSapo Executive Dashboard",
+    "tags": ["techsapo", "executive", "business"],
+    "style": "dark",
+    "timezone": "Asia/Tokyo",
+    "refresh": "1m",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health Score",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "techsapo:service_availability",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.95},
+                {"color": "green", "value": 0.99}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Daily Request Volume",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(techsapo:daily_request_volume)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Daily Cost ($)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(techsapo_wallbounce_cost_usd[24h]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 1.87},
+                {"color": "red", "value": 2.33}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "SLA Compliance",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(techsapo:wallbounce_success_rate)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.95},
+                {"color": "green", "value": 0.99}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Request Volume Trend (24h)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(techsapo_wallbounce_requests_total[1h]))",
+            "legendFormat": "Requests/hour",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Cost Tracking (24h)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(techsapo_wallbounce_cost_usd[1h]))",
+            "legendFormat": "$/hour",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 7,
+        "title": "Task Type Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (task_type) (rate(techsapo_wallbounce_requests_total[24h]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 9, "w": 8, "x": 0, "y": 17}
+      },
+      {
+        "id": 8,
+        "title": "LLM Provider Performance",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "sum by (provider) (techsapo:llm_success_rate_by_provider)",
+            "format": "table",
+            "refId": "A"
+          },
+          {
+            "expr": "sum by (provider) (techsapo:llm_avg_response_time_by_provider)",
+            "format": "table", 
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 9, "w": 16, "x": 8, "y": 17}
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "time_range",
+          "type": "interval",
+          "query": "1m,5m,15m,1h,6h,24h",
+          "current": {
+            "text": "5m",
+            "value": "5m"
+          }
+        }
+      ]
+    },
+    "links": [
+      {
+        "title": "Operations Dashboard",
+        "url": "/d/techsapo-operations/techsapo-operations-dashboard",
+        "type": "dashboards"
+      },
+      {
+        "title": "Development Dashboard", 
+        "url": "/d/techsapo-development/techsapo-development-dashboard",
+        "type": "dashboards"
+      }
+    ],
+    "schemaVersion": 27,
+    "version": 1,
+    "uid": "techsapo-executive"
+  }
+}

@@ -1,0 +1,185 @@
+# TechSapo Prometheus Recording Rules  
+# 計算集約的なクエリを事前計算してパフォーマンス向上
+
+groups:
+  # Wall-bounce Analysis Performance Recording Rules
+  - name: techsapo.wallbounce.performance
+    interval: 30s
+    rules:
+      - record: techsapo:wallbounce_success_rate
+        expr: rate(techsapo_wallbounce_requests_total{status="success"}[5m]) / rate(techsapo_wallbounce_requests_total[5m])
+        labels:
+          component: wall-bounce-analyzer
+          
+      - record: techsapo:wallbounce_avg_confidence_5m
+        expr: rate(techsapo_wallbounce_consensus_confidence_sum[5m]) / rate(techsapo_wallbounce_consensus_confidence_count[5m])
+        labels:
+          component: wall-bounce-analyzer
+          
+      - record: techsapo:wallbounce_p95_processing_time
+        expr: histogram_quantile(0.95, rate(techsapo_wallbounce_processing_duration_seconds_bucket[5m]))
+        labels:
+          component: wall-bounce-analyzer
+          
+      - record: techsapo:wallbounce_cost_per_minute
+        expr: rate(techsapo_wallbounce_cost_usd[1m])
+        labels:
+          component: cost-tracking
+
+  # LLM Provider Performance Recording Rules
+  - name: techsapo.llm.performance
+    interval: 30s
+    rules:
+      - record: techsapo:llm_success_rate_by_provider
+        expr: rate(techsapo_llm_requests_total{status="success"}[5m]) / rate(techsapo_llm_requests_total[5m])
+        labels:
+          component: llm-providers
+          
+      - record: techsapo:llm_avg_response_time_by_provider
+        expr: rate(techsapo_llm_response_time_seconds_sum[5m]) / rate(techsapo_llm_response_time_seconds_count[5m])
+        labels:
+          component: llm-providers
+          
+      - record: techsapo:llm_token_rate_by_provider
+        expr: rate(techsapo_llm_token_usage_total[1m])
+        labels:
+          component: llm-providers
+          
+      - record: techsapo:llm_cost_efficiency
+        expr: rate(techsapo_wallbounce_cost_usd[5m]) / rate(techsapo_llm_token_usage_total{type="output"}[5m])
+        labels:
+          component: llm-providers
+
+  # HTTP API Performance Recording Rules
+  - name: techsapo.http.performance
+    interval: 30s
+    rules:
+      - record: techsapo:http_request_rate
+        expr: rate(techsapo_http_requests_total[5m])
+        labels:
+          component: http-api
+          
+      - record: techsapo:http_error_rate
+        expr: rate(techsapo_http_requests_total{status_code=~"4..|5.."}[5m])
+        labels:
+          component: http-api
+          
+      - record: techsapo:http_p50_response_time
+        expr: histogram_quantile(0.50, rate(techsapo_http_request_duration_seconds_bucket[5m]))
+        labels:
+          component: http-api
+          
+      - record: techsapo:http_p95_response_time
+        expr: histogram_quantile(0.95, rate(techsapo_http_request_duration_seconds_bucket[5m]))
+        labels:
+          component: http-api
+          
+      - record: techsapo:http_p99_response_time
+        expr: histogram_quantile(0.99, rate(techsapo_http_request_duration_seconds_bucket[5m]))
+        labels:
+          component: http-api
+
+  # System Resource Recording Rules
+  - name: techsapo.system.resources
+    interval: 60s
+    rules:
+      - record: techsapo:memory_utilization
+        expr: techsapo_memory_usage_bytes{component="heap_used"} / techsapo_memory_usage_bytes{component="heap_total"}
+        labels:
+          component: nodejs-runtime
+          
+      - record: techsapo:active_connection_total
+        expr: sum(techsapo_active_connections)
+        labels:
+          component: connections
+          
+      - record: techsapo:queue_total_size
+        expr: sum(techsapo_queue_size)
+        labels:
+          component: queues
+
+  # Business Intelligence Recording Rules
+  - name: techsapo.business.intelligence
+    interval: 300s  # 5 minutes
+    rules:
+      - record: techsapo:daily_request_volume
+        expr: increase(techsapo_wallbounce_requests_total[24h])
+        labels:
+          component: business-metrics
+          aggregation: daily
+          
+      - record: techsapo:hourly_cost_burn
+        expr: increase(techsapo_wallbounce_cost_usd[1h])
+        labels:
+          component: business-metrics
+          aggregation: hourly
+          
+      - record: techsapo:task_type_distribution
+        expr: rate(techsapo_wallbounce_requests_total[1h])
+        labels:
+          component: business-metrics
+          
+      - record: techsapo:provider_performance_score
+        expr: (techsapo:llm_success_rate_by_provider * 0.4 + (1 - (techsapo:llm_avg_response_time_by_provider / 10)) * 0.3 + (techsapo:wallbounce_avg_confidence_5m * 0.3))
+        labels:
+          component: business-metrics
+
+  # Cache Performance Recording Rules
+  - name: techsapo.cache.performance
+    interval: 60s
+    rules:
+      - record: techsapo:redis_operation_rate
+        expr: rate(techsapo_redis_operations_total[5m])
+        labels:
+          component: redis-cache
+          
+      - record: techsapo:redis_error_rate
+        expr: rate(techsapo_redis_operations_total{status="error"}[5m]) / rate(techsapo_redis_operations_total[5m])
+        labels:
+          component: redis-cache
+          
+      - record: techsapo:cache_efficiency
+        expr: avg(techsapo_cache_hit_ratio)
+        labels:
+          component: cache-system
+
+  # Error Analysis Recording Rules
+  - name: techsapo.error.analysis
+    interval: 60s
+    rules:
+      - record: techsapo:error_rate_by_type
+        expr: rate(techsapo_errors_total[5m])
+        labels:
+          component: error-tracking
+          
+      - record: techsapo:critical_error_rate
+        expr: rate(techsapo_errors_total{severity="critical"}[5m])
+        labels:
+          component: error-tracking
+          
+      - record: techsapo:service_availability
+        expr: 1 - (rate(techsapo_errors_total{severity=~"high|critical"}[5m]) / rate(techsapo_http_requests_total[5m]))
+        labels:
+          component: service-health
+
+  # Long-term Trend Analysis (15 minute intervals)
+  - name: techsapo.trends
+    interval: 900s  # 15 minutes
+    rules:
+      - record: techsapo:wallbounce_confidence_trend_1h
+        expr: avg_over_time(techsapo:wallbounce_avg_confidence_5m[1h])
+        labels:
+          component: trend-analysis
+          window: 1h
+          
+      - record: techsapo:cost_trend_24h
+        expr: avg_over_time(techsapo:hourly_cost_burn[24h])
+        labels:
+          component: trend-analysis
+          window: 24h
+          
+      - record: techsapo:performance_trend_6h
+        expr: avg_over_time(techsapo:http_p95_response_time[6h])
+        labels:
+          component: trend-analysis
+          window: 6h

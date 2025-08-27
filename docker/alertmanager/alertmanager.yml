@@ -1,0 +1,239 @@
+# TechSapo Alert Manager Configuration
+# アラート通知とエスカレーション管理
+
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@techsapo.com'
+  smtp_auth_username: 'alerts@techsapo.com'
+  smtp_auth_password: 'your-smtp-password'  # 環境変数で設定推奨
+  smtp_require_tls: true
+  # Slack webhook (optional)
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+# Template files
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route configuration
+route:
+  # Default route
+  group_by: ['alertname', 'service', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+  receiver: 'default-notification'
+  
+  # Sub-routes for different severity levels
+  routes:
+    # Critical alerts (P0) - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      group_interval: 2m
+      repeat_interval: 5m
+      
+    # Warning alerts (P1) - standard notification
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 1h
+      
+    # Info alerts (P2) - batched notification
+    - match:
+        severity: info
+      receiver: 'info-alerts'
+      group_wait: 5m
+      group_interval: 15m
+      repeat_interval: 6h
+      
+    # Wall-bounce specific alerts
+    - match_re:
+        service: 'wall-bounce-analyzer|llm-providers'
+      receiver: 'wallbounce-team'
+      group_wait: 20s
+      group_interval: 3m
+      repeat_interval: 30m
+      
+    # Cost management alerts
+    - match:
+        service: 'cost-management'
+      receiver: 'finance-team'
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 2h
+      
+    # Security alerts
+    - match:
+        service: 'security'
+      receiver: 'security-team'
+      group_wait: 15s
+      group_interval: 2m
+      repeat_interval: 15m
+
+# Inhibit rules
+inhibit_rules:
+  # Inhibit warning and info if critical is firing
+  - source_match:
+      severity: 'critical'
+    target_match_re:
+      severity: 'warning|info'
+    equal: ['alertname', 'service']
+    
+  # Inhibit info if warning is firing  
+  - source_match:
+      severity: 'warning'
+    target_match:
+      severity: 'info'
+    equal: ['alertname', 'service']
+
+# Notification receivers
+receivers:
+  # Default notification (development/fallback)
+  - name: 'default-notification'
+    email_configs:
+      - to: 'dev-team@techsapo.com'
+        subject: 'TechSapo Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Service: {{ .Labels.service }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 JST" }}
+          {{ end }}
+
+  # Critical alerts (P0) - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@techsapo.com,cto@techsapo.com'
+        subject: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        body: |
+          CRITICAL ALERT TRIGGERED
+          
+          {{ range .Alerts }}
+          Summary: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Priority: {{ .Labels.priority }}
+          Started: {{ .StartsAt.Format "2006-01-02 15:04:05 JST" }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          
+          IMMEDIATE ACTION REQUIRED
+    # Slack notification for critical alerts
+    slack_configs:
+      - channel: '#alerts-critical'
+        title: '🚨 Critical Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          Service: {{ .Labels.service }}
+          {{ .Annotations.description }}
+          {{ end }}
+        color: 'danger'
+
+  # Warning alerts (P1)
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'dev-team@techsapo.com'
+        subject: '⚠️ Warning: {{ .GroupLabels.alertname }}'
+        body: |
+          WARNING ALERT
+          
+          {{ range .Alerts }}
+          Summary: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Started: {{ .StartsAt.Format "2006-01-02 15:04:05 JST" }}
+          {{ end }}
+    slack_configs:
+      - channel: '#alerts-warning'
+        title: '⚠️ Warning Alert'
+        text: |
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          Service: {{ .Labels.service }}
+          {{ end }}
+        color: 'warning'
+
+  # Info alerts (P2) - batched
+  - name: 'info-alerts'
+    email_configs:
+      - to: 'monitoring@techsapo.com'
+        subject: 'ℹ️ Info Alert Summary ({{ .Alerts | len }} alerts)'
+        body: |
+          INFO ALERT SUMMARY
+          
+          {{ range .Alerts }}
+          - {{ .Annotations.summary }} ({{ .Labels.service }})
+          {{ end }}
+
+  # Wall-bounce team specific
+  - name: 'wallbounce-team'
+    email_configs:
+      - to: 'ai-team@techsapo.com'
+        subject: '🤖 Wall-bounce Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          WALL-BOUNCE SYSTEM ALERT
+          
+          {{ range .Alerts }}
+          Issue: {{ .Annotations.summary }}
+          Details: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Confidence: {{ .Labels.confidence }}
+          Provider: {{ .Labels.provider }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 JST" }}
+          {{ end }}
+    slack_configs:
+      - channel: '#wallbounce-alerts'
+        title: '🤖 Wall-bounce Alert'
+        text: |
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          Provider: {{ .Labels.provider }}
+          {{ end }}
+
+  # Finance team for cost alerts
+  - name: 'finance-team'
+    email_configs:
+      - to: 'finance@techsapo.com,cfo@techsapo.com'
+        subject: '💰 Cost Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          COST MANAGEMENT ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Details: {{ .Annotations.description }}
+          Current Cost: {{ .Labels.cost }}
+          Budget Status: {{ .Labels.budget_status }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 JST" }}
+          {{ end }}
+
+  # Security team
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@techsapo.com,ciso@techsapo.com'
+        subject: '🔒 Security Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          SECURITY ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Details: {{ .Annotations.description }}
+          Client IP: {{ .Labels.client_ip }}
+          Attack Type: {{ .Labels.type }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 JST" }}
+          {{ end }}
+    slack_configs:
+      - channel: '#security-alerts'
+        title: '🔒 Security Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          IP: {{ .Labels.client_ip }}
+          {{ .Annotations.description }}
+          {{ end }}
+        color: 'danger'

@@ -1,0 +1,200 @@
+# TechSapo Prometheus Alert Rules
+# 壁打ち分析システム用アラート設定
+
+groups:
+  # Critical Alerts (P0 - 即座対応)
+  - name: techsapo.critical
+    interval: 30s
+    rules:
+      - alert: WallBounceConsensusConfidenceLow
+        expr: techsapo_wallbounce_consensus_confidence < 0.7
+        for: 5m
+        labels:
+          severity: critical
+          priority: P0
+          service: wall-bounce-analyzer
+        annotations:
+          summary: "壁打ち分析の合意信頼度が低下"
+          description: "過去5分間の壁打ち分析で合意信頼度が0.7を下回りました (現在値: {{ $value }})"
+          runbook_url: "https://docs.techsapo.com/runbooks/wallbounce-confidence"
+          
+      - alert: LLMProviderErrorRateHigh
+        expr: rate(techsapo_llm_requests_total{status="error"}[5m]) / rate(techsapo_llm_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          priority: P0
+          service: llm-providers
+        annotations:
+          summary: "LLMプロバイダーエラー率上昇"
+          description: "{{ $labels.provider }} のエラー率が5%を超えました (現在値: {{ $value | humanizePercentage }})"
+          
+      - alert: HTTPErrorRate5xxHigh
+        expr: rate(techsapo_http_requests_total{status_code=~"5.."}[5m]) / rate(techsapo_http_requests_total[5m]) > 0.01
+        for: 1m
+        labels:
+          severity: critical
+          priority: P0
+          service: http-api
+        annotations:
+          summary: "HTTP 5xxエラー率上昇"
+          description: "HTTP 5xxエラー率が1%を超えました (現在値: {{ $value | humanizePercentage }})"
+          
+      - alert: MemoryUsageHigh
+        expr: (techsapo_memory_usage_bytes{component="heap_used"} / techsapo_memory_usage_bytes{component="heap_total"}) > 0.9
+        for: 30s
+        labels:
+          severity: critical
+          priority: P0
+          service: nodejs-runtime
+        annotations:
+          summary: "メモリ使用率が90%を超過"
+          description: "Node.jsヒープメモリ使用率が90%を超えました (現在値: {{ $value | humanizePercentage }})"
+
+  # Warning Alerts (P1 - 15分以内)
+  - name: techsapo.warning
+    interval: 60s
+    rules:
+      - alert: AverageResponseTimeSlow
+        expr: rate(techsapo_http_request_duration_seconds_sum[10m]) / rate(techsapo_http_request_duration_seconds_count[10m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          priority: P1
+          service: http-api
+        annotations:
+          summary: "平均応答時間が5秒を超過"
+          description: "{{ $labels.route }} の平均応答時間が5秒を超えました (現在値: {{ $value }}s)"
+          
+      - alert: WallBounceBudgetConsumptionHigh
+        expr: sum(increase(techsapo_wallbounce_cost_usd[1d])) > 56  # $70/月 * 80% / 30日
+        for: 0m
+        labels:
+          severity: warning
+          priority: P1
+          service: cost-management
+        annotations:
+          summary: "日次予算消費が80%を超過"
+          description: "本日の壁打ち分析コストが予算の80%を超えました (現在値: ${{ $value }})"
+          
+      - alert: RedisConnectionFailures
+        expr: increase(techsapo_redis_operations_total{status="error"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          priority: P1
+          service: redis-cache
+        annotations:
+          summary: "Redis接続エラーが頻発"
+          description: "過去5分間でRedis接続エラーが10回を超えました ({{ $value }}回)"
+          
+      - alert: ConsensusConfidenceDeclining
+        expr: (avg_over_time(techsapo_wallbounce_consensus_confidence[1h]) - avg_over_time(techsapo_wallbounce_consensus_confidence[2h:1h])) < -0.1
+        for: 1h
+        labels:
+          severity: warning
+          priority: P1
+          service: wall-bounce-analyzer
+        annotations:
+          summary: "合意信頼度が低下傾向"
+          description: "過去1時間で壁打ち分析の合意信頼度が10%以上低下しました"
+
+  # Info Alerts (P2 - 1時間以内) 
+  - name: techsapo.info
+    interval: 300s
+    rules:
+      - alert: DailyRequestVolumeHigh
+        expr: sum(increase(techsapo_wallbounce_requests_total[1d])) > 1.5 * sum(avg_over_time(techsapo_wallbounce_requests_total[7d:1d]))
+        for: 0m
+        labels:
+          severity: info
+          priority: P2
+          service: capacity-planning
+        annotations:
+          summary: "日次リクエスト数が平常時の150%を超過"
+          description: "本日のリクエスト数が過去7日平均の150%を超えました (現在値: {{ $value }})"
+          
+      - alert: CacheHitRateLow
+        expr: techsapo_cache_hit_ratio{cache_type="redis"} < 0.8
+        for: 30m
+        labels:
+          severity: info
+          priority: P2
+          service: performance
+        annotations:
+          summary: "Redisキャッシュヒット率が低下"
+          description: "Redisキャッシュヒット率が80%を下回りました (現在値: {{ $value | humanizePercentage }})"
+          
+      - alert: NewLLMProviderAdded
+        expr: increase(label_replace(techsapo_llm_requests_total, "provider_count", "$1", "provider", "(.+)")[5m:]) and on () (count by () (group by (provider) (techsapo_llm_requests_total)) > 4)
+        for: 0m
+        labels:
+          severity: info
+          priority: P2
+          service: configuration
+        annotations:
+          summary: "新しいLLMプロバイダーが追加されました"
+          description: "システムに新しいLLMプロバイダーが追加されました"
+
+  # Circuit Breaker Alerts
+  - name: techsapo.circuit-breaker
+    interval: 30s  
+    rules:
+      - alert: CircuitBreakerOpen
+        expr: techsapo_circuit_breaker_state == 2
+        for: 0m
+        labels:
+          severity: warning
+          priority: P1
+          service: reliability
+        annotations:
+          summary: "サーキットブレーカーが開状態"
+          description: "{{ $labels.service }} のサーキットブレーカーが開状態になりました"
+          
+      - alert: CircuitBreakerHalfOpen
+        expr: techsapo_circuit_breaker_state == 1
+        for: 2m
+        labels:
+          severity: info
+          priority: P2
+          service: reliability
+        annotations:
+          summary: "サーキットブレーカーがハーフ開状態"
+          description: "{{ $labels.service }} のサーキットブレーカーがハーフ開状態です"
+
+  # Security Alerts
+  - name: techsapo.security
+    interval: 60s
+    rules:
+      - alert: AuthenticationFailureSpike
+        expr: rate(techsapo_auth_attempts_total{status="failed"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          priority: P1
+          service: security
+        annotations:
+          summary: "認証失敗の急増"
+          description: "認証失敗が1分間に10回を超えました (現在値: {{ $value }}/min)"
+          
+      - alert: RateLimitExceeded
+        expr: rate(techsapo_rate_limit_hits_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: info
+          priority: P2
+          service: security
+        annotations:
+          summary: "レート制限に頻繁にヒット"
+          description: "{{ $labels.endpoint }} でレート制限に頻繁にヒットしています ({{ $labels.client_ip }})"
+          
+      - alert: SuspiciousInputBlocked
+        expr: rate(techsapo_input_sanitization_total{blocked="true"}[10m]) > 1
+        for: 5m
+        labels:
+          severity: info
+          priority: P2
+          service: security
+        annotations:
+          summary: "疑わしい入力がブロック"
+          description: "疑わしい入力が10分間に複数回ブロックされました (タイプ: {{ $labels.type }})"

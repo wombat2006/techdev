@@ -1,0 +1,42 @@
+# Grafana Datasources Configuration
+# Prometheus データソース自動プロビジョニング
+
+apiVersion: 1
+
+datasources:
+  # Primary Prometheus datasource
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      timeInterval: 15s
+      queryTimeout: 60s
+      httpMethod: GET
+      manageAlerts: true
+      alertmanagerUrl: http://alertmanager:9093
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: jaeger
+    secureJsonData: {}
+    version: 1
+    editable: false
+
+  # Alertmanager datasource for alert management
+  - name: Alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager:9093
+    jsonData:
+      implementation: prometheus
+    version: 1
+    editable: false
+
+  # Local JSON datasource for static data (if needed)
+  - name: JSON
+    type: marcusolsson-json-datasource
+    access: proxy
+    url: http://localhost
+    version: 1
+    editable: false

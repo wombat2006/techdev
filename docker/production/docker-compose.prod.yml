@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  techsapo-production:
+    build:
+      context: ../..
+      dockerfile: docker/production/Dockerfile
+    ports:
+      - "443:4000"  # HTTPS production port
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - LOG_LEVEL=info
+      - REDIS_URL=${REDIS_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    volumes:
+      - production-logs:/app/logs
+      - /etc/ssl/certs/:/etc/ssl/certs/:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - techsapo-prod
+
+  redis-prod:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    networks:
+      - techsapo-prod
+
+  nginx-lb:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl/:/etc/nginx/ssl/:ro
+      - production-logs:/var/log/nginx/
+    depends_on:
+      - techsapo-production
+    restart: unless-stopped
+    networks:
+      - techsapo-prod
+
+volumes:
+  production-logs:
+  redis-data:
+
+networks:
+  techsapo-prod:
+    driver: bridge

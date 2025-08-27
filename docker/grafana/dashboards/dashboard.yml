@@ -1,0 +1,49 @@
+# Grafana Dashboard Provisioning Configuration
+# ダッシュボード自動プロビジョニング設定
+
+apiVersion: 1
+
+providers:
+  # TechSapo Executive Dashboard
+  - name: 'executive-dashboards'
+    orgId: 1
+    folder: 'Executive'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/executive
+
+  # TechSapo Operations Dashboard  
+  - name: 'operations-dashboards'
+    orgId: 1
+    folder: 'Operations'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/operations
+
+  # TechSapo Development Dashboard
+  - name: 'development-dashboards'
+    orgId: 1
+    folder: 'Development'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/development
+
+  # System Infrastructure Dashboard
+  - name: 'system-dashboards'
+    orgId: 1
+    folder: 'System'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/system
