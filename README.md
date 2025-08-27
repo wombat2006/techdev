@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TechSapo Hugging Face Integration
 
 Enterprise-grade Infrastructure Support Tool with Multi-Tier LLM Orchestrator and Japanese embedding models integration.
@@ -312,3 +313,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **🌟 Enterprise-Grade LLM Orchestrator - Production Ready!**
+=======
+# techsapo
+Technical support tool for IT engineers
+>>>>>>> 57119253bf79f503c74695b389e3347c4863e6ab
