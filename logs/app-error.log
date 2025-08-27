@@ -1,0 +1,85 @@
+2025-08-27T00:27:29.391Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:27:29.392Z [[31merror[39m]: HuggingFace connection test failed {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:27:53.411Z [[31merror[39m]: ValidationError: Validation failed
+    at /home/wombat/ai/prj/techsapo/dist/middleware/validation.js:64:19
+    at Layer.handle [as handle_request] (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at /home/wombat/ai/prj/techsapo/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/index.js:280:10)
+    at /home/wombat/ai/prj/techsapo/dist/middleware/validation.js:246:9
+    at Layer.handle [as handle_request] (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5) {"service":"techsapo-huggingface","error":"Validation failed","path":"/embeddings","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T00:27:58.853Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:00.206Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:02.527Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:06.856Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:06.856Z [[31merror[39m]: Failed to process embedding batch 1 {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","batchSize":1,"error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:07.174Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:07.496Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:07.497Z [[31merror[39m]: Error: "Invalid credentials in Authorization header"
+    at request (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:257:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async featureExtraction (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:635:15)
+    at async HuggingFaceClient.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:74:30)
+    at async /home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:54:28
+    at async HuggingFaceClient.retryWithBackoff (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:218:24)
+    at async EmbeddingService.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:53:39)
+    at async /home/wombat/ai/prj/techsapo/dist/controllers/huggingface-controller.js:82:26 {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\"","path":"/embeddings","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T00:30:59.462Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:30:59.463Z [[31merror[39m]: HuggingFace connection test failed {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:11.290Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:12.809Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:15.323Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:20.186Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:20.186Z [[31merror[39m]: Failed to process embedding batch 1 {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","batchSize":1,"error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:20.632Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","error":"\"You need to install fugashi to use MecabTokenizer. See https://pypi.org/project/fugashi/ for installation.\""}
+2025-08-27T00:31:21.022Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:21.024Z [[31merror[39m]: Error: An error occurred while fetching the blob
+    at request (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:260:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async featureExtraction (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:635:15)
+    at async HuggingFaceClient.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:74:30)
+    at async /home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:54:28
+    at async HuggingFaceClient.retryWithBackoff (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:218:24)
+    at async EmbeddingService.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:53:39)
+    at async /home/wombat/ai/prj/techsapo/dist/controllers/huggingface-controller.js:82:26 {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob","path":"/embeddings","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T00:31:28.628Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:29.812Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:32.013Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.200Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.200Z [[31merror[39m]: Failed to process embedding batch 1 {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","batchSize":1,"error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.474Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","error":"\"You need to install fugashi to use MecabTokenizer. See https://pypi.org/project/fugashi/ for installation.\""}
+2025-08-27T00:31:36.661Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.662Z [[31merror[39m]: Error: An error occurred while fetching the blob
+    at request (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:260:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async featureExtraction (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:635:15)
+    at async HuggingFaceClient.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:74:30)
+    at async /home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:54:28
+    at async HuggingFaceClient.retryWithBackoff (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:218:24)
+    at async EmbeddingService.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:53:39)
+    at async /home/wombat/ai/prj/techsapo/dist/controllers/huggingface-controller.js:82:26 {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob","path":"/embeddings","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T02:18:36.026Z [[31merror[39m]: ValidationError: Validation failed
+    at /ai/prj/techsapo/src/middleware/validation.ts:85:13
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at next (/ai/prj/techsapo/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/ai/prj/techsapo/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at /ai/prj/techsapo/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/ai/prj/techsapo/node_modules/express/lib/router/index.js:346:12)
+    at next (/ai/prj/techsapo/node_modules/express/lib/router/index.js:280:10)
+    at /ai/prj/techsapo/src/middleware/validation.ts:281:5
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5) {"service":"techsapo-huggingface","error":"Validation failed","path":"/generate","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T02:18:40.719Z [[31merror[39m]: ValidationError: Validation failed
+    at /ai/prj/techsapo/src/middleware/validation.ts:85:13
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at next (/ai/prj/techsapo/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/ai/prj/techsapo/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at /ai/prj/techsapo/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/ai/prj/techsapo/node_modules/express/lib/router/index.js:346:12)
+    at next (/ai/prj/techsapo/node_modules/express/lib/router/index.js:280:10)
+    at /ai/prj/techsapo/src/middleware/validation.ts:281:5
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5) {"service":"techsapo-huggingface","error":"Validation failed","path":"/generate","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}

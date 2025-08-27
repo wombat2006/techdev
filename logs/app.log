@@ -1,0 +1,207 @@
+2025-08-27T00:26:51.555Z [[32minfo[39m]: Starting TechSapo Hugging Face Integration server... {"service":"techsapo-huggingface"}
+2025-08-27T00:26:51.561Z [[32minfo[39m]: Server started successfully {"service":"techsapo-huggingface","port":4000,"environment":"development","version":"1.0.0"}
+2025-08-27T00:27:28.963Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/health","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T00:27:28.964Z [[32minfo[39m]: Testing HuggingFace connection {"service":"techsapo-huggingface"}
+2025-08-27T00:27:28.965Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:27:29.391Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:27:29.392Z [[31merror[39m]: HuggingFace connection test failed {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:27:38.543Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/info","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T00:27:43.313Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/models","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T00:27:48.363Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/api/docs","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T00:27:53.409Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/embeddings","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T00:27:53.411Z [[31merror[39m]: ValidationError: Validation failed
+    at /home/wombat/ai/prj/techsapo/dist/middleware/validation.js:64:19
+    at Layer.handle [as handle_request] (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at /home/wombat/ai/prj/techsapo/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/index.js:280:10)
+    at /home/wombat/ai/prj/techsapo/dist/middleware/validation.js:246:9
+    at Layer.handle [as handle_request] (/home/wombat/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5) {"service":"techsapo-huggingface","error":"Validation failed","path":"/embeddings","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T00:27:58.511Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/embeddings","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T00:27:58.512Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","userId":"anonymous","sessionId":"a4c0aabb-3e15-44fc-99cf-0bb38253f73f","model":"default","textLength":14}
+2025-08-27T00:27:58.513Z [[32minfo[39m]: Processing embedding batch 1/1 {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","batchSize":1}
+2025-08-27T00:27:58.513Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:27:58.853Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:27:58.853Z [[33mwarn[39m]: Retrying operation after 1000ms (attempt 1/4) {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:27:59.854Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:28:00.206Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:00.206Z [[33mwarn[39m]: Retrying operation after 2000ms (attempt 2/4) {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:02.207Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:28:02.527Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:02.528Z [[33mwarn[39m]: Retrying operation after 4000ms (attempt 3/4) {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:06.529Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:28:06.856Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:06.856Z [[31merror[39m]: Failed to process embedding batch 1 {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","batchSize":1,"error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:06.857Z [[32minfo[39m]: Trying fallback model: sonoisa/sentence-bert-base-ja-mean-tokens-v2 {"service":"techsapo-huggingface"}
+2025-08-27T00:28:06.857Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","textCount":1}
+2025-08-27T00:28:07.174Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:07.175Z [[33mwarn[39m]: Fallback model sonoisa/sentence-bert-base-ja-mean-tokens-v2 also failed {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:07.175Z [[32minfo[39m]: Trying fallback model: colorfulscoop/sbert-base-ja {"service":"techsapo-huggingface"}
+2025-08-27T00:28:07.175Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","textCount":1}
+2025-08-27T00:28:07.496Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:07.497Z [[33mwarn[39m]: Fallback model colorfulscoop/sbert-base-ja also failed {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\""}
+2025-08-27T00:28:07.497Z [[31merror[39m]: Error: "Invalid credentials in Authorization header"
+    at request (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:257:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async featureExtraction (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:635:15)
+    at async HuggingFaceClient.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:74:30)
+    at async /home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:54:28
+    at async HuggingFaceClient.retryWithBackoff (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:218:24)
+    at async EmbeddingService.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:53:39)
+    at async /home/wombat/ai/prj/techsapo/dist/controllers/huggingface-controller.js:82:26 {"service":"techsapo-huggingface","error":"\"Invalid credentials in Authorization header\"","path":"/embeddings","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T00:28:11.676Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/cost/summary","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T00:30:27.330Z [[32minfo[39m]: Received shutdown signal, starting graceful shutdown... {"service":"techsapo-huggingface"}
+2025-08-27T00:30:46.426Z [[32minfo[39m]: Starting TechSapo Hugging Face Integration server... {"service":"techsapo-huggingface"}
+2025-08-27T00:30:46.432Z [[32minfo[39m]: Server started successfully {"service":"techsapo-huggingface","port":4000,"environment":"development","version":"1.0.0"}
+2025-08-27T00:30:58.833Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/health","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T00:30:58.834Z [[32minfo[39m]: Testing HuggingFace connection {"service":"techsapo-huggingface"}
+2025-08-27T00:30:58.835Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:30:59.462Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:30:59.463Z [[31merror[39m]: HuggingFace connection test failed {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:10.739Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/embeddings","ip":"::1","userAgent":"curl/7.76.1","userId":"test-user"}
+2025-08-27T00:31:10.741Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","userId":"test-user","sessionId":"3fbd9a43-98e3-4aa4-9ada-b7b49bf439c2","model":"cl-tohoku/bert-base-japanese-v3","textLength":14}
+2025-08-27T00:31:10.742Z [[32minfo[39m]: Processing embedding batch 1/1 {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","batchSize":1}
+2025-08-27T00:31:10.742Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:31:11.290Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:11.290Z [[33mwarn[39m]: Retrying operation after 1000ms (attempt 1/4) {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:12.290Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:31:12.809Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:12.809Z [[33mwarn[39m]: Retrying operation after 2000ms (attempt 2/4) {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:14.809Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:31:15.323Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:15.323Z [[33mwarn[39m]: Retrying operation after 4000ms (attempt 3/4) {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:19.324Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T00:31:20.186Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:20.186Z [[31merror[39m]: Failed to process embedding batch 1 {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","batchSize":1,"error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:20.187Z [[32minfo[39m]: Trying fallback model: sonoisa/sentence-bert-base-ja-mean-tokens-v2 {"service":"techsapo-huggingface"}
+2025-08-27T00:31:20.187Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","textCount":1}
+2025-08-27T00:31:20.632Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","error":"\"You need to install fugashi to use MecabTokenizer. See https://pypi.org/project/fugashi/ for installation.\""}
+2025-08-27T00:31:20.633Z [[33mwarn[39m]: Fallback model sonoisa/sentence-bert-base-ja-mean-tokens-v2 also failed {"service":"techsapo-huggingface","error":"\"You need to install fugashi to use MecabTokenizer. See https://pypi.org/project/fugashi/ for installation.\""}
+2025-08-27T00:31:20.633Z [[32minfo[39m]: Trying fallback model: colorfulscoop/sbert-base-ja {"service":"techsapo-huggingface"}
+2025-08-27T00:31:20.633Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","textCount":1}
+2025-08-27T00:31:21.022Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:21.022Z [[33mwarn[39m]: Fallback model colorfulscoop/sbert-base-ja also failed {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:21.024Z [[31merror[39m]: Error: An error occurred while fetching the blob
+    at request (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:260:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async featureExtraction (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:635:15)
+    at async HuggingFaceClient.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:74:30)
+    at async /home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:54:28
+    at async HuggingFaceClient.retryWithBackoff (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:218:24)
+    at async EmbeddingService.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:53:39)
+    at async /home/wombat/ai/prj/techsapo/dist/controllers/huggingface-controller.js:82:26 {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob","path":"/embeddings","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T00:31:28.244Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/embeddings","ip":"::1","userAgent":"curl/7.76.1","userId":"test-user"}
+2025-08-27T00:31:28.244Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","userId":"test-user","sessionId":"c77c43d9-4735-476b-8652-d876d9678fcb","model":"sentence-transformers/all-MiniLM-L6-v2","textLength":11}
+2025-08-27T00:31:28.244Z [[32minfo[39m]: Processing embedding batch 1/1 {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","batchSize":1}
+2025-08-27T00:31:28.245Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","textCount":1}
+2025-08-27T00:31:28.628Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:28.628Z [[33mwarn[39m]: Retrying operation after 1000ms (attempt 1/4) {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:29.629Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","textCount":1}
+2025-08-27T00:31:29.812Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:29.812Z [[33mwarn[39m]: Retrying operation after 2000ms (attempt 2/4) {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:31.812Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","textCount":1}
+2025-08-27T00:31:32.013Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:32.014Z [[33mwarn[39m]: Retrying operation after 4000ms (attempt 3/4) {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.014Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","textCount":1}
+2025-08-27T00:31:36.200Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.200Z [[31merror[39m]: Failed to process embedding batch 1 {"service":"techsapo-huggingface","model":"sentence-transformers/all-MiniLM-L6-v2","batchSize":1,"error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.200Z [[32minfo[39m]: Trying fallback model: sonoisa/sentence-bert-base-ja-mean-tokens-v2 {"service":"techsapo-huggingface"}
+2025-08-27T00:31:36.200Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","textCount":1}
+2025-08-27T00:31:36.474Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","error":"\"You need to install fugashi to use MecabTokenizer. See https://pypi.org/project/fugashi/ for installation.\""}
+2025-08-27T00:31:36.474Z [[33mwarn[39m]: Fallback model sonoisa/sentence-bert-base-ja-mean-tokens-v2 also failed {"service":"techsapo-huggingface","error":"\"You need to install fugashi to use MecabTokenizer. See https://pypi.org/project/fugashi/ for installation.\""}
+2025-08-27T00:31:36.474Z [[32minfo[39m]: Trying fallback model: colorfulscoop/sbert-base-ja {"service":"techsapo-huggingface"}
+2025-08-27T00:31:36.474Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","textCount":1}
+2025-08-27T00:31:36.661Z [[31merror[39m]: Failed to generate embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.661Z [[33mwarn[39m]: Fallback model colorfulscoop/sbert-base-ja also failed {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob"}
+2025-08-27T00:31:36.662Z [[31merror[39m]: Error: An error occurred while fetching the blob
+    at request (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:260:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async featureExtraction (/home/wombat/ai/prj/techsapo/node_modules/@huggingface/inference/dist/index.cjs:635:15)
+    at async HuggingFaceClient.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:74:30)
+    at async /home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:54:28
+    at async HuggingFaceClient.retryWithBackoff (/home/wombat/ai/prj/techsapo/dist/services/huggingface-client.js:218:24)
+    at async EmbeddingService.generateEmbeddings (/home/wombat/ai/prj/techsapo/dist/services/embedding-service.js:53:39)
+    at async /home/wombat/ai/prj/techsapo/dist/controllers/huggingface-controller.js:82:26 {"service":"techsapo-huggingface","error":"An error occurred while fetching the blob","path":"/embeddings","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T01:13:43.866Z [[32minfo[39m]: Received shutdown signal, starting graceful shutdown... {"service":"techsapo-huggingface"}
+2025-08-27T01:18:55.180Z [[32minfo[39m]: Using Hugging Face Mock Client for development {"service":"techsapo-huggingface"}
+2025-08-27T01:18:55.190Z [[32minfo[39m]: Starting TechSapo Hugging Face Integration server... {"service":"techsapo-huggingface"}
+2025-08-27T01:18:55.197Z [[32minfo[39m]: Server started successfully {"service":"techsapo-huggingface","port":4000,"environment":"development","version":"1.0.0"}
+2025-08-27T01:19:15.456Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/health","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T01:19:15.458Z [[32minfo[39m]: Mock: Testing connection (always returns true) {"service":"techsapo-huggingface"}
+2025-08-27T01:19:22.288Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/embeddings","ip":"::1","userAgent":"curl/7.76.1","userId":"test-user"}
+2025-08-27T01:19:22.290Z [[32minfo[39m]: Generating embeddings {"service":"techsapo-huggingface","userId":"test-user","sessionId":"test-session","model":"cl-tohoku/bert-base-japanese-v3","textLength":14}
+2025-08-27T01:19:22.291Z [[32minfo[39m]: Processing embedding batch 1/1 {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","batchSize":1}
+2025-08-27T01:19:22.291Z [[32minfo[39m]: Mock: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T01:19:22.407Z [[32minfo[39m]: Mock: Embeddings generated successfully {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","embeddingCount":1,"dimensions":768,"processingTime":116}
+2025-08-27T01:19:22.408Z [[32minfo[39m]: Cost tracked {"service":"techsapo-huggingface","userId":"test-user","model":"cl-tohoku/bert-base-japanese-v3","cost":0.00021,"inputTokens":21,"outputTokens":0,"taskType":"basic"}
+2025-08-27T01:19:31.110Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/generate","ip":"::1","userAgent":"curl/7.76.1","userId":"test-user"}
+2025-08-27T01:19:31.111Z [[32minfo[39m]: Generating inference {"service":"techsapo-huggingface","userId":"test-user","sessionId":"test-session","model":"rinna/japanese-gpt2-medium","taskType":"premium","inputLength":31}
+2025-08-27T01:19:31.112Z [[32minfo[39m]: Starting inference generation {"service":"techsapo-huggingface","model":"rinna/japanese-gpt2-medium","taskType":"premium","conversationId":"test-session","inputLength":118}
+2025-08-27T01:19:31.113Z [[32minfo[39m]: Mock: Generating text inference {"service":"techsapo-huggingface","model":"rinna/japanese-gpt2-medium","inputLength":118}
+2025-08-27T01:19:31.804Z [[32minfo[39m]: Mock: Inference generated successfully {"service":"techsapo-huggingface","model":"rinna/japanese-gpt2-medium","inputTokens":151,"outputTokens":49,"processingTime":692}
+2025-08-27T01:19:31.805Z [[32minfo[39m]: Inference generation completed {"service":"techsapo-huggingface","model":"rinna/japanese-gpt2-medium","processingTime":693,"outputLength":34,"confidence":0.7215686274509804}
+2025-08-27T01:19:31.806Z [[32minfo[39m]: Cost tracked {"service":"techsapo-huggingface","userId":"test-user","model":"rinna/japanese-gpt2-medium","cost":0.00747,"inputTokens":151,"outputTokens":49,"taskType":"premium"}
+2025-08-27T01:19:38.621Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/embeddings/analyze","ip":"::1","userAgent":"curl/7.76.1","userId":"test-user"}
+2025-08-27T01:19:38.622Z [[32minfo[39m]: Starting multi-model analysis {"service":"techsapo-huggingface","userId":"test-user","sessionId":"a6a7ba2c-db62-411f-92c0-1c620491de36","modelCount":3,"textLength":15}
+2025-08-27T01:19:38.623Z [[32minfo[39m]: Starting multi-model embedding analysis {"service":"techsapo-huggingface","modelCount":3,"textCount":1}
+2025-08-27T01:19:38.623Z [[32minfo[39m]: Processing embedding batch 1/1 {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","batchSize":1}
+2025-08-27T01:19:38.623Z [[32minfo[39m]: Mock: Generating embeddings {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","textCount":1}
+2025-08-27T01:19:38.624Z [[32minfo[39m]: Processing embedding batch 1/1 {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","batchSize":1}
+2025-08-27T01:19:38.624Z [[32minfo[39m]: Mock: Generating embeddings {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","textCount":1}
+2025-08-27T01:19:38.624Z [[32minfo[39m]: Processing embedding batch 1/1 {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","batchSize":1}
+2025-08-27T01:19:38.624Z [[32minfo[39m]: Mock: Generating embeddings {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","textCount":1}
+2025-08-27T01:19:38.735Z [[32minfo[39m]: Mock: Embeddings generated successfully {"service":"techsapo-huggingface","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","embeddingCount":1,"dimensions":768,"processingTime":111}
+2025-08-27T01:19:38.818Z [[32minfo[39m]: Mock: Embeddings generated successfully {"service":"techsapo-huggingface","model":"cl-tohoku/bert-base-japanese-v3","embeddingCount":1,"dimensions":768,"processingTime":195}
+2025-08-27T01:19:38.916Z [[32minfo[39m]: Mock: Embeddings generated successfully {"service":"techsapo-huggingface","model":"colorfulscoop/sbert-base-ja","embeddingCount":1,"dimensions":768,"processingTime":292}
+2025-08-27T01:19:38.918Z [[32minfo[39m]: Multi-model embedding analysis completed {"service":"techsapo-huggingface","successfulModels":3,"totalModels":3,"bestModel":"sonoisa/sentence-bert-base-ja-mean-tokens-v2"}
+2025-08-27T01:19:38.918Z [[32minfo[39m]: Cost tracked {"service":"techsapo-huggingface","userId":"test-user","model":"cl-tohoku/bert-base-japanese-v3","cost":0.000345,"inputTokens":23,"outputTokens":0,"taskType":"premium"}
+2025-08-27T01:19:38.918Z [[32minfo[39m]: Cost tracked {"service":"techsapo-huggingface","userId":"test-user","model":"sonoisa/sentence-bert-base-ja-mean-tokens-v2","cost":0.000345,"inputTokens":23,"outputTokens":0,"taskType":"premium"}
+2025-08-27T01:19:38.918Z [[32minfo[39m]: Cost tracked {"service":"techsapo-huggingface","userId":"test-user","model":"colorfulscoop/sbert-base-ja","cost":0.000345,"inputTokens":23,"outputTokens":0,"taskType":"premium"}
+2025-08-27T01:20:05.413Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/cost/summary","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T01:20:11.872Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/cost/report/daily","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T02:02:52.399Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/info","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.1; rv:109.0) Gecko/20100101 Firefox/120.0","userId":"anonymous"}
+2025-08-27T02:02:52.402Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/health","ip":"::1","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.1; rv:109.0) Gecko/20100101 Firefox/120.0","userId":"anonymous"}
+2025-08-27T02:02:52.402Z [[32minfo[39m]: Mock: Testing connection (always returns true) {"service":"techsapo-huggingface"}
+2025-08-27T02:02:52.532Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/info","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.1; rv:109.0) Gecko/20100101 Firefox/120.0","userId":"anonymous"}
+2025-08-27T02:18:13.282Z [[32minfo[39m]: Using Hugging Face Mock Client for development {"service":"techsapo-huggingface"}
+2025-08-27T02:18:13.293Z [[32minfo[39m]: Starting TechSapo Hugging Face Integration server... {"service":"techsapo-huggingface"}
+2025-08-27T02:18:13.297Z [[32minfo[39m]: Server started successfully {"service":"techsapo-huggingface","port":4000,"environment":"development","version":"1.0.0"}
+2025-08-27T02:18:21.550Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/health","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T02:18:21.551Z [[32minfo[39m]: Mock: Testing connection (always returns true) {"service":"techsapo-huggingface"}
+2025-08-27T02:18:26.706Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/embeddings/generate","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T02:18:31.131Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"GET","path":"/info","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T02:18:36.006Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/generate","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T02:18:36.026Z [[31merror[39m]: ValidationError: Validation failed
+    at /ai/prj/techsapo/src/middleware/validation.ts:85:13
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at next (/ai/prj/techsapo/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/ai/prj/techsapo/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at /ai/prj/techsapo/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/ai/prj/techsapo/node_modules/express/lib/router/index.js:346:12)
+    at next (/ai/prj/techsapo/node_modules/express/lib/router/index.js:280:10)
+    at /ai/prj/techsapo/src/middleware/validation.ts:281:5
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5) {"service":"techsapo-huggingface","error":"Validation failed","path":"/generate","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T02:18:40.718Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/generate","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T02:18:40.719Z [[31merror[39m]: ValidationError: Validation failed
+    at /ai/prj/techsapo/src/middleware/validation.ts:85:13
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at next (/ai/prj/techsapo/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/ai/prj/techsapo/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5)
+    at /ai/prj/techsapo/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/ai/prj/techsapo/node_modules/express/lib/router/index.js:346:12)
+    at next (/ai/prj/techsapo/node_modules/express/lib/router/index.js:280:10)
+    at /ai/prj/techsapo/src/middleware/validation.ts:281:5
+    at Layer.handle [as handle_request] (/ai/prj/techsapo/node_modules/express/lib/router/layer.js:95:5) {"service":"techsapo-huggingface","error":"Validation failed","path":"/generate","method":"POST","ip":"::1","userAgent":"curl/7.76.1"}
+2025-08-27T02:18:45.732Z [[32minfo[39m]: Incoming request {"service":"techsapo-huggingface","method":"POST","path":"/generate","ip":"::1","userAgent":"curl/7.76.1","userId":"anonymous"}
+2025-08-27T02:18:45.733Z [[32minfo[39m]: Generating inference {"service":"techsapo-huggingface","userId":"anonymous","sessionId":"edd3afb6-25f9-4293-aeb2-df46c610b8df","taskType":"basic","inputLength":19}
+2025-08-27T02:18:45.734Z [[32minfo[39m]: Starting inference generation {"service":"techsapo-huggingface","model":"rinna/japanese-gpt2-small","taskType":"basic","conversationId":"edd3afb6-25f9-4293-aeb2-df46c610b8df","inputLength":82}
+2025-08-27T02:18:45.735Z [[32minfo[39m]: Mock: Generating text inference {"service":"techsapo-huggingface","model":"rinna/japanese-gpt2-small","inputLength":82}
+2025-08-27T02:18:46.217Z [[32minfo[39m]: Mock: Inference generated successfully {"service":"techsapo-huggingface","model":"rinna/japanese-gpt2-small","inputTokens":96,"outputTokens":49,"processingTime":482}
+2025-08-27T02:18:46.218Z [[32minfo[39m]: Inference generation completed {"service":"techsapo-huggingface","model":"rinna/japanese-gpt2-small","processingTime":484,"outputLength":34,"confidence":0.7215686274509804}
+2025-08-27T02:18:46.219Z [[32minfo[39m]: Cost tracked {"service":"techsapo-huggingface","userId":"anonymous","model":"rinna/japanese-gpt2-small","cost":0.00194,"inputTokens":96,"outputTokens":49,"taskType":"basic"}
+2025-08-27T03:58:05.241Z [[32minfo[39m]: Received shutdown signal, starting graceful shutdown... {"service":"techsapo-huggingface"}
