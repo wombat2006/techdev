@@ -1,0 +1,10 @@
+# Environment and Secret Files
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.crt
+secrets/
+credentials/
+config/production.*
