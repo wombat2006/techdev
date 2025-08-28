@@ -23,7 +23,7 @@ export interface DocumentMetadata {
 export interface ProcessedDocument {
     id: string;
     name: string;
-    content: string;
+    content: string | Buffer;
     metadata: DocumentMetadata;
     vectorStoreFileId?: string;
 }

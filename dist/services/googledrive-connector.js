@@ -78,13 +78,15 @@ class GoogleDriveRAGConnector {
         'application/vnd.google-apps.document',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'text/plain',
-        'text/csv'
+        'text/csv',
+        'text/markdown',
+        'text/x-markdown'
     ]) {
         try {
             logger_1.logger.info('📋 GoogleDriveドキュメント一覧取得開始', { folderId, mimeTypes });
+            // 一時的にMIMETypeフィルタを無効化して全ファイル取得
             const query = [
                 folderId ? `'${folderId}' in parents` : null,
-                `mimeType in ('${mimeTypes.join("','")}')`,
                 'trashed = false'
             ].filter(Boolean).join(' and ');
             const response = await this.drive.files.list({
@@ -138,17 +140,79 @@ class GoogleDriveRAGConnector {
                 });
                 content = exportResponse.data;
             }
-            else {
-                // その他のファイルを直接ダウンロード
-                const downloadResponse = await this.drive.files.get({
+            else if (metadata.mimeType === 'application/vnd.google-apps.spreadsheet') {
+                // Google Sheetsをテキストでエクスポート
+                const exportResponse = await this.drive.files.export({
                     fileId: documentId,
-                    alt: 'media'
+                    mimeType: 'text/csv'
                 });
-                content = downloadResponse.data;
+                content = exportResponse.data;
+            }
+            else if (metadata.mimeType === 'application/vnd.google-apps.presentation') {
+                // Google Slidesをテキストでエクスポート
+                const exportResponse = await this.drive.files.export({
+                    fileId: documentId,
+                    mimeType: 'text/plain'
+                });
+                content = exportResponse.data;
+            }
+            else {
+                // その他のファイル（PDF、Office文書等）- 公式サンプル準拠の一時ファイル経由処理
+                logger_1.logger.info('🎯 公式パターン準拠ダウンロード開始', {
+                    documentId,
+                    mimeType: metadata.mimeType
+                });
+                // 一時ファイル作成（o3-high推奨パターンC）
+                const tmpDir = '/tmp/googledrive-rag';
+                await fs.mkdir(tmpDir, { recursive: true });
+                const fileExtension = metadata.mimeType === 'application/pdf' ? '.pdf' :
+                    metadata.mimeType.includes('image') ? '.img' : '.bin';
+                const tmpPath = path.join(tmpDir, `${documentId}${fileExtension}`);
+                try {
+                    // 公式Google Drive APIサンプル準拠ストリーミング処理
+                    const streamResponse = await this.drive.files.get({
+                        fileId: documentId,
+                        alt: 'media'
+                    }, {
+                        responseType: 'stream' // Blob問題完全回避
+                    });
+                    // Node.js pipeline使用（back-pressure対応）
+                    await new Promise((resolve, reject) => {
+                        const writeStream = (0, fs_1.createWriteStream)(tmpPath);
+                        streamResponse.data
+                            .on('error', reject)
+                            .pipe(writeStream)
+                            .on('error', reject)
+                            .on('finish', () => {
+                            logger_1.logger.info('🎯 ストリーミング完了', { documentId });
+                            resolve();
+                        });
+                    });
+                    // 一時ファイルからBufferに読み込み
+                    content = await fs.readFile(tmpPath);
+                    logger_1.logger.info('✅ 公式パターン処理完了', {
+                        documentId,
+                        bufferSize: content.length,
+                        tmpPath
+                    });
+                }
+                finally {
+                    // 一時ファイル削除（必ずクリーンアップ）
+                    try {
+                        await fs.unlink(tmpPath);
+                        logger_1.logger.info('🗑️ 一時ファイル削除完了', { tmpPath });
+                    }
+                    catch (cleanupError) {
+                        logger_1.logger.warn('⚠️ 一時ファイル削除失敗', {
+                            tmpPath,
+                            error: cleanupError instanceof Error ? cleanupError.message : 'Unknown error'
+                        });
+                    }
+                }
             }
             logger_1.logger.info('✅ ドキュメントダウンロード完了', {
                 name: metadata.name,
-                contentLength: content.length
+                contentLength: Buffer.isBuffer(content) ? content.length : content.length
             });
             return {
                 id: documentId,
@@ -206,8 +270,18 @@ class GoogleDriveRAGConnector {
             // 一時ファイル作成
             const tempDir = '/tmp/googledrive-rag';
             await fs.mkdir(tempDir, { recursive: true });
-            const tempFilePath = path.join(tempDir, `${document.id}.txt`);
-            await fs.writeFile(tempFilePath, document.content, 'utf-8');
+            // ファイル拡張子を適切に設定
+            const fileExtension = document.metadata.mimeType === 'application/pdf' ? '.pdf' : '.txt';
+            const tempFilePath = path.join(tempDir, `${document.id}${fileExtension}`);
+            // Bufferかプレーンテキストかを判定して適切に書き込み
+            if (Buffer.isBuffer(document.content)) {
+                // バイナリファイルの場合、Bufferとして直接書き込み
+                await fs.writeFile(tempFilePath, document.content);
+            }
+            else {
+                // テキストファイルの場合、UTF-8で書き込み
+                await fs.writeFile(tempFilePath, document.content, 'utf-8');
+            }
             try {
                 // OpenAI Files APIにアップロード
                 const fileStream = (0, fs_1.createReadStream)(tempFilePath);

@@ -1,85 +1,85 @@
-# TechSapo - IT Infrastructure Support Tool with AI Orchestration
+# TechSapo - AIオーケストレーション付きIT基盤支援ツール
 
-Enterprise-grade IT Infrastructure Support Tool featuring **Wall-Bounce Analysis** with Multi-LLM orchestration, comprehensive Prometheus monitoring, and Japanese AI integration.
+**壁打ち分析**とマルチLLMオーケストレーション、包括的Prometheus監視、日本語AI統合を特徴とするエンタープライズグレードIT基盤支援ツール
 
-## 🎯 Core Architecture
+## 🎯 コアアーキテクチャ
 
-### Wall-Bounce Analysis System (必須壁打ち)
+### 壁打ち分析システム（必須壁打ち）
 すべてのクエリで複数LLMによる協調分析を実行する革新的システム
-- **必須要件**: 最低2つのLLMによる分析
+- **必須要件**: 最低2つのLLMによる分析実行
 - **合意形成**: 複数の回答から最適解を導出
 - **品質保証**: ハルシネーション検証とエスカレーション機能
 
-### Multi-LLM Orchestration
-- **Tier 1**: Claude Code (総司令官・ルーティング)
-- **Tier 2**: Gemini 2.5 Pro + GPT-5 (基本処理)
-- **Tier 3**: Claude Sonnet4 (プレミアム分析)
-- **Tier 4**: OpenRouter Ensemble (補助分析)
-- **Tier 5**: Claude Opus4.1 (緊急時専用)
+### マルチLLMオーケストレーション
+- **Tier 1**: Claude Code（総司令官・ルーティング）
+- **Tier 2**: Gemini 2.5 Pro + GPT-5（基本処理）
+- **Tier 3**: Claude Sonnet4（プレミアム分析）
+- **Tier 4**: OpenRouter Ensemble（補助分析）
+- **Tier 5**: Claude Opus4.1（緊急時専用）
 
-## 🚀 Key Features
+## 🚀 主要機能
 
-### 🤖 AI-Powered Analysis
+### 🤖 AI駆動分析
 - **壁打ち分析**: 複数LLMによる協調分析で高品質な回答生成
 - **IT障害解析**: システムログとエラー出力の自動分析
 - **RAG検索**: GoogleDrive統合による個人データ活用
 - **3段階品質**: Basic/Premium/Critical対応
 
-### 📊 Comprehensive Monitoring
-- **Prometheus統合**: 20+ カスタムメトリクス
-- **Grafana可視化**: Executive/Operations/Development ダッシュボード
-- **3段階アラート**: P0(即座)/P1(15分)/P2(1時間)対応
-- **コスト監視**: リアルタイム予算追跡($70/月)
+### 📊 包括的監視機能
+- **Prometheus統合**: 20+のカスタムメトリクス
+- **Grafana可視化**: 経営/運用/開発ダッシュボード
+- **3段階アラート**: P0（即座）/P1（15分）/P2（1時間）対応
+- **コスト監視**: リアルタイム予算追跡（月額$70）
 
-### 🔐 Enterprise Security
+### 🔐 エンタープライズセキュリティ
 - **セキュリティメトリクス**: 認証・レート制限・入力検証
 - **GDPR/HIPAA準拠**: 機密情報マスキング
 - **監査ログ**: MySQL全活動記録
 - **SSL/TLS**: Let's Encrypt自動更新
 
-### 🏗️ Production Infrastructure
+### 🏗️ 本番環境インフラ
 - **Docker完全対応**: フルコンテナ化
 - **SSL証明書自動更新**: 90日サイクル
 - **ゼロダウンタイム**: Nginx + PM2
-- **高可用性**: Prometheus HA + Grafana clustering
+- **高可用性**: Prometheus HA + Grafana クラスタリング
 
-## 📋 Prerequisites
+## 📋 前提条件
 
-- Node.js 18.0.0 or higher
-- Docker & Docker Compose (または Podman)
-- API Keys: OpenAI, Google (Gemini), Claude, OpenRouter
-- (Optional) Redis, MySQL for production
+- Node.js 18.0.0 以上
+- Docker & Docker Compose（またはPodman）
+- APIキー: OpenAI、Google（Gemini）、Claude、OpenRouter
+- （オプション）本番環境用Redis、MySQL
 
-## 🛠 Quick Start
+## 🛠 クイックスタート
 
-### 1. Repository Setup
+### 1. リポジトリセットアップ
 ```bash
 git clone https://github.com/wombat2006/techsapo.git
 cd techsapo
 npm install
 ```
 
-### 2. Environment Configuration
+### 2. 環境設定
 ```bash
 cp .env.example .env
-# Edit .env with your API keys
+# .envファイルにAPIキーを設定
 ```
 
-### 3. Build and Start
+### 3. ビルドと起動
 ```bash
-# Complete monitoring stack startup
+# 完全監視スタック起動
 ./scripts/start-monitoring.sh
 
-# Or manual startup
+# または手動起動
 npm run build
 npm start
 ```
 
-## 🎯 Core Endpoints
+## 🎯 主要エンドポイント
 
-### Wall-Bounce Analysis
+### 壁打ち分析
 ```bash
-# Basic IT support
+# 基本IT支援
 curl -X POST http://localhost:4000/api/v1/generate \
   -H "Content-Type: application/json" \
   -d '{
@@ -88,7 +88,7 @@ curl -X POST http://localhost:4000/api/v1/generate \
     "user_id": "engineer-001"
   }'
 
-# Premium analysis (3 LLMs)
+# プレミアム分析（3つのLLM）
 curl -X POST http://localhost:4000/api/v1/generate \
   -H "Content-Type: application/json" \
   -d '{
@@ -96,7 +96,7 @@ curl -X POST http://localhost:4000/api/v1/generate \
     "task_type": "premium"
   }'
 
-# Critical emergency response (4 LLMs)
+# 緊急時対応（4つのLLM）
 curl -X POST http://localhost:4000/api/v1/generate \
   -H "Content-Type: application/json" \
   -d '{
@@ -105,7 +105,7 @@ curl -X POST http://localhost:4000/api/v1/generate \
   }'
 ```
 
-### Log Analysis
+### ログ解析
 ```bash
 curl -X POST http://localhost:4000/api/v1/analyze-logs \
   -H "Content-Type: application/json" \
@@ -116,7 +116,7 @@ curl -X POST http://localhost:4000/api/v1/analyze-logs \
   }'
 ```
 
-### RAG Search
+### RAG検索
 ```bash
 curl -X POST http://localhost:4000/api/v1/rag/search \
   -H "Content-Type: application/json" \
@@ -126,187 +126,187 @@ curl -X POST http://localhost:4000/api/v1/rag/search \
   }'
 ```
 
-## 📊 Monitoring & Observability
+## 📊 監視とオブザーバビリティ
 
-### Access Points
-- **Application**: http://localhost:4000
+### アクセス先
+- **アプリケーション**: http://localhost:4000
 - **Prometheus**: http://localhost:9090
-- **Grafana**: http://localhost:3000 (admin/techsapo2024!)
+- **Grafana**: http://localhost:3000（admin/techsapo2024!）
 - **AlertManager**: http://localhost:9093
-- **Metrics**: http://localhost:4000/metrics
+- **メトリクス**: http://localhost:4000/metrics
 
-### Key Metrics
+### 主要メトリクス
 ```prometheus
-# Wall-bounce analysis success rate
+# 壁打ち分析成功率
 techsapo:wallbounce_success_rate
 
-# Average confidence score (5min)
+# 平均信頼度スコア（5分間）
 techsapo:wallbounce_avg_confidence_5m
 
-# LLM provider performance
+# LLMプロバイダー性能
 techsapo:llm_success_rate_by_provider{provider="Gemini"}
 
-# Daily cost tracking
+# 日次コスト追跡
 sum(increase(techsapo_wallbounce_cost_usd[24h]))
 
-# HTTP P95 response time
+# HTTP P95応答時間
 techsapo:http_p95_response_time
 ```
 
-### Alert Examples
-- **Critical**: 壁打ち合意信頼度 < 0.7 (5分間)
-- **Warning**: 平均応答時間 > 5秒 (5分間)
-- **Info**: 日次リクエスト数 > 平常時150%
+### アラート例
+- **クリティカル**: 壁打ち合意信頼度 < 0.7（5分間）
+- **警告**: 平均応答時間 > 5秒（5分間）
+- **情報**: 日次リクエスト数 > 平常時150%
 
-## 🏗️ Architecture Overview
+## 🏗️ アーキテクチャ概要
 
 ```
 ┌─────────────────┐    ┌──────────────┐    ┌─────────────┐
-│   TechSapo App  │───▶│  Prometheus  │───▶│   Grafana   │
-│   (Port 4000)   │    │  (Port 9090) │    │ (Port 3000) │
-│   Wall-Bounce   │    │   Metrics    │    │ Dashboards  │
+│   TechSapoアプリ │───▶│ Prometheus   │───▶│  Grafana    │
+│  （ポート 4000） │    │（ポート 9090）│    │（ポート 3000）│
+│   壁打ち分析    │    │   メトリクス  │    │ ダッシュボード│
 └─────────────────┘    └──────────────┘    └─────────────┘
          │                       │
          ▼                       ▼
 ┌─────────────────┐    ┌──────────────┐    ┌─────────────┐
-│  Multi-LLM      │    │ AlertManager │    │ Node        │
-│  Orchestrator   │    │ (Port 9093)  │    │ Exporter    │
-│  ┌─────────────┐│    │ Notifications│    │ (Port 9100) │
-│  │Gemini 2.5Pro││    └──────────────┘    └─────────────┘
-│  │GPT-5        ││
-│  │Claude Sonnet││         ┌──────────────┐
-│  │OpenRouter   ││         │ Redis Cache  │
-│  └─────────────┘│         │ (Port 6379)  │
+│ マルチLLM       │    │AlertManager  │    │ Node        │
+│ オーケストレータ │    │（ポート 9093）│    │ Exporter    │
+│ ┌─────────────┐ │    │ 通知管理     │    │（ポート 9100）│
+│ │Gemini 2.5Pro│ │    └──────────────┘    └─────────────┘
+│ │GPT-5        │ │
+│ │Claude Sonnet│ │         ┌──────────────┐
+│ │OpenRouter   │ │         │ Redisキャッシュ│
+│ └─────────────┘ │         │（ポート 6379）│
 └─────────────────┘         └──────────────┘
 ```
 
-## 📈 Deployment Options
+## 📈 デプロイメントオプション
 
-### Docker Production Stack
+### Docker本番スタック
 ```bash
-# Complete monitoring environment
+# 完全監視環境
 docker-compose -f docker/docker-compose.monitoring.yml up -d
 
-# Production deployment
+# 本番環境デプロイメント
 docker-compose -f docker/production/docker-compose.prod.yml up -d
 ```
 
-### SSL Certificate Management
+### SSL証明書管理
 ```bash
-# Install auto-renewal (90-day cycle)
+# 自動更新インストール（90日サイクル）
 ./scripts/install-renewal-cron.sh
 
-# Manual renewal
+# 手動更新
 ./scripts/renew-certificates.sh
 ```
 
-### PM2 Process Management
+### PM2プロセス管理
 ```bash
 pm2 start ecosystem.config.js
 pm2 monit
 pm2 logs techsapo
 ```
 
-## 🔐 Security Features
+## 🔐 セキュリティ機能
 
-- **Authentication**: OpenAI API key validation middleware
-- **Input Sanitization**: XSS/SQL injection protection
-- **Rate Limiting**: Configurable per-endpoint limits  
-- **Data Privacy**: PII masking and GDPR compliance
-- **Audit Logging**: Complete activity tracking
-- **SSL/TLS**: Auto-renewed certificates
+- **認証**: OpenAI APIキー検証ミドルウェア
+- **入力サニタイゼーション**: XSS/SQLインジェクション保護
+- **レート制限**: エンドポイント別設定可能制限
+- **データプライバシー**: PII マスキングとGDPR準拠
+- **監査ログ**: 完全な活動追跡
+- **SSL/TLS**: 自動更新証明書
 
-## 💰 Cost Management
+## 💰 コスト管理
 
-- **Monthly Budget**: $70 (configurable)
-- **Real-time Tracking**: Per-request cost monitoring
-- **Automatic Alerts**: 80% budget threshold
-- **Provider Optimization**: Cost-efficiency analysis
-- **Usage Prediction**: ML-based forecasting
+- **月次予算**: $70（設定可能）
+- **リアルタイム追跡**: リクエスト毎のコスト監視
+- **自動アラート**: 予算80%閾値
+- **プロバイダー最適化**: コスト効率分析
+- **使用量予測**: ML ベース予測
 
-## 🧪 Testing & Quality
+## 🧪 テストと品質保証
 
 ```bash
-# Run comprehensive tests
+# 包括的テスト実行
 npm test
 
-# Test with coverage
+# カバレッジ付きテスト
 npm run test:coverage  
 
-# Punycode replacement tests
+# Punycode置換テスト
 npm test tests/punycode-replacement.test.ts
 
-# Integration tests
+# 統合テスト
 npm run test:integration
 ```
 
-## 📚 Documentation
+## 📚 ドキュメント
 
-- **[Monitoring Setup](./MONITORING_SETUP.md)**: Complete Prometheus monitoring guide
-- **[Prometheus Design](./docs/prometheus-monitoring-design.md)**: Detailed metrics architecture
-- **[RAG Setup Guide](./docs/RAG_SETUP_GUIDE.md)**: GoogleDrive integration
-- **[CLAUDE.md](./CLAUDE.md)**: System configuration and requirements
+- **[監視セットアップ](./MONITORING_SETUP.md)**: 完全なPrometheus監視ガイド
+- **[Prometheus設計](./docs/prometheus-monitoring-design.md)**: 詳細なメトリクスアーキテクチャ
+- **[RAGセットアップガイド](./docs/RAG_SETUP_GUIDE.md)**: GoogleDrive統合
+- **[CLAUDE.md](./CLAUDE.md)**: システム設定と要件
 
-## 🔧 Configuration Files
+## 🔧 設定ファイル
 
 ```
 ├── docker/
-│   ├── docker-compose.monitoring.yml    # Complete monitoring stack
-│   ├── prometheus/                       # Prometheus configuration
-│   ├── grafana/                         # Grafana dashboards
-│   └── production/                      # Production deployment
+│   ├── docker-compose.monitoring.yml    # 完全監視スタック
+│   ├── prometheus/                       # Prometheus設定
+│   ├── grafana/                         # Grafanaダッシュボード
+│   └── production/                      # 本番環境デプロイメント
 ├── src/
-│   ├── services/wall-bounce-analyzer.ts # Core analysis engine
-│   ├── metrics/prometheus-client.ts     # Custom metrics
-│   └── wall-bounce-server.ts           # Main application server
+│   ├── services/wall-bounce-analyzer.ts # コア分析エンジン
+│   ├── metrics/prometheus-client.ts     # カスタムメトリクス
+│   └── wall-bounce-server.ts           # メインアプリケーションサーバー
 └── scripts/
-    ├── start-monitoring.sh              # Monitoring stack startup
-    └── renew-certificates.sh            # SSL certificate management
+    ├── start-monitoring.sh              # 監視スタック起動
+    └── renew-certificates.sh            # SSL証明書管理
 ```
 
-## 🌟 Production Features
+## 🌟 本番環境機能
 
-### High Availability
-- **Multi-instance**: PM2 cluster mode
-- **Load Balancing**: Nginx upstream configuration
-- **Health Checks**: Automated failover
-- **Graceful Shutdown**: Zero-downtime restarts
+### 高可用性
+- **マルチインスタンス**: PM2クラスタモード
+- **負荷分散**: Nginxアップストリーム設定
+- **ヘルスチェック**: 自動フェイルオーバー
+- **グレースフルシャットダウン**: ゼロダウンタイム再起動
 
-### Monitoring & Alerting
-- **Multi-channel Notifications**: Email, Slack, SMS
-- **Escalation Policies**: P0/P1/P2 priority handling
-- **SLA Monitoring**: 99.9% uptime tracking
-- **Performance Optimization**: Automated scaling decisions
+### 監視とアラート
+- **マルチチャネル通知**: Email、Slack、SMS
+- **エスカレーションポリシー**: P0/P1/P2優先度処理
+- **SLA監視**: 99.9%稼働率追跡
+- **性能最適化**: 自動スケーリング判定
 
-### Data Management
-- **Backup Strategy**: Automated daily backups
-- **Disaster Recovery**: Cross-region replication
-- **Data Retention**: 15 days detailed, 90 days aggregated
-- **Privacy Compliance**: GDPR/HIPAA ready
+### データ管理
+- **バックアップ戦略**: 自動日次バックアップ
+- **災害復旧**: リージョン間レプリケーション
+- **データ保持**: 15日詳細、90日集約
+- **プライバシー準拠**: GDPR/HIPAA対応
 
-## 🤝 Contributing
+## 🤝 貢献方法
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Follow wall-bounce analysis patterns
-4. Add comprehensive monitoring metrics
-5. Include tests and documentation
-6. Submit Pull Request
+1. リポジトリをフォーク
+2. 機能ブランチを作成（`git checkout -b feature/amazing-feature`）
+3. 壁打ち分析パターンに従う
+4. 包括的監視メトリクスを追加
+5. テストとドキュメントを含める
+6. プルリクエストを送信
 
-## 📄 License
+## 📄 ライセンス
 
-MIT License - Enterprise usage permitted. See [LICENSE](LICENSE) for details.
+MITライセンス - エンタープライズ利用可。詳細は[LICENSE](LICENSE)を参照。
 
-## 📞 Support
+## 📞 サポート
 
-- **Documentation**: Complete setup guides included
-- **Issues**: [GitHub Issues](https://github.com/wombat2006/techsapo/issues)
-- **Monitoring**: Built-in health checks and alerts
-- **Community**: Japanese language support
+- **ドキュメント**: 完全なセットアップガイド付属
+- **問題報告**: [GitHub Issues](https://github.com/wombat2006/techsapo/issues)
+- **監視**: 組み込みヘルスチェックとアラート
+- **コミュニティ**: 日本語サポート
 
 ---
 
-**🎯 Enterprise-Grade IT Infrastructure Support Tool**
-**壁打ち分析システム - Production Ready!**
+**🎯 エンタープライズグレードIT基盤支援ツール**
+**壁打ち分析システム - 本番環境対応完了！**
 
-*Powered by Multi-LLM Orchestration with Comprehensive Prometheus Monitoring*
+*マルチLLMオーケストレーションと包括的Prometheus監視による強力な支援*

@@ -1,28 +1,28 @@
-# TechSapo Deployment Guide - Production Ready
+# TechSapo デプロイメントガイド - 本番環境対応
 
-本番環境でのTechSapo壁打ち分析システム + Prometheus監視環境の完全デプロイメントガイド
+本番環境でのTechSapo壁打ち分析システム + Prometheus監視環境の完全デプロイメント手順書
 
 ## 🎯 デプロイメント概要
 
 ### 基本構成
-- **アプリケーション**: TechSapo Wall-Bounce Analysis Server
+- **アプリケーション**: TechSapo 壁打ち分析サーバー
 - **監視システム**: Prometheus + Grafana + AlertManager
-- **インフラ**: Docker/Podman + Nginx + SSL/TLS
-- **データベース**: Redis (キャッシュ) + MySQL (ログ)
+- **インフラストラクチャ**: Docker/Podman + Nginx + SSL/TLS
+- **データベース**: Redis（キャッシュ）+ MySQL（ログ）
 - **セキュリティ**: Let's Encrypt SSL + 認証・認可
 
 ### 対応環境
 - **OS**: Ubuntu 20.04+ / CentOS 8+ / RHEL 8+
-- **Container**: Docker 20.10+ または Podman 3.0+
-- **Node.js**: 18.0+ (コンテナ内)
-- **メモリ**: 最低 4GB (推奨 8GB+)
-- **ディスク**: 最低 20GB (推奨 50GB+)
+- **コンテナ**: Docker 20.10+ または Podman 3.0+
+- **Node.js**: 18.0+（コンテナ内）
+- **メモリ**: 最低 4GB（推奨 8GB+）
+- **ディスク容量**: 最低 20GB（推奨 50GB+）
 
 ## 🚀 クイックデプロイメント
 
-### 1. Repository Clone & Setup
+### 1. リポジトリ取得とセットアップ
 ```bash
-# Repository取得
+# リポジトリ取得
 git clone https://github.com/wombat2006/techsapo.git
 cd techsapo
 
@@ -33,51 +33,51 @@ sudo apt update && sudo apt install -y docker.io docker-compose curl git
 sudo systemctl start docker
 sudo systemctl enable docker
 sudo usermod -aG docker $USER
-# ログアウト・ログインして権限反映
+# ログアウト・ログインして権限を反映
 ```
 
-### 2. Environment Configuration
+### 2. 環境設定ファイル作成
 ```bash
 # 環境設定ファイル作成
 cp .env.example .env
 
-# API Keys設定 (必須)
+# API キー設定（必須）
 cat << 'EOF' > .env
-# Core Configuration
+# コア設定
 NODE_ENV=production
 PORT=4000
 PROMETHEUS_METRICS=true
 
-# LLM API Keys (必須設定)
+# LLM API キー（必須設定）
 OPENAI_API_KEY=sk-your-openai-key-here
 GOOGLE_API_KEY=your-google-api-key
 CLAUDE_API_KEY=your-claude-api-key
 OPENROUTER_API_KEY=your-openrouter-key
 
-# Security
+# セキュリティ
 JWT_SECRET=your-secure-jwt-secret-here
 CORS_ORIGIN=https://yourdomain.com
 
-# Database (Optional - 本番推奨)
+# データベース（オプション - 本番推奨）
 REDIS_URL=redis://localhost:6379
 MYSQL_HOST=localhost
 MYSQL_USER=techsapo
 MYSQL_PASSWORD=secure-password
 MYSQL_DATABASE=techsapo
 
-# Cost Management
+# コスト管理
 MONTHLY_BUDGET_LIMIT=70
 COST_ALERT_THRESHOLD=0.8
 
-# SSL Certificate (Let's Encrypt)
+# SSL証明書（Let's Encrypt）
 DOMAIN=yourdomain.com
 EMAIL=admin@yourdomain.com
 EOF
 ```
 
-### 3. SSL Certificate Setup (本番環境)
+### 3. SSL証明書セットアップ（本番環境）
 ```bash
-# ドメインの場合: Let's Encrypt自動設定
+# ドメイン使用の場合: Let's Encrypt自動設定
 sudo ./scripts/install-renewal-cron.sh yourdomain.com admin@yourdomain.com
 
 # ローカル開発の場合: 自己署名証明書
@@ -86,7 +86,7 @@ sudo ./scripts/install-renewal-cron.sh yourdomain.com admin@yourdomain.com
 
 ### 4. 監視スタック起動
 ```bash
-# 完全な監視環境を一発起動
+# 完全な監視環境を一括起動
 ./scripts/start-monitoring.sh
 
 # または手動起動
@@ -121,14 +121,14 @@ curl http://localhost:4000/metrics | grep techsapo_wallbounce
 # - AlertManager: http://alertmanager:9093
 
 # ダッシュボード自動インポート済み
-# - Executive Dashboard
-# - Operations Dashboard
-# - Development Dashboard
+# - 経営ダッシュボード（Executive Dashboard）
+# - 運用ダッシュボード（Operations Dashboard）
+# - 開発ダッシュボード（Development Dashboard）
 ```
 
 ### アラート通知設定
 ```bash
-# Slack通知設定 (optional)
+# Slack通知設定（オプション）
 # docker/alertmanager/alertmanager.yml を編集
 
 # Email通知設定
@@ -141,13 +141,13 @@ docker-compose -f docker/docker-compose.monitoring.yml restart alertmanager
 
 ## 🔐 セキュリティ設定
 
-### Firewall Configuration
+### ファイアウォール設定
 ```bash
 # Ubuntu/Debian
 sudo ufw allow 22/tcp    # SSH
-sudo ufw allow 80/tcp    # HTTP (リダイレクト用)
+sudo ufw allow 80/tcp    # HTTP（リダイレクト用）
 sudo ufw allow 443/tcp   # HTTPS
-sudo ufw allow 4000/tcp  # TechSapo App (内部のみ)
+sudo ufw allow 4000/tcp  # TechSapoアプリ（内部のみ）
 sudo ufw --force enable
 
 # CentOS/RHEL
@@ -158,9 +158,9 @@ sudo firewall-cmd --permanent --add-port=4000/tcp
 sudo firewall-cmd --reload
 ```
 
-### Nginx Reverse Proxy (推奨)
+### Nginxリバースプロキシ（推奨）
 ```bash
-# Nginx設定（SSL termination）
+# Nginx設定（SSL終端処理）
 sudo cp docker/production/nginx-letsencrypt.conf /etc/nginx/sites-available/techsapo
 sudo ln -s /etc/nginx/sites-available/techsapo /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
@@ -174,48 +174,48 @@ crontab -l | grep certbot
 # 手動更新テスト
 sudo certbot renew --dry-run
 
-# TechSapo certificate renewal
+# TechSapo証明書更新
 ./scripts/renew-certificates.sh
 ```
 
-## 📈 Performance Optimization
+## 📈 パフォーマンス最適化
 
 ### システムチューニング
 ```bash
-# Node.js heap size調整 (8GB環境)
+# Node.js ヒープサイズ調整（8GB環境）
 echo "NODE_OPTIONS='--max-old-space-size=4096'" >> .env
 
-# Docker resource limits
+# Dockerリソース制限
 # docker/docker-compose.monitoring.yml のmem_limit設定を調整
 
-# Prometheus retention設定
+# Prometheus保持期間設定
 # docker/prometheus/prometheus.yml
-# retention.time: 15d → 30d (必要に応じて)
+# retention.time: 15d → 30d（必要に応じて）
 ```
 
-### Database Optimization
+### データベース最適化
 ```bash
 # Redis設定最適化
 docker exec techsapo-redis redis-cli CONFIG SET maxmemory 512mb
 docker exec techsapo-redis redis-cli CONFIG SET maxmemory-policy allkeys-lru
 
-# MySQL設定最適化 (optional)
+# MySQL設定最適化（オプション）
 # my.cnf設定でinnodb_buffer_pool_size調整
 ```
 
-## 🔄 Backup & Recovery
+## 🔄 バックアップ・復旧
 
 ### データベースバックアップ
 ```bash
-# Redis バックアップ
+# Redisバックアップ
 docker exec techsapo-redis redis-cli BGSAVE
 docker cp techsapo-redis:/data/dump.rdb ./backups/redis-$(date +%Y%m%d).rdb
 
-# Prometheus データバックアップ
+# Prometheusデータバックアップ
 docker-compose -f docker/docker-compose.monitoring.yml exec prometheus \
   tar czf /prometheus/backup-$(date +%Y%m%d).tar.gz /prometheus/data
 
-# Grafana 設定バックアップ  
+# Grafana設定バックアップ
 docker cp techsapo-grafana:/var/lib/grafana ./backups/grafana-$(date +%Y%m%d)
 ```
 
@@ -288,15 +288,15 @@ docker logs techsapo-app --tail 100
 
 ## 📊 監視・アラート設定詳細
 
-### Critical Alerts (P0)
+### クリティカルアラート（P0）
 - 壁打ち分析信頼度 < 0.7 → Slack + Email
 - LLMエラー率 > 5% → 即座通知
 - メモリ使用率 > 90% → SMS + Email
 
-### Warning Alerts (P1)  
+### 警告アラート（P1）
 - 応答時間 > 5秒 → Email通知
 - 日次コスト > $1.87 → 予算アラート
-- キャッシュヒット率 < 80% → 性能アラート
+- キャッシュヒット率 < 80% → パフォーマンスアラート
 
 ### 通知チャネル設定
 ```yaml
@@ -308,15 +308,15 @@ receivers:
         channel: '#alerts-critical'
     email_configs:
       - to: 'oncall@company.com'
-        subject: '🚨 CRITICAL: TechSapo Alert'
+        subject: '🚨 緊急: TechSapoアラート'
 ```
 
-## 🚀 Production Checklist
+## 🚀 本番環境チェックリスト
 
 ### デプロイ前確認
-- [ ] 全API Keys設定完了
-- [ ] SSL証明書設定完了  
-- [ ] Firewall設定完了
+- [ ] 全APIキー設定完了
+- [ ] SSL証明書設定完了
+- [ ] ファイアウォール設定完了
 - [ ] バックアップ設定完了
 - [ ] 監視アラート設定完了
 - [ ] DNS設定完了（ドメイン使用時）
@@ -326,7 +326,7 @@ receivers:
 - [ ] 全サービス正常起動確認
 - [ ] 壁打ち分析動作確認
 - [ ] メトリクス収集確認
-- [ ] アラート動作確認  
+- [ ] アラート動作確認
 - [ ] SSL/HTTPS動作確認
 - [ ] バックアップ動作確認
 - [ ] ログ出力確認
@@ -339,6 +339,54 @@ receivers:
 - [ ] 容量監視閾値設定
 - [ ] コスト監視設定確認
 
+## 📊 パフォーマンス監視指標
+
+### アプリケーション指標
+- **壁打ち分析成功率**: > 95%
+- **平均応答時間**: < 3秒
+- **LLM合意信頼度**: > 0.8
+- **日次コスト**: < $2.33
+
+### インフラ指標
+- **CPU使用率**: < 70%
+- **メモリ使用率**: < 80%
+- **ディスク使用率**: < 85%
+- **ネットワークレイテンシ**: < 100ms
+
+### ビジネス指標
+- **月次予算遵守率**: > 95%
+- **SLA達成率**: > 99.9%
+- **エラー率**: < 0.1%
+- **ユーザー満足度**: > 4.5/5.0
+
+## 🛡️ セキュリティ運用
+
+### 日常監視項目
+- 認証失敗回数の監視
+- 異常なトラフィックパターンの検出
+- APIキー使用量の追跡
+- 不正アクセス試行の記録
+
+### 定期セキュリティタスク
+- **週次**: ログ分析とセキュリティイベント確認
+- **月次**: 脆弱性スキャンとパッチ適用
+- **四半期**: セキュリティ設定レビュー
+- **年次**: 包括的セキュリティ監査
+
+## 💡 運用のベストプラクティス
+
+### 日常運用
+1. **朝次チェック**: Grafanaダッシュボードでシステム状態確認
+2. **コスト監視**: 日次予算消費率確認
+3. **アラート対応**: P0は即座、P1は15分以内、P2は1時間以内
+4. **ログレビュー**: エラーログと異常パターンの確認
+
+### 週次・月次メンテナンス
+1. **週次**: バックアップ確認とシステム更新
+2. **月次**: パフォーマンス分析とキャパシティプランニング
+3. **四半期**: システムアーキテクチャレビュー
+4. **年次**: 災害復旧テストとSLA見直し
+
 ## 📞 サポート・お問い合わせ
 
 ### 技術サポート
@@ -347,15 +395,21 @@ receivers:
 - **設定例**: docker/ ディレクトリ内各種設定ファイル
 
 ### 緊急時対応
-- **Grafana Alert**: http://localhost:3000/alerting
-- **Prometheus Status**: http://localhost:9090/targets
-- **Application Logs**: `docker logs techsapo-app`
-- **System Health**: `curl http://localhost:4000/health`
+- **Grafanaアラート**: http://localhost:3000/alerting
+- **Prometheusステータス**: http://localhost:9090/targets
+- **アプリケーションログ**: `docker logs techsapo-app`
+- **システムヘルス**: `curl http://localhost:4000/health`
+
+### エスカレーション手順
+1. **L1サポート**: 基本的な動作確認とログ収集
+2. **L2サポート**: システム分析と一次対応
+3. **L3サポート**: 深刻な問題の根本原因分析
+4. **緊急対応**: 24時間体制でのクリティカル問題対応
 
 ---
 
-**🎯 Production-Grade Deployment Complete!**
+**🎯 本番環境デプロイメント完了！**
 
-**TechSapo壁打ち分析システム + 完全監視環境の本番デプロイメント完了**
+**TechSapo壁打ち分析システム + 完全監視環境の本番デプロイメントが完了しました**
 
-*Enterprise-Ready Infrastructure with Full Observability*
+*エンタープライズ対応インフラストラクチャ with フル・オブザーバビリティ*

@@ -7,12 +7,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.inputSanitizationTotal = exports.rateLimitHitsTotal = exports.authAttemptsTotal = exports.queueSize = exports.activeConnections = exports.memoryUsage = exports.circuitBreakerState = exports.errorsTotal = exports.cacheHitRatio = exports.mysqlQueriesTotal = exports.redisConnectionPoolSize = exports.redisOperationsTotal = exports.httpResponseSize = exports.httpRequestSize = exports.httpRequestDuration = exports.httpRequestsTotal = exports.llmAgreementScore = exports.llmTokenUsage = exports.llmResponseTime = exports.llmRequestsTotal = exports.wallbounceCostUsd = exports.wallbounceProcessingDuration = exports.wallbounceConsensusConfidence = exports.wallbounceRequestsTotal = exports.register = void 0;
+exports.inputSanitizationTotal = exports.rateLimitHitsTotal = exports.authAttemptsTotal = exports.ragCostUsd = exports.webhookProcessingDuration = exports.webhookNotificationsTotal = exports.ragDocumentProcessingTotal = exports.ragSearchDuration = exports.ragSearchRequests = exports.ragSyncDuration = exports.googledriveApiRequestsTotal = exports.queueSize = exports.activeConnections = exports.memoryUsage = exports.circuitBreakerState = exports.errorsTotal = exports.cacheHitRatio = exports.mysqlQueriesTotal = exports.redisConnectionPoolSize = exports.redisOperationsTotal = exports.httpResponseSize = exports.httpRequestSize = exports.httpRequestDuration = exports.httpRequestsTotal = exports.llmAgreementScore = exports.llmTokenUsage = exports.llmResponseTime = exports.llmRequestsTotal = exports.wallbounceCostUsd = exports.wallbounceProcessingDuration = exports.wallbounceConsensusConfidence = exports.wallbounceRequestsTotal = exports.register = void 0;
 exports.initializeMetrics = initializeMetrics;
 exports.recordWallBounceAnalysis = recordWallBounceAnalysis;
 exports.recordHttpRequest = recordHttpRequest;
 exports.recordError = recordError;
 exports.recordLLMResponse = recordLLMResponse;
+exports.recordRAGSyncEvent = recordRAGSyncEvent;
+exports.recordRAGSearch = recordRAGSearch;
+exports.recordWebhookNotification = recordWebhookNotification;
+exports.recordWebhookProcessingDuration = recordWebhookProcessingDuration;
+exports.recordWebhookError = recordWebhookError;
+exports.recordDriveSyncEvent = recordDriveSyncEvent;
+exports.recordRAGCost = recordRAGCost;
 const prom_client_1 = __importDefault(require("prom-client"));
 const logger_1 = require("../utils/logger");
 /**
@@ -195,6 +202,68 @@ exports.queueSize = new prom_client_1.default.Gauge({
     registers: [exports.register]
 });
 /**
+ * Google Drive RAG & Webhook メトリクス
+ */
+// GoogleDrive API呼び出し統計
+exports.googledriveApiRequestsTotal = new prom_client_1.default.Counter({
+    name: 'techsapo_googledrive_api_requests_total',
+    help: 'Total number of Google Drive API requests',
+    labelNames: ['operation', 'status', 'folder_id'],
+    registers: [exports.register]
+});
+// RAG同期処理時間
+exports.ragSyncDuration = new prom_client_1.default.Histogram({
+    name: 'techsapo_rag_sync_duration_seconds',
+    help: 'RAG synchronization processing time in seconds',
+    buckets: [1, 5, 15, 30, 60, 120, 300, 600],
+    labelNames: ['folder_id', 'document_count', 'batch_size'],
+    registers: [exports.register]
+});
+// RAG検索リクエスト
+exports.ragSearchRequests = new prom_client_1.default.Counter({
+    name: 'techsapo_rag_search_requests_total',
+    help: 'Total number of RAG search requests',
+    labelNames: ['vector_store_id', 'status'],
+    registers: [exports.register]
+});
+// RAG検索処理時間
+exports.ragSearchDuration = new prom_client_1.default.Histogram({
+    name: 'techsapo_rag_search_duration_seconds',
+    help: 'RAG search processing time in seconds',
+    buckets: [0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0],
+    labelNames: ['vector_store_id', 'query_type'],
+    registers: [exports.register]
+});
+// RAGドキュメント処理統計
+exports.ragDocumentProcessingTotal = new prom_client_1.default.Counter({
+    name: 'techsapo_rag_document_processing_total',
+    help: 'Total number of RAG document processing events',
+    labelNames: ['mime_type', 'status'],
+    registers: [exports.register]
+});
+// Webhook通知統計
+exports.webhookNotificationsTotal = new prom_client_1.default.Counter({
+    name: 'techsapo_webhook_notifications_total',
+    help: 'Total number of webhook notifications received',
+    labelNames: ['source', 'resource_state', 'status'],
+    registers: [exports.register]
+});
+// Webhook処理時間
+exports.webhookProcessingDuration = new prom_client_1.default.Histogram({
+    name: 'techsapo_webhook_processing_duration_seconds',
+    help: 'Webhook processing time in seconds',
+    buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 5.0],
+    labelNames: ['webhook_type'],
+    registers: [exports.register]
+});
+// RAGコスト追跡
+exports.ragCostUsd = new prom_client_1.default.Counter({
+    name: 'techsapo_rag_cost_usd',
+    help: 'RAG operations cost in USD',
+    labelNames: ['operation', 'provider'],
+    registers: [exports.register]
+});
+/**
  * セキュリティメトリクス
  */
 // 認証試行回数
@@ -278,6 +347,65 @@ function recordLLMResponse(provider, model, responseTime, inputTokens, outputTok
     exports.llmResponseTime.observe({ provider, model }, responseTime / 1000);
     exports.llmTokenUsage.inc({ provider, type: 'input', model }, inputTokens);
     exports.llmTokenUsage.inc({ provider, type: 'output', model }, outputTokens);
+}
+/**
+ * RAG & Webhook メトリクス記録関数群
+ */
+// RAG同期イベント記録
+function recordRAGSyncEvent(eventType, mimeType, status, folderId, duration) {
+    exports.ragDocumentProcessingTotal.inc({ mime_type: mimeType, status });
+    if (folderId) {
+        exports.googledriveApiRequestsTotal.inc({
+            operation: eventType,
+            status,
+            folder_id: folderId
+        });
+    }
+    if (duration) {
+        exports.ragSyncDuration.observe({
+            folder_id: folderId || 'unknown',
+            document_count: '1',
+            batch_size: '1'
+        }, duration / 1000);
+    }
+}
+// RAG検索記録
+function recordRAGSearch(vectorStoreId, queryType, duration, resultCount, status) {
+    exports.ragSearchRequests.inc({ vector_store_id: vectorStoreId, status });
+    exports.ragSearchDuration.observe({ vector_store_id: vectorStoreId, query_type: queryType }, duration / 1000);
+}
+// Webhook通知記録
+function recordWebhookNotification(resourceState, status) {
+    exports.webhookNotificationsTotal.inc({
+        source: 'googledrive',
+        resource_state: resourceState,
+        status
+    });
+}
+// Webhook処理時間記録
+function recordWebhookProcessingDuration(duration) {
+    exports.webhookProcessingDuration.observe({ webhook_type: 'googledrive' }, duration / 1000);
+}
+// Webhookエラー記録
+function recordWebhookError(errorType) {
+    recordError(errorType, 'medium', 'webhook_handler');
+    exports.webhookNotificationsTotal.inc({
+        source: 'googledrive',
+        resource_state: 'error',
+        status: 'failed'
+    });
+}
+// Drive同期イベント記録
+function recordDriveSyncEvent(eventType, resourceId) {
+    exports.googledriveApiRequestsTotal.inc({
+        operation: eventType,
+        status: 'success',
+        folder_id: resourceId
+    });
+}
+// RAGコスト記録
+function recordRAGCost(operation, provider, cost) {
+    exports.ragCostUsd.inc({ operation, provider }, cost);
 }
 // プロバイダー名からモデル名を取得
 function getModelByProvider(provider) {
