@@ -172,14 +172,14 @@ class GoogleDriveRAGConnector {
         try {
             logger_1.logger.info('🗂️ Vector Store確認開始', { name });
             // 既存のVector Store検索
-            const vectorStores = await this.openai.beta.vectorStores.list();
+            const vectorStores = await this.openai.vectorStores.list();
             const existingStore = vectorStores.data.find((store) => store.name === name);
             if (existingStore) {
                 logger_1.logger.info('✅ 既存Vector Store使用', { id: existingStore.id, name });
                 return existingStore.id;
             }
             // 新規Vector Store作成
-            const newStore = await this.openai.beta.vectorStores.create({
+            const newStore = await this.openai.vectorStores.create({
                 name,
                 expires_after: {
                     anchor: 'last_active_at',
@@ -216,7 +216,7 @@ class GoogleDriveRAGConnector {
                     purpose: 'assistants'
                 });
                 // Vector Storeにファイル追加
-                await this.openai.beta.vectorStores.files.create(vectorStoreId, {
+                await this.openai.vectorStores.files.create(vectorStoreId, {
                     file_id: file.id
                 });
                 // 一時ファイル削除

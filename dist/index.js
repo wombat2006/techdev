@@ -11,6 +11,9 @@ const environment_1 = require("./config/environment");
 const logger_1 = require("./utils/logger");
 const error_handler_1 = require("./middleware/error-handler");
 const huggingface_routes_1 = __importDefault(require("./routes/huggingface-routes"));
+const rag_endpoint_1 = __importDefault(require("./routes/rag-endpoint"));
+const webhook_endpoints_1 = __importDefault(require("./routes/webhook-endpoints"));
+const webhook_setup_1 = __importDefault(require("./routes/webhook-setup"));
 class TechSapoServer {
     app;
     server;
@@ -80,6 +83,11 @@ class TechSapoServer {
         this.app.use('/api/v1/huggingface', huggingface_routes_1.default);
         this.app.use('/api/huggingface', huggingface_routes_1.default); // Backward compatibility
         this.app.use('/', huggingface_routes_1.default); // Root level for direct access
+        // RAG System routes
+        this.app.use('/api/v1/rag', rag_endpoint_1.default);
+        // Webhook routes
+        this.app.use('/api/v1/webhooks', webhook_endpoints_1.default);
+        this.app.use('/api/v1/webhook-setup', webhook_setup_1.default);
         // API documentation endpoint
         this.app.get('/api/docs', (req, res) => {
             res.json({

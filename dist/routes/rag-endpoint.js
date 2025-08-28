@@ -31,6 +31,36 @@ const initializeRAGConnector = () => {
     return ragConnector;
 };
 /**
+ * 🏥 RAGシステムヘルスチェック
+ */
+router.get('/health', async (req, res) => {
+    try {
+        const status = {
+            status: 'healthy',
+            service: 'rag-system',
+            timestamp: new Date().toISOString(),
+            configuration: {
+                google_drive_configured: !!googleDriveConfig.clientId && !!googleDriveConfig.refreshToken,
+                openai_configured: !!openaiConfig.apiKey,
+                rag_connector_initialized: !!ragConnector
+            }
+        };
+        res.json(status);
+        logger_1.logger.info('🏥 RAGヘルスチェック実行', status);
+    }
+    catch (error) {
+        logger_1.logger.error('❌ RAGヘルスチェックエラー', {
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        res.status(500).json({
+            status: 'unhealthy',
+            service: 'rag-system',
+            timestamp: new Date().toISOString(),
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+/**
  * 🔄 GoogleDriveフォルダをRAGに同期
  */
 router.post('/sync-folder', async (req, res) => {
@@ -239,7 +269,7 @@ router.get('/vector-stores', async (req, res) => {
         }
         // OpenAI Vector Store一覧取得（直接APIアクセス）
         const openai = connector.openai;
-        const vectorStores = await openai.beta.vectorStores.list();
+        const vectorStores = await openai.vectorStores.list();
         res.json({
             success: true,
             data: {
@@ -276,7 +306,7 @@ router.delete('/vector-stores/:id', async (req, res) => {
         }
         // Vector Store削除
         const openai = connector.openai;
-        const deletedStore = await openai.beta.vectorStores.del(id);
+        const deletedStore = await openai.vectorStores.del(id);
         res.json({
             success: true,
             message: 'Vector Storeを削除しました',

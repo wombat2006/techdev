@@ -187,7 +187,7 @@ export class GoogleDriveRAGConnector {
       logger.info('🗂️ Vector Store確認開始', { name });
 
       // 既存のVector Store検索
-      const vectorStores = await (this.openai.beta as any).vectorStores.list();
+      const vectorStores = await this.openai.vectorStores.list();
       const existingStore = vectorStores.data.find((store: any) => store.name === name);
 
       if (existingStore) {
@@ -196,7 +196,7 @@ export class GoogleDriveRAGConnector {
       }
 
       // 新規Vector Store作成
-      const newStore = await (this.openai.beta as any).vectorStores.create({
+      const newStore = await this.openai.vectorStores.create({
         name,
         expires_after: {
           anchor: 'last_active_at',
@@ -242,7 +242,7 @@ export class GoogleDriveRAGConnector {
         });
 
         // Vector Storeにファイル追加
-        await (this.openai.beta as any).vectorStores.files.create(vectorStoreId, {
+        await this.openai.vectorStores.files.create(vectorStoreId, {
           file_id: file.id
         });
 

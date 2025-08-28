@@ -5,6 +5,9 @@ import { config, validateEnvironment } from './config/environment';
 import { logger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import huggingfaceRoutes from './routes/huggingface-routes';
+import ragRoutes from './routes/rag-endpoint';
+import webhookRoutes from './routes/webhook-endpoints';
+import webhookSetupRoutes from './routes/webhook-setup';
 
 class TechSapoServer {
   private app: express.Application;
@@ -82,6 +85,13 @@ class TechSapoServer {
     this.app.use('/api/v1/huggingface', huggingfaceRoutes);
     this.app.use('/api/huggingface', huggingfaceRoutes); // Backward compatibility
     this.app.use('/', huggingfaceRoutes); // Root level for direct access
+    
+    // RAG System routes
+    this.app.use('/api/v1/rag', ragRoutes);
+    
+    // Webhook routes
+    this.app.use('/api/v1/webhooks', webhookRoutes);
+    this.app.use('/api/v1/webhook-setup', webhookSetupRoutes);
 
     // API documentation endpoint
     this.app.get('/api/docs', (req, res) => {
