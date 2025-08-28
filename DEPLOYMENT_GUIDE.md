@@ -1,24 +1,34 @@
-# TechSapo デプロイメントガイド - 本番環境対応
+# TechSapo MCP Orchestration デプロイメントガイド - 本番環境対応
 
-本番環境でのTechSapo壁打ち分析システム + Prometheus監視環境の完全デプロイメント手順書
+本番環境でのTechSapo Enhanced MCP Orchestration + 7つの専門MCPサーバー + 包括的監視環境の完全デプロイメント手順書
 
-## 🎯 デプロイメント概要
+## 🎯 Enhanced MCP デプロイメント概要
 
-### 基本構成
-- **アプリケーション**: TechSapo 壁打ち分析サーバー
-- **監視システム**: Prometheus + Grafana + AlertManager
+### MCP Services Architecture  
+- **Core MCP Services**: 7つの専門MCPサーバー統合
+- **Wall-Bounce MCP**: 複数LLM協調処理オーケストレーター
+- **Vault MCP**: AES-256-GCM暗号化環境変数管理
+- **Context7 MCP**: リアルタイムライブラリドキュメント統合
+- **Stash MCP**: セマンティックコード検索・コンテキスト管理
+- **OpenRouter MCP**: 200+モデルAPIゲートウェイ
+- **Cipher MCP**: 高度暗号化・セキュリティサービス
+- **Monitoring MCP**: 統合監視・メトリクス収集
+
+### Infrastructure Components
+- **MCP Protocol**: v2025-03-26準拠統一通信
+- **監視システム**: Prometheus + Grafana + AlertManager + MCP監視
 - **インフラストラクチャ**: Docker/Podman + Nginx + SSL/TLS
-- **データベース**: Redis（キャッシュ）+ MySQL（ログ）
-- **セキュリティ**: Let's Encrypt SSL + 認証・認可
+- **データストレージ**: Redis（Vault Cache）+ File Storage（暗号化）
+- **セキュリティ**: Let's Encrypt SSL + JWT認証 + RBAC
 
 ### 対応環境
 - **OS**: Ubuntu 20.04+ / CentOS 8+ / RHEL 8+
 - **コンテナ**: Docker 20.10+ または Podman 3.0+
-- **Node.js**: 18.0+（コンテナ内）
-- **メモリ**: 最低 4GB（推奨 8GB+）
-- **ディスク容量**: 最低 20GB（推奨 50GB+）
+- **Node.js**: 18.0+（MCPサーバー内）
+- **メモリ**: 最低 8GB（推奨 16GB+ for 7 MCP services）
+- **ディスク容量**: 最低 50GB（推奨 100GB+ for encrypted storage）
 
-## 🚀 クイックデプロイメント
+## 🚀 Enhanced MCP デプロイメント
 
 ### 1. リポジトリ取得とセットアップ
 ```bash
@@ -36,17 +46,43 @@ sudo usermod -aG docker $USER
 # ログアウト・ログインして権限を反映
 ```
 
-### 2. 環境設定ファイル作成
+### 2. MCP Services 環境設定
 ```bash
-# 環境設定ファイル作成
+# MCP サービス設定ファイル作成
 cp .env.example .env
 
-# API キー設定（必須）
+# MCP統合環境設定（必須）
 cat << 'EOF' > .env
-# コア設定
+# MCP Core Configuration
 NODE_ENV=production
-PORT=4000
-PROMETHEUS_METRICS=true
+MCP_SERVER_PORT=3000
+MCP_LOG_LEVEL=info
+
+# Wall-Bounce MCP Settings
+WALL_BOUNCE_MAX_CONCURRENT=4
+WALL_BOUNCE_QUALITY_THRESHOLD=0.7
+WALL_BOUNCE_CONSENSUS_THRESHOLD=0.6
+
+# Vault MCP Encryption Settings  
+VAULT_ENCRYPTION_KEY=base64_encoded_256bit_key
+VAULT_JWT_SECRET=your_jwt_secret_key
+REDIS_URL=redis://localhost:6379
+
+# Context7 MCP Integration
+CONTEXT7_API_KEY=your_context7_api_key
+CONTEXT7_CACHE_TTL=3600
+
+# OpenRouter MCP Gateway
+OPENROUTER_API_KEY=sk-or-your-openrouter-key
+OPENROUTER_COST_TRACKING=enabled
+
+# Cipher MCP Security
+CIPHER_HSM_ENABLED=false
+CIPHER_POST_QUANTUM=experimental
+
+# Monitoring MCP
+PROMETHEUS_URL=http://localhost:9090
+GRAFANA_URL=http://localhost:3001
 
 # LLM API キー（必須設定）
 OPENAI_API_KEY=sk-your-openai-key-here

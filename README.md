@@ -1,64 +1,74 @@
-# 🏓 TechSapo - Google Drive RAGシステム with マルチLLM壁打ち分析
+# 🏓 TechSapo - Enhanced MCP Orchestration with Wall-Bounce Analysis
 
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](./tests/)
-[![File Formats](https://img.shields.io/badge/formats-42+-blue.svg)](#file-formats)
+[![MCP Services](https://img.shields.io/badge/MCP%20services-7+-blue.svg)](#mcp-services)
 [![Security](https://img.shields.io/badge/security-enterprise-red.svg)](#security)
-[![Performance](https://img.shields.io/badge/performance-optimized-orange.svg)](#performance)
+[![Wall-Bounce](https://img.shields.io/badge/wall--bounce-enabled-green.svg)](#wall-bounce)
 
-**壁打ち分析**とマルチLLMオーケストレーション、Google Drive RAG統合、42+ファイル形式対応による企業レベルAI支援システム
+**Model Context Protocol統合**による壁打ち分析システム、環境変数暗号化、包括的テスト戦略による次世代IT支援プラットフォーム
 
-## 🎯 コアアーキテクチャ
+## 🎯 Enhanced MCP Architecture
 
-### 壁打ち分析システム（必須壁打ち）
-すべてのクエリで複数LLMによる協調分析を実行する革新的システム
-- **必須要件**: 最低2つのLLMによる分析実行
-- **合意形成**: 複数の回答から最適解を導出
-- **品質保証**: ハルシネーション検証とエスカレーション機能
+### 🏓 Wall-Bounce Analysis with MCP Integration
+Model Context Protocol基盤の協調分析システム
+- **必須MCP壁打ち**: 複数MCPサーバー経由での分析実行
+- **品質統合**: ハルシネーション検証とコンセンサス評価
+- **リファレンス強化**: Context7/Stash経由での最新ドキュメント参照
 
-### マルチLLMオーケストレーション
-- **Tier 1**: Claude Code（総司令官・ルーティング）
-- **Tier 2**: Gemini 2.5 Pro + GPT-5（基本処理）
-- **Tier 3**: Claude Sonnet4（プレミアム分析）
-- **Tier 4**: OpenRouter Ensemble（補助分析）
-- **Tier 5**: Claude Opus4.1（緊急時専用）
+### Multi-LLM MCP Orchestration
+- **Tier 0**: Stash/Context7 - リファレンス・ドキュメント参照層（非LLM）
+- **Tier 1**: Claude Code - ルーティング・統合責任者
+- **Tier 2**: Gemini 2.5 Flash + Claude Haiku 3.5 + cursor-mcp - 基本処理
+- **Tier 3**: Claude Sonnet4 + OpenRouter - 複雑分析
+- **Tier 4**: GPT-5 - 最高品質
+- **Tier 5**: Claude Opus4.1 + Cipher - 緊急時・セキュリティ専用
+
+### 🔗 MCP Services Infrastructure {#mcp-services}
+- **Wall-Bounce MCP**: 複数LLM協調処理オーケストレーター
+- **Vault MCP**: AES-256-GCM暗号化環境変数管理
+- **Stash MCP**: セマンティックコード検索・コンテキスト管理
+- **OpenRouter MCP**: 200+モデルAPIゲートウェイ
+- **Context7 MCP**: リアルタイムライブラリドキュメント統合
+- **Cipher MCP**: 高度暗号化・セキュリティサービス
+- **Monitoring MCP**: システム監視・メトリクス収集
 
 ## 🚀 主要機能
 
-### 🤖 AI駆動分析
-- **壁打ち分析**: 複数LLMによる協調分析で高品質な回答生成
-- **IT障害解析**: システムログとエラー出力の自動分析
-- **RAG検索**: GoogleDrive統合による個人データ活用
-- **3段階品質**: Basic/Premium/Critical対応
+### 🤖 Enhanced AI Analysis
+- **MCP Wall-Bounce**: Model Context Protocol経由の協調分析
+- **Environment Security**: Vault MCP暗号化環境変数管理
+- **Code Intelligence**: Stash MCP + cursor-mcp統合コード理解
+- **Reference Integration**: Context7必須参照でドキュメント品質向上
+- **Multi-Model Gateway**: OpenRouter 200+モデル統合
 
-### 📁 ファイル形式対応 {#file-formats}
-**42+種類のファイル形式に完全対応**
-- **オフィス文書(15種)**: PDF, DOCX, XLSX, PPTX, DOC, XLS, PPT, XLSB, ODT, ODS, ODP, Pages, Numbers, Key, XLMS
-- **アーカイブ(8種)**: ZIP, 7Z, RAR, GZIP, XZ, TAR, LZH, EPUB
-- **画像・メディア(6種)**: PNG, JPEG, J2K, MP4, MPG, MP3
-- **プログラミング(10種)**: C, C++, Python, JavaScript, Shell, SQL, JSON, YAML, CSV, TSV
-- **セキュリティ(3種)**: PEM証明書, CRT証明書, P7B証明書
-- **その他**: SQLite, RTF, TXT
+### 🔐 Advanced Security Features {#security}
+- **Vault MCP**: AES-256-GCM暗号化 + JWT認証
+- **Redis+File Hybrid**: 高可用性環境変数ストレージ
+- **自動ローテーション**: 90日サイクル暗号キー更新
+- **監査ログ**: 全アクセスパターン完全追跡
+- **RBAC**: ロールベースアクセス制御
+- **GDPR/HIPAA準拠**: 機密情報マスキング対応
 
-### 📊 包括的監視機能
-- **Prometheus統合**: 20+のカスタムメトリクス
-- **Grafana可視化**: 経営/運用/開発ダッシュボード
-- **3段階アラート**: P0（即座）/P1（15分）/P2（1時間）対応
-- **コスト監視**: リアルタイム予算追跡（月額$70）
+### 📊 MCP Monitoring & Observability
+- **Monitoring MCP**: 専用MCPサーバーによる統合監視
+- **Wall-Bounce Metrics**: 品質スコア・コンセンサス・実行時間追跡
+- **Vault Security Metrics**: 暗号化操作・認証・アクセス監視  
+- **Multi-Service Health**: 全MCPサービス稼働状況統合管理
+- **Cost Optimization**: $70/月予算でのリアルタイム最適化
 
-### 🔐 エンタープライズセキュリティ {#security}
-- **マジックナンバー検証**: バイナリ署名による正確なファイル形式判定
-- **拡張子詐称対策**: ファイル実体と拡張子の整合性チェック
-- **マルウェア検出**: PE実行形式等の危険ファイル自動排除
-- **暗号化通信**: TLS 1.3による全通信暗号化
-- **GDPR/HIPAA準拠**: 機密情報マスキング・監査ログ
-- **SSL/TLS**: Let's Encrypt自動更新
+### 🧪 Comprehensive Testing Strategy {#wall-bounce}
+- **Property-Based Testing**: fast-check活用の体系的テスト
+- **Wall-Bounce Quality Assurance**: 複数LLM品質検証
+- **Security Testing**: ReDOS・暗号化・認証脆弱性検出
+- **E2E MCP Integration**: 全サービス統合テスト
+- **Performance Validation**: 負荷耐性・応答時間検証
 
-### ⚡ パフォーマンス最適化 {#performance}
-- **ファイル処理速度**: 100MB/s以上の高速処理
-- **レスポンス時間**: 50ms以内（90パーセンタイル）
-- **メモリ効率**: 処理ファイルサイズの3倍以下
-- **同時接続**: 1000RPS対応
-- **100%テスト通過**: 包括的品質保証システム
+### ⚡ Enhanced Performance
+- **MCP Protocol Efficiency**: 標準化通信による最適化
+- **Concurrent Processing**: 並列MCPサービス実行
+- **Reference Caching**: Context7/Stash結果キャッシュ  
+- **Quality Thresholds**: 信頼度0.7・コンセンサス0.6自動保証
+- **Property-Test Coverage**: 包括的品質保証システム
 
 ### 🏗️ 本番環境インフラ
 - **Docker完全対応**: フルコンテナ化
@@ -98,33 +108,113 @@ npm run build
 npm start
 ```
 
-## 🎯 主要エンドポイント
+## 🎯 MCP エンドポイント
 
-### 壁打ち分析
+### Wall-Bounce MCP Analysis
 ```bash
-# 基本IT支援
-curl -X POST http://localhost:4000/api/v1/generate \
+# MCP Wall-Bounce 基本分析
+curl -X POST http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
   -d '{
-    "prompt": "Dockerコンテナが起動しない問題を解決したい",
-    "task_type": "basic",
-    "user_id": "engineer-001"
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "wall-bounce-analyze",
+      "arguments": {
+        "query": "Dockerコンテナ起動問題の解決方法",
+        "priority": "standard"
+      }
+    }
   }'
 
-# プレミアム分析（3つのLLM）
-curl -X POST http://localhost:4000/api/v1/generate \
+# 高品質分析（Context7参照付き）
+curl -X POST http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
   -d '{
-    "prompt": "Kubernetesクラスタのネットワーク問題を分析",
-    "task_type": "premium"
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "wall-bounce-analyze",
+      "arguments": {
+        "query": "Kubernetes最新ベストプラクティス分析",
+        "priority": "high",
+        "context": {"useContext7": true}
+      }
+    }
   }'
 
-# 緊急時対応（4つのLLM）
-curl -X POST http://localhost:4000/api/v1/generate \
+# 緊急時対応（全MCPサービス統合）
+curl -X POST http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
   -d '{
-    "prompt": "本番データベース全停止の緊急復旧",
-    "task_type": "critical"
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "wall-bounce-analyze",
+      "arguments": {
+        "query": "本番データベース全停止の緊急復旧",
+        "priority": "critical"
+      }
+    }
+  }'
+```
+
+### Vault MCP 環境変数管理
+```bash
+# 暗号化環境変数設定
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "tools/call",
+    "params": {
+      "name": "vault-set-secret",
+      "arguments": {
+        "key": "DATABASE_URL",
+        "value": "postgresql://user:pass@host:5432/db",
+        "environment": "production"
+      }
+    }
+  }'
+
+# 暗号化環境変数取得
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 5,
+    "method": "tools/call",
+    "params": {
+      "name": "vault-get-secret",
+      "arguments": {
+        "key": "DATABASE_URL",
+        "environment": "production"
+      }
+    }
+  }'
+```
+
+### Context7 MCP ドキュメント参照
+```bash
+# ライブラリドキュメント取得
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 6,
+    "method": "tools/call",
+    "params": {
+      "name": "context7-get-docs",
+      "arguments": {
+        "libraryId": "/microsoft/typescript",
+        "topic": "advanced types",
+        "maxTokens": 2000
+      }
+    }
   }'
 ```
 

@@ -1,51 +1,86 @@
-# IT Infrastructure Support Tool with LLM Orchestrator
+# Enhanced IT Infrastructure Support with MCP Orchestration
 
 ## 🎯 大原則
 - **日本語回答**: 基本的に日本語で応答
-- **必須壁打ち**: すべてのクエリで複数LLMによる壁打ち分析を実行
+- **MCP壁打ち**: Model Context Protocol経由での必須壁打ち分析
 - **品質向上**: ユーザー入力を鵜呑みにせず、不足要素は追加ヒアリング
+- **Property-Testing**: fast-check活用の包括的品質保証
 
-## 🏗️ Multi-LLM Architecture
+## 🏗️ Enhanced MCP Architecture
 
-### 一時受付窓口処理フロー
+### MCP統合処理フロー
 1. **クエリ受信** → Claude Code (総司令官)
-2. **パラレル壁打ち発行** → 複数LLMに同時クエリ送信
-   - Gemini 2.5 Flash + Claude Haiku 3.5 (基本)
-   - Claude Sonnet4 + GPT-5 (複雑・高品質)
-   - MCPサーバ経由でLlama/Qwen等 (補助)
-3. **回答統合・品質評価** → ハルシネーション検証、エスカレーション判定
-4. **最終回答生成** → 統合された高品質回答を提示
+2. **環境変数取得** → Vault MCP経由で暗号化設定取得
+3. **リファレンス準備** → Stash/Context7 MCP並列でドキュメント参照
+4. **壁打ち実行** → Wall-Bounce MCP経由で複数LLM協調分析
+   - Gemini 2.5 Flash + Claude Haiku 3.5 + cursor-mcp (基本)
+   - Claude Sonnet4 + OpenRouter MCP (複雑・高品質)
+   - Cipher MCP (セキュリティ・暗号化専用)
+5. **品質統合** → 信頼度・コンセンサス評価、自動エスカレーション
+6. **監視記録** → Monitoring MCP経由でメトリクス収集
+7. **最終回答生成** → 統合された高品質回答を提示
 
-### LLM階層構成
-- **Tier 1**: Claude Code - ルーティング・統合責任者
-- **Tier 2**: Gemini 2.5 Flash + Claude Haiku 3.5 - 基本処理
-- **Tier 3**: Claude Sonnet4 ($3/MTok入力) - 複雑分析
-- **Tier 4**: GPT-5 ($1.25/MTok入力) - 最高品質
-- **Tier 5**: Claude Opus4.1 - 緊急時専用
+### MCP Service Hierarchy
+- **Tier 0**: Stash/Context7 MCP - リファレンス・ドキュメント参照層
+- **Tier 1**: Claude Code - MCP Orchestrator (統合責任者)
+- **Tier 2**: Wall-Bounce MCP - 複数LLM協調処理エンジン
+- **Tier 3**: Vault MCP - 環境変数暗号化管理
+- **Tier 4**: OpenRouter MCP - 200+モデルAPIゲートウェイ
+- **Tier 5**: Cipher MCP - 高度暗号化・セキュリティサービス
+- **Tier 6**: Monitoring MCP - 統合監視・メトリクス収集
 
-## 🔧 IT運用エンドポイント
-- `localhost:4000/analyze-logs` - 技術障害分析
-- `localhost:4000/generate` - premium/critical対応
+## 🔧 MCP統合エンドポイント
+- `localhost:3000/mcp` - Model Context Protocol統一API
+- 全サービスがMCP v2025-03-26準拠で標準化
 
-### 実用コマンド例
+### MCP実用コマンド例
 ```bash
-# 障害解析 (自動壁打ち)
-curl -X POST http://localhost:4000/analyze-logs \
+# Wall-Bounce MCP 協調分析
+curl -X POST http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
-  -d '{"user_command": "systemctl start mysql", 
-       "error_output": "Connection refused on port 3306"}'
+  -d '{
+    "jsonrpc": "2.0", "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "wall-bounce-analyze",
+      "arguments": {
+        "query": "Pacemakerクラスタstonith問題解決",
+        "priority": "high",
+        "context": {"useContext7": true}
+      }
+    }
+  }'
 
-# 高品質支援 (強制Sonnet4壁打ち)
-curl -X POST http://localhost:4000/generate \
+# Vault MCP 暗号化環境変数管理
+curl -X POST http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
-  -d '{"prompt": "Pacemakerクラスタstonith問題解決", 
-       "task_type": "premium"}'
+  -d '{
+    "jsonrpc": "2.0", "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "vault-set-secret",
+      "arguments": {
+        "key": "PRODUCTION_DATABASE_URL",
+        "value": "postgresql://...",
+        "environment": "production"
+      }
+    }
+  }'
 
-# 緊急対応 (強制Opus4.1壁打ち)
-curl -X POST http://localhost:4000/generate \
+# Context7 MCP 必須リファレンス参照
+curl -X POST http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
-  -d '{"prompt": "本番JobArranger全停止緊急復旧", 
-       "task_type": "critical"}'
+  -d '{
+    "jsonrpc": "2.0", "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "context7-get-docs",
+      "arguments": {
+        "libraryId": "/kubernetes/kubernetes",
+        "topic": "cluster networking"
+      }
+    }
+  }'
 ```
 
 ## 🔐 セキュリティ・コスト管理
@@ -54,12 +89,13 @@ curl -X POST http://localhost:4000/generate \
 - **監査**: MySQL全活動ログ、Prometheus監視
 
 ## ⚡ 重要実装原則
-- **コーディング**: Claude Code + GPT-5 壁打ち協業必須
-- **壁打ち徹底**: 単一LLM処理禁止、常にパラレル複数LLM処理
-- **統合ロジック**: 各LLM回答を品質評価・統合して最終回答生成
-- **エスカレーション**: 不十分な回答は上位Tierへ自動昇格
-- **監視必須**: すべてのメトリクスをPrometheus収集・Grafana可視化
-- **品質保証**: 信頼度0.7未満は自動エラーアラート発生
+- **MCP準拠**: すべての通信をModel Context Protocol v2025-03-26準拠
+- **Context7必須**: コーディング・ドキュメント参照時は必ずContext7 MCP使用
+- **Vault暗号化**: 環境変数はVault MCP経由でAES-256-GCM必須暗号化
+- **壁打ち徹底**: Wall-Bounce MCP経由での複数LLM協調処理必須
+- **品質閾値**: 信頼度0.7・コンセンサス0.6未満は自動エスカレーション
+- **Property-Testing**: fast-check活用の包括的品質保証システム
+- **統合監視**: Monitoring MCP経由でのリアルタイム監視必須
 
 ## 🚀 Deployment Ready
 - **環境変数**: 全API key外部設定対応
