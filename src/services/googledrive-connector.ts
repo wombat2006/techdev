@@ -139,6 +139,10 @@ export class GoogleDriveRAGConnector {
         webViewLink: fileResponse.data.webViewLink
       };
 
+      if (metadata.mimeType === 'application/pdf' && metadata.size > 10 * 1024 * 1024) {
+        throw new Error('PDF file size exceeds 10MB limit');
+      }
+
       let content = '';
 
       // MIMEタイプに応じたコンテンツ取得
@@ -151,11 +155,19 @@ export class GoogleDriveRAGConnector {
         content = exportResponse.data;
       } else {
         // その他のファイルを直接ダウンロード
-        const downloadResponse = await this.drive.files.get({
-          fileId: documentId,
-          alt: 'media'
-        });
-        content = downloadResponse.data;
+        const downloadResponse = await this.drive.files.get(
+          {
+            fileId: documentId,
+            alt: 'media'
+          },
+          { responseType: 'arraybuffer' }
+        );
+        const buffer = Buffer.from(downloadResponse.data as ArrayBuffer);
+        if (metadata.mimeType === 'application/pdf') {
+          content = buffer.toString('base64');
+        } else {
+          content = buffer.toString('utf-8');
+        }
       }
 
       logger.info('✅ ドキュメントダウンロード完了', { 
