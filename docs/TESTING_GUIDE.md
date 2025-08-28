@@ -53,8 +53,8 @@ cp .env.example .env.test
 
 # テスト固有の設定
 TEST_VECTOR_STORE_ID=vs_68afb31d429c8191bd4f520b096b54d9
-GOOGLE_CLIENT_ID=3861889604-eale8hvlh3238ibgadrago5oeumhghqq.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 RAG_FOLDER_ID=1FWaeY0DRv_fb4fA8RrKk0WbIk-TMK3qb
 ```
 

@@ -12,8 +12,8 @@ import { createHash } from 'crypto';
 // テスト環境設定
 const TEST_CONFIG = {
   GOOGLE_DRIVE: {
-    clientId: process.env.GOOGLE_CLIENT_ID || '3861889604-eale8hvlh3238ibgadrago5oeumhghqq.apps.googleusercontent.com',
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET || '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',
+    clientId: process.env.GOOGLE_CLIENT_ID || 'your_google_client_id_here',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'your_google_client_secret_here',
     redirectUri: process.env.GOOGLE_REDIRECT_URI || 'urn:ietf:wg:oauth:2.0:oob',
     refreshToken: process.env.GOOGLE_REFRESH_TOKEN || ''
   },

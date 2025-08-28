@@ -85,8 +85,8 @@ PORT=4000
 LOG_LEVEL=debug
 
 # Google Drive API
-GOOGLE_CLIENT_ID=3861889604-eale8hvlh3238ibgadrago5oeumhghqq.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 GOOGLE_REDIRECT_URI=urn:ietf:wg:oauth:2.0:oob
 
 # OpenAI API
