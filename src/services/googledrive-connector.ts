@@ -10,6 +10,7 @@ import { createReadStream, createWriteStream } from 'fs';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { logger } from '../utils/logger';
+import { sanitizeFileName } from '../utils/security';
 
 export interface GoogleDriveConfig {
   clientId: string;
@@ -103,7 +104,7 @@ export class GoogleDriveRAGConnector {
 
       const documents: DocumentMetadata[] = response.data.files.map((file: any) => ({
         id: file.id,
-        name: file.name,
+        name: sanitizeFileName(file.name || ''),
         mimeType: file.mimeType,
         size: parseInt(file.size || '0'),
         modifiedTime: file.modifiedTime,
@@ -134,7 +135,7 @@ export class GoogleDriveRAGConnector {
 
       const metadata: DocumentMetadata = {
         id: fileResponse.data.id,
-        name: fileResponse.data.name,
+        name: sanitizeFileName(fileResponse.data.name || ''),
         mimeType: fileResponse.data.mimeType,
         size: parseInt(fileResponse.data.size || '0'),
         modifiedTime: fileResponse.data.modifiedTime,
@@ -264,7 +265,7 @@ export class GoogleDriveRAGConnector {
           }
         }
         
-        // 一時ファイル作成（o3-high推奨パターンC）
+        // 一時ファイル作成（GPT-5推奨パターンC）
         const tmpDir = '/tmp/googledrive-rag';
         await fs.mkdir(tmpDir, { recursive: true });
         
@@ -377,13 +378,23 @@ export class GoogleDriveRAGConnector {
    * 📚 ドキュメントをVector Storeに追加
    */
   async addDocumentToVectorStore(
-    vectorStoreId: string, 
+    vectorStoreId: string,
     document: ProcessedDocument
   ): Promise<string> {
+    const sanitizedDocument: ProcessedDocument = {
+      ...document,
+      name: sanitizeFileName(document.name),
+      metadata: {
+        ...document.metadata,
+        name: sanitizeFileName(document.metadata.name)
+      }
+    };
+
     try {
-      logger.info('📚 Vector Storeにドキュメント追加開始', { 
-        vectorStoreId, 
-        documentName: document.name 
+      
+      logger.info('📚 Vector Storeにドキュメント追加開始', {
+        vectorStoreId,
+        documentName: sanitizedDocument.name
       });
 
       // 一時ファイル作成
@@ -391,16 +402,16 @@ export class GoogleDriveRAGConnector {
       await fs.mkdir(tempDir, { recursive: true });
       
       // ファイル拡張子を適切に設定
-      const fileExtension = document.metadata.mimeType === 'application/pdf' ? '.pdf' : '.txt';
-      const tempFilePath = path.join(tempDir, `${document.id}${fileExtension}`);
+      const fileExtension = sanitizedDocument.metadata.mimeType === 'application/pdf' ? '.pdf' : '.txt';
+      const tempFilePath = path.join(tempDir, `${sanitizedDocument.id}${fileExtension}`);
       
       // Bufferかプレーンテキストかを判定して適切に書き込み
-      if (Buffer.isBuffer(document.content)) {
+      if (Buffer.isBuffer(sanitizedDocument.content)) {
         // バイナリファイルの場合、Bufferとして直接書き込み
-        await fs.writeFile(tempFilePath, document.content);
+        await fs.writeFile(tempFilePath, sanitizedDocument.content);
       } else {
         // テキストファイルの場合、UTF-8で書き込み
-        await fs.writeFile(tempFilePath, document.content, 'utf-8');
+        await fs.writeFile(tempFilePath, sanitizedDocument.content, 'utf-8');
       }
 
       try {
@@ -419,9 +430,9 @@ export class GoogleDriveRAGConnector {
         // 一時ファイル削除
         await fs.unlink(tempFilePath);
 
-        logger.info('✅ Vector Storeにドキュメント追加完了', { 
-          fileId: file.id, 
-          documentName: document.name 
+        logger.info('✅ Vector Storeにドキュメント追加完了', {
+          fileId: file.id,
+          documentName: sanitizedDocument.name
         });
 
         return file.id;
@@ -433,10 +444,10 @@ export class GoogleDriveRAGConnector {
       }
 
     } catch (error) {
-      logger.error('❌ Vector Storeドキュメント追加エラー', { 
-        vectorStoreId, 
-        documentName: document.name,
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      logger.error('❌ Vector Storeドキュメント追加エラー', {
+        vectorStoreId,
+        documentName: sanitizedDocument.name,
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
       throw error;
     }

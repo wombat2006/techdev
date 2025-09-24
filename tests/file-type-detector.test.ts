@@ -383,20 +383,45 @@ describe('File Type Detector', () => {
       // Windows executable header (MZ) disguised with PDF extension
       const fakeExeBuffer = Buffer.from([0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00]); // MZ header
       const result = detectFileType(fakeExeBuffer);
-      
+
       // Should not be detected as PDF
       expect(result.extension).not.toBe('.pdf');
       expect(result.mimeType).not.toBe('application/pdf');
       expect(result.extension).toBe('.bin');
     });
-    
+
     test('should detect fake Office file', () => {
       // Non-ZIP header claiming to be Office
       const fakeOfficeBuffer = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // Actually JPEG
       const result = detectFileType(fakeOfficeBuffer);
-      
+
       expect(result.extension).toBe('.jpg');
       expect(result.mimeType).toBe('image/jpeg');
+    });
+  });
+
+  describe('Textual Detection Edge Cases', () => {
+    test('should detect JSON files larger than the preview window', () => {
+      const payload = 'a'.repeat(2048);
+      const jsonString = JSON.stringify({ payload });
+      const jsonBuffer = Buffer.from(jsonString, 'utf8');
+
+      const result = detectFileType(jsonBuffer);
+
+      expect(result.extension).toBe('.json');
+      expect(result.mimeType).toBe('application/json');
+      expect(result.encoding).toBe('utf8');
+    });
+
+    test('should treat UTF-8 multibyte text as plain text', () => {
+      const japaneseText = 'これはテキストファイルです。'.repeat(64);
+      const textBuffer = Buffer.from(japaneseText, 'utf8');
+
+      const result = detectFileType(textBuffer);
+
+      expect(result.extension).toBe('.txt');
+      expect(result.mimeType).toBe('text/plain');
+      expect(result.encoding).toBe('utf8');
     });
   });
 

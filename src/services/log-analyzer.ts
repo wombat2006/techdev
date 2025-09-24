@@ -27,6 +27,28 @@ interface LogAnalysisRequest {
   log_type?: 'systemd' | 'application' | 'kernel' | 'nginx' | 'mysql' | 'general';
 }
 
+interface CollaborationTrace {
+  openai_codex_gpt_5?: {
+    root_cause: string;
+    mechanism: string;
+    resolution: string[];
+    prevention: string[];
+  };
+  gemini_environment?: {
+    environment_factors: string[];
+    configuration_issues: string[];
+    adjusted_resolution: string[];
+  };
+  claude_integration?: {
+    integrated_root_cause: string;
+    prioritized_solutions: string[];
+    confidence: number;
+  };
+  fallback?: {
+    reason: string;
+  };
+}
+
 interface LogAnalysisResult {
   issue_identified: boolean;
   problem_category: string;
@@ -36,6 +58,7 @@ interface LogAnalysisResult {
   severity_level: 'low' | 'medium' | 'high' | 'critical';
   confidence_score: number;
   additional_checks: string[];
+  collaboration_trace?: CollaborationTrace;
 }
 
 interface ErrorContext {
@@ -137,6 +160,12 @@ export class LogAnalyzer {
     // additional_checksに品質低下の警告を追加
     analysis.additional_checks.unshift('🚨 Analysis quality significantly reduced without multi-LLM collaboration');
     analysis.additional_checks.unshift('🔄 Wall-bounce analysis unavailable - consider system diagnostics or retry');
+
+    analysis.collaboration_trace = {
+      fallback: {
+        reason: 'Wall-bounce collaboration unavailable - single-LLM fallback invoked'
+      }
+    };
 
     logger.error('EMERGENCY fallback analysis completed with reduced quality', {
       issueIdentified: analysis.issue_identified,
@@ -285,18 +314,18 @@ export class LogAnalyzer {
     logger.info('🔄 Initiating mandatory wall-bounce analysis with multiple LLMs');
 
     try {
-      // 🎯 Phase 1: o3-high による高精度技術分析
-      const o3HighAnalysis = await this.performO3HighAnalysis(request);
-      
+      // 🎯 Phase 1: GPT-5 による高精度技術分析
+      const gpt5Analysis = await this.performGpt5Analysis(request);
+
       // 🎯 Phase 2: Gemini 2.5 Pro による環境依存性解析
-      const geminiAnalysis = await this.performGeminiEnvironmentAnalysis(request, o3HighAnalysis);
-      
+      const geminiAnalysis = await this.performGeminiEnvironmentAnalysis(request, gpt5Analysis);
+
       // 🎯 Phase 3: Claude Sonnet4 による統合分析と解決策優先順位付け
-      const integratedAnalysis = await this.performIntegratedAnalysis(request, o3HighAnalysis, geminiAnalysis);
-      
+      const integratedAnalysis = await this.performIntegratedAnalysis(request, gpt5Analysis, geminiAnalysis);
+
       if (integratedAnalysis) {
         logger.info('🎉 Wall-bounce analysis successful', {
-          phases: ['o3-high', 'gemini', 'integrated'],
+          phases: ['gpt-5', 'gemini', 'integrated'],
           confidenceScore: integratedAnalysis.confidence_score
         });
         return integratedAnalysis;
@@ -312,9 +341,9 @@ export class LogAnalyzer {
   }
 
   /**
-   * 🎯 Phase 1: o3-high High-Precision Technical Analysis
+   * 🎯 Phase 1: GPT-5 High-Precision Technical Analysis
    */
-  private static async performO3HighAnalysis(request: LogAnalysisRequest): Promise<any> {
+  private static async performGpt5Analysis(request: LogAnalysisRequest): Promise<any> {
     try {
       const prompt = `Ultra-complex infrastructure failure root cause analysis:
 
@@ -330,29 +359,29 @@ Provide detailed technical analysis:
 
 Focus on environment-dependent complexities, hardware/software interactions, multi-layer conflicts.`;
 
-      logger.info('🔍 o3-high analysis initiated');
-      
-      // 🎯 MCP o3-highを使用して高精度分析を実行
+      logger.info('🔍 GPT-5 analysis initiated');
+
+      // 🎯 MCP GPT-5を使用して高精度分析を実行
       const mcpClients = await import('../utils/mcp-clients');
-      if (mcpClients.mcp__o3_high__o3_search) {
-        const o3Result = await mcpClients.mcp__o3_high__o3_search({ input: prompt });
+      if (mcpClients.mcp__gpt_5__deep_analysis) {
+        const gpt5Result = await mcpClients.mcp__gpt_5__deep_analysis({ input: prompt });
         return {
-          rootCause: o3Result.rootCause || 'Complex technical analysis completed',
-          mechanism: o3Result.mechanism || 'Multi-layer system interaction analyzed',
-          resolution: o3Result.resolution || ['Advanced technical resolution steps provided'],
-          prevention: o3Result.prevention || ['Prevention strategies identified']
+          rootCause: gpt5Result.rootCause || 'Complex technical analysis completed',
+          mechanism: gpt5Result.mechanism || 'Multi-layer system interaction analyzed',
+          resolution: gpt5Result.resolution || ['Advanced technical resolution steps provided'],
+          prevention: gpt5Result.prevention || ['Prevention strategies identified']
         };
       }
-      
+
       // Fallback if MCP unavailable
       return {
-        rootCause: 'Advanced technical root cause analysis (o3-high unavailable)',
+        rootCause: 'Advanced technical root cause analysis (GPT-5 unavailable)',
         mechanism: 'Multi-layer failure mechanism identified',
         resolution: ['Technical resolution step 1', 'Technical resolution step 2'],
         prevention: ['Prevention strategy 1', 'Prevention strategy 2']
       };
     } catch (error) {
-      logger.error('o3-high analysis failed', { error });
+      logger.error('GPT-5 analysis failed', { error });
       throw error;
     }
   }
@@ -360,13 +389,13 @@ Focus on environment-dependent complexities, hardware/software interactions, mul
   /**
    * 🎯 Phase 2: Gemini Environment-Dependency Analysis
    */
-  private static async performGeminiEnvironmentAnalysis(request: LogAnalysisRequest, o3Analysis: any): Promise<any> {
+  private static async performGeminiEnvironmentAnalysis(request: LogAnalysisRequest, gpt5Analysis: any): Promise<any> {
     try {
       logger.info('🔍 Gemini environment analysis initiated');
       
       const prompt = `Environment-dependent failure analysis:
 
-Technical Analysis: ${o3Analysis.rootCause}
+Technical Analysis: ${gpt5Analysis.rootCause}
 Error: ${request.error_output}
 Context: ${request.system_context}
 
@@ -414,36 +443,63 @@ Provide environment-specific adjustments.`;
    * 🎯 Phase 3: Integrated Analysis and Solution Prioritization
    */
   private static async performIntegratedAnalysis(
-    request: LogAnalysisRequest, 
-    o3Analysis: any, 
+    request: LogAnalysisRequest,
+    gpt5Analysis: any,
     geminiAnalysis: any
   ): Promise<LogAnalysisResult> {
     try {
       logger.info('🔍 Integrated analysis and solution prioritization initiated');
-      
+
       // 統合分析: 複数LLMの結果を統合して最適解を生成
-      const integratedRootCause = this.integrateRootCauseAnalysis(o3Analysis, geminiAnalysis);
-      const prioritizedSolutions = this.prioritizeSolutions(o3Analysis, geminiAnalysis);
-      const confidenceScore = this.calculateWallBounceConfidence(o3Analysis, geminiAnalysis);
-      
+      const integratedRootCause = this.integrateRootCauseAnalysis(gpt5Analysis, geminiAnalysis);
+      const prioritizedSolutions = this.prioritizeSolutions(gpt5Analysis, geminiAnalysis);
+      const confidenceScore = this.calculateWallBounceConfidence(gpt5Analysis, geminiAnalysis);
+
+      const collaborationTrace: CollaborationTrace = {
+        openai_codex_gpt_5: {
+          root_cause: gpt5Analysis.rootCause || 'Analysis unavailable',
+          mechanism: gpt5Analysis.mechanism || 'Not provided',
+          resolution: Array.isArray(gpt5Analysis.resolution) ? gpt5Analysis.resolution : [],
+          prevention: Array.isArray(gpt5Analysis.prevention) ? gpt5Analysis.prevention : []
+        },
+        gemini_environment: {
+          environment_factors: Array.isArray(geminiAnalysis.environmentFactors) ? geminiAnalysis.environmentFactors : [],
+          configuration_issues: Array.isArray(geminiAnalysis.configurationIssues) ? geminiAnalysis.configurationIssues : [],
+          adjusted_resolution: Array.isArray(geminiAnalysis.adjustedResolution) ? geminiAnalysis.adjustedResolution : []
+        },
+        claude_integration: {
+          integrated_root_cause: integratedRootCause,
+          prioritized_solutions: prioritizedSolutions,
+          confidence: confidenceScore
+        }
+      };
+
+      logger.info('🧭 Multi-LLM collaboration trace captured', {
+        codex_root_cause: collaborationTrace.openai_codex_gpt_5?.root_cause,
+        codex_resolution_steps: collaborationTrace.openai_codex_gpt_5?.resolution?.length || 0,
+        gemini_environment_factors: collaborationTrace.gemini_environment?.environment_factors?.length || 0,
+        claude_confidence: collaborationTrace.claude_integration?.confidence
+      });
+
       // サービス名抽出
       const serviceMatch = request.error_output.match(/([a-zA-Z0-9\-_]+)\.service/);
       const serviceName = serviceMatch ? serviceMatch[1] : 'system';
-      
+
       return {
         issue_identified: true,
         problem_category: `${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)} Complex Infrastructure Failure - 🔄 Wall-Bounce Analysis`,
         root_cause: integratedRootCause,
         solution_steps: prioritizedSolutions,
         related_services: this.extractRelatedServices(request.error_output),
-        severity_level: this.determineSeverityFromWallBounce(o3Analysis, geminiAnalysis),
+        severity_level: this.determineSeverityFromWallBounce(gpt5Analysis, geminiAnalysis),
         confidence_score: confidenceScore,
         additional_checks: [
           '🔄 Analysis method: Multi-LLM collaborative wall-bounce',
           '🎯 Root cause verified through cross-model validation',
           '🌐 Environment-specific factors incorporated',
           '⚡ Solutions prioritized by effectiveness and safety'
-        ]
+        ],
+        collaboration_trace: collaborationTrace
       };
     } catch (error) {
       logger.error('Integrated analysis failed', { error });
@@ -454,14 +510,14 @@ Provide environment-specific adjustments.`;
   /**
    * 統合根本原因分析
    */
-  private static integrateRootCauseAnalysis(o3Analysis: any, geminiAnalysis: any): string {
-    return `🔄 Wall-Bounce Root Cause Analysis: ${o3Analysis.rootCause || 'Technical analysis completed'} - Environment factors: ${geminiAnalysis.environmentFactors?.join(', ') || 'Environment-dependent factors identified'}`;
+  private static integrateRootCauseAnalysis(gpt5Analysis: any, geminiAnalysis: any): string {
+    return `🔄 Wall-Bounce Root Cause Analysis: ${gpt5Analysis.rootCause || 'Technical analysis completed'} - Environment factors: ${geminiAnalysis.environmentFactors?.join(', ') || 'Environment-dependent factors identified'}`;
   }
 
   /**
    * 解決策の優先順位付け
    */
-  private static prioritizeSolutions(o3Analysis: any, geminiAnalysis: any): string[] {
+  private static prioritizeSolutions(gpt5Analysis: any, geminiAnalysis: any): string[] {
     const solutions = [
       '🎯 Primary Resolution (High-Confidence): Execute technical fix based on wall-bounce analysis',
       '🌐 Environment Adjustment: Apply environment-specific configuration changes',
@@ -469,12 +525,12 @@ Provide environment-specific adjustments.`;
       '🛡️ Prevention Implementation: Apply preventive measures to avoid recurrence',
       '📊 Monitoring Setup: Establish monitoring for similar failure patterns'
     ];
-    
+
     // Add specific solutions from analyses
-    if (o3Analysis.resolution) {
-      solutions.push(...o3Analysis.resolution.map((s: string) => `🔍 Technical: ${s}`));
+    if (gpt5Analysis.resolution) {
+      solutions.push(...gpt5Analysis.resolution.map((s: string) => `🔍 Technical: ${s}`));
     }
-    
+
     if (geminiAnalysis.adjustedResolution) {
       solutions.push(...geminiAnalysis.adjustedResolution.map((s: string) => `🌐 Environment: ${s}`));
     }
@@ -485,7 +541,7 @@ Provide environment-specific adjustments.`;
   /**
    * 壁打ち分析の信頼度計算
    */
-  private static calculateWallBounceConfidence(o3Analysis: any, geminiAnalysis: any): number {
+  private static calculateWallBounceConfidence(gpt5Analysis: any, geminiAnalysis: any): number {
     // 複数LLMの合意に基づく高信頼度
     return 0.95; // Wall-bounce分析により非常に高い信頼度
   }
@@ -516,7 +572,7 @@ Provide environment-specific adjustments.`;
   /**
    * 壁打ち分析に基づく深刻度判定
    */
-  private static determineSeverityFromWallBounce(o3Analysis: any, geminiAnalysis: any): 'low' | 'medium' | 'high' | 'critical' {
+  private static determineSeverityFromWallBounce(gpt5Analysis: any, geminiAnalysis: any): 'low' | 'medium' | 'high' | 'critical' {
     // 複雑なインフラ障害は基本的に高深刻度
     return 'high';
   }
