@@ -1,10 +1,10 @@
-import RedisMock from 'ioredis-mock';
+import mockRedisModule from 'ioredis-mock';
 import { UpstashRedisService } from '../../src/services/redis-service';
 
 // Mock the @upstash/redis module
 jest.mock('@upstash/redis', () => ({
   Redis: jest.fn().mockImplementation(() => {
-    const redisMock = new RedisMock();
+    const redisMock = new mockRedisModule();
     return {
       get: jest.fn().mockImplementation(async (key: string) => {
         const result = await redisMock.get(key);
