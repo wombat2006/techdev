@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import { config } from './config/environment';
 import { getRedisService } from './services/redis-service';
 import { getSessionManager } from './services/session-manager';
@@ -10,15 +11,65 @@ export function createServer() {
   const app = express();
 
   // Security middleware
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: false, // Allow inline styles for WebApp
+    crossOriginEmbedderPolicy: false
+  }));
   app.use(cors());
 
   // Body parsing
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // Static file serving
+  const publicPath = path.join(__dirname, '..', 'public');
+  app.use(express.static(publicPath, {
+    maxAge: process.env.NODE_ENV === 'production' ? '1d' : '0',
+    etag: true,
+    lastModified: true
+  }));
+
   // RAG API routes
   app.use('/api/v1/rag', ragEndpoints);
+
+  // Real-time metrics endpoint (Server-Sent Events)
+  app.get('/api/v1/metrics/stream', (req, res) => {
+    // Set SSE headers
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control'
+    });
+
+    // Send initial connection message
+    res.write(`data: ${JSON.stringify({
+      type: 'connected',
+      timestamp: new Date().toISOString(),
+      message: 'メトリクスストリーム接続完了'
+    })}\n\n`);
+
+    // Send metrics every 5 seconds
+    const interval = setInterval(async () => {
+      try {
+        const metrics = await generateRealTimeMetrics();
+        res.write(`data: ${JSON.stringify({
+          type: 'metrics',
+          timestamp: new Date().toISOString(),
+          data: metrics
+        })}\n\n`);
+      } catch (error) {
+        console.error('Error generating metrics:', error);
+      }
+    }, 5000);
+
+    // Handle client disconnect
+    req.on('close', () => {
+      clearInterval(interval);
+      console.log('SSE client disconnected');
+    });
+  });
 
   // Health check endpoints
   app.get('/health', (req, res) => {
@@ -126,13 +177,19 @@ export function createServer() {
     }
   });
 
-  // Error handling middleware
-  app.use((req, res) => {
-    res.status(404).json({
-      error: 'Not found',
-      path: req.path,
-      method: req.method
-    });
+  // SPA routing - serve index.html for non-API routes
+  app.get('*', (req, res) => {
+    // Don't serve index.html for API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({
+        error: 'API endpoint not found',
+        path: req.path,
+        method: req.method
+      });
+    }
+
+    // Serve index.html for all other routes (SPA routing)
+    res.sendFile(path.join(publicPath, 'index.html'));
   });
 
   app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -153,6 +210,46 @@ export function createServer() {
   });
 
   return { app, server };
+}
+
+/**
+ * Generate real-time system metrics
+ */
+async function generateRealTimeMetrics() {
+  const memUsage = process.memoryUsage();
+  const cpuUsage = process.cpuUsage();
+
+  // Calculate CPU percentage (approximation)
+  const cpuPercent = Math.min(100, Math.floor(Math.random() * 100)); // Mock for now
+
+  // Memory usage in MB
+  const memoryUsagePercent = Math.floor((memUsage.heapUsed / memUsage.heapTotal) * 100);
+
+  // Active connections (mock)
+  const activeConnections = Math.floor(Math.random() * 50) + 1;
+
+  // Response time (mock based on some calculation)
+  const responseTime = Math.floor(Math.random() * 200) + 30;
+
+  return {
+    cpu: {
+      usage: cpuPercent,
+      userTime: cpuUsage.user,
+      systemTime: cpuUsage.system
+    },
+    memory: {
+      usage: memoryUsagePercent,
+      heapUsed: Math.floor(memUsage.heapUsed / 1024 / 1024), // MB
+      heapTotal: Math.floor(memUsage.heapTotal / 1024 / 1024), // MB
+      external: Math.floor(memUsage.external / 1024 / 1024) // MB
+    },
+    network: {
+      activeConnections,
+      responseTime
+    },
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  };
 }
 
 // For testing purposes
