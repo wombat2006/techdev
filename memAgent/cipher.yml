@@ -1,0 +1,28 @@
+# Cipher Memory Agent Configuration for TechSapo
+name: cipher
+version: "0.3.0"
+description: "Long-term memory system for TechSapo infrastructure support"
+
+# Memory configuration
+memory:
+  persist: true
+  database_path: "./data/cipher-sessions.db"
+
+# MCP server configuration
+mcp:
+  enabled: true
+  transport: "stdio"
+  tools:
+    - name: "ask_cipher"
+      description: "Query and store information in long-term memory"
+
+# Integration settings
+integrations:
+  wall_bounce: true
+  pattern_analysis: true
+  user_interactions: true
+
+# Logging
+logging:
+  level: "info"
+  file: "./logs/cipher.log"

@@ -194,37 +194,203 @@ class WallBounceAnalyzer {
     }
     // LLMプロバイダー実装（モック）
     async invokeGemini(prompt) {
-        // 実際の実装ではGemini APIを呼び出し
-        await this.simulateDelay(800, 1200);
-        return {
-            content: `[Gemini 2.5 Pro分析] ${prompt.substring(0, 50)}...に対する分析結果`,
-            confidence: 0.85 + Math.random() * 0.1,
-            reasoning: 'Gemini 2.5 Proによる多角的分析',
-            cost: 0.003,
-            tokens: { input: prompt.length / 4, output: 150 }
-        };
+        const startTime = Date.now();
+        try {
+            const { GoogleGenerativeAI } = require('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+            const result = await model.generateContent([
+                {
+                    role: 'user',
+                    parts: [{
+                            text: `システム: あなたは高度な技術解析AIです。多角的な視点で詳細な分析を行い、実践的な解決策を提案してください。
+
+ユーザークエリ: ${prompt}`
+                        }]
+                }
+            ]);
+            const processingTime = Date.now() - startTime;
+            const content = result.response.text() || 'No response generated';
+            // Gemini pricing estimation (rough approximation)
+            const estimatedInputTokens = prompt.length / 4;
+            const estimatedOutputTokens = content.length / 4;
+            const cost = (estimatedInputTokens * 0.00000125) + (estimatedOutputTokens * 0.00000375); // Gemini 2.0 Flash pricing
+            logger_1.logger.info('✅ Gemini API call successful', {
+                processing_time_ms: processingTime,
+                estimated_input_tokens: estimatedInputTokens,
+                estimated_output_tokens: estimatedOutputTokens,
+                cost: cost
+            });
+            return {
+                content: `[Gemini 2.0 Flash分析] ${content}`,
+                confidence: 0.85 + Math.random() * 0.1,
+                reasoning: 'Gemini 2.0 Flashによる多角的分析と環境適応型ソリューション',
+                cost: cost,
+                tokens: { input: estimatedInputTokens, output: estimatedOutputTokens }
+            };
+        }
+        catch (error) {
+            logger_1.logger.error('❌ Gemini API call failed', { error });
+            // Fallback to mock response if API fails
+            await this.simulateDelay(800, 1200);
+            return {
+                content: `[Gemini API Error] ${prompt.substring(0, 50)}...への分析中にエラーが発生しました`,
+                confidence: 0.3,
+                reasoning: 'Gemini API呼び出しに失敗しました',
+                cost: 0,
+                tokens: { input: prompt.length / 4, output: 50 }
+            };
+        }
     }
-    async invokeGPT5(prompt) {
-        // 実際の実装ではOpenAI GPT-5 APIを呼び出し
-        await this.simulateDelay(600, 1000);
-        return {
-            content: `[GPT-5分析] ${prompt.substring(0, 50)}...に対する包括的な解析`,
-            confidence: 0.88 + Math.random() * 0.08,
-            reasoning: 'GPT-5による論理的推論',
-            cost: 0.005,
-            tokens: { input: prompt.length / 4, output: 180 }
-        };
+    async invokeGPT5(prompt, sessionContext) {
+        const startTime = Date.now();
+        try {
+            const OpenAI = require('openai');
+            const { mcpConfigManager } = require('./mcp-config-manager');
+            const openai = new OpenAI({
+                apiKey: process.env.OPENAI_API_KEY,
+                organization: process.env.OPENAI_ORG_ID, // org-HsTVZwNSnfbrV160Hkh2EFLD
+                project: process.env.OPENAI_PROJECT_ID // proj_wCdanc91DKlzaJoUSqo2jdI3
+            });
+            // Enhanced MCP configuration with cost optimization
+            const mcpContext = {
+                taskType: sessionContext?.taskType || 'basic',
+                budgetTier: process.env.MCP_BUDGET_TIER || 'standard',
+                securityLevel: process.env.MCP_SECURITY_LEVEL || 'internal',
+                userRole: 'wall_bounce_analyzer',
+                projectId: 'techsapo_infrastructure'
+            };
+            // Get optimized MCP tools based on context
+            const mcpTools = mcpConfigManager.getOptimizedToolsForContext(mcpContext);
+            // Estimate costs before execution
+            const costEstimate = mcpConfigManager.estimateToolCosts(mcpTools, 3);
+            logger_1.logger.info('💰 MCP Cost Analysis', {
+                estimated_total_cost: costEstimate.total_cost,
+                tools_selected: mcpTools.length,
+                budget_tier: mcpContext.budgetTier,
+                cost_breakdown: costEstimate.cost_breakdown
+            });
+            if (costEstimate.budget_warning) {
+                logger_1.logger.warn('⚠️ Budget Warning', { warning: costEstimate.budget_warning });
+            }
+            // Using new Responses API with optimized MCP integration
+            const response = await openai.responses.create({
+                model: 'gpt-5', // Using GPT-5 as per CLAUDE.md instructions
+                tools: mcpTools,
+                instructions: `あなたは技術的問題解決のエキスパートです。壁打ち分析システムの一部として、詳細で実用的な分析を提供してください。
+
+利用可能なMCPツール (コスト最適化済み):
+${mcpTools.map((tool) => `- ${tool.server_label}: ${tool.allowed_tools.join(', ')}`).join('\n')}
+
+分析時は以下を考慮してください:
+1. 過去の類似問題の解決策 (Cipher Memory)
+2. 技術的ベストプラクティス (Context7)
+3. 関連ドキュメントとリソース (Google Drive/SharePoint)
+4. 実装可能で検証済みのソリューション
+
+効率的にツールを使用し、コストパフォーマンスを最大化してください。`,
+                input: prompt,
+                store: true, // Enable stateful context for better reasoning
+                reasoning: {
+                    effort: sessionContext?.taskType === 'critical' ? 'high' : 'medium'
+                }
+            });
+            const processingTime = Date.now() - startTime;
+            const content = response.output_text || 'No response generated';
+            // Calculate comprehensive cost with MCP usage
+            const inputTokens = response.usage?.input_tokens || 0;
+            const outputTokens = response.usage?.output_tokens || 0;
+            const mcpCalls = response.output?.filter((item) => item.type === 'mcp_call')?.length || 0;
+            const baseCost = (inputTokens * 0.0000015) + (outputTokens * 0.000006);
+            const mcpCost = costEstimate.total_cost; // Estimated MCP cost
+            const totalCost = baseCost + mcpCost;
+            // Log MCP tool usage for monitoring
+            const mcpToolsUsed = response.output?.filter((item) => item.type === 'mcp_call')
+                ?.map((call) => ({ tool: call.server_label, operation: call.name })) || [];
+            logger_1.logger.info('✅ GPT-5 API call successful (Responses API + Optimized MCP)', {
+                processing_time_ms: processingTime,
+                input_tokens: inputTokens,
+                output_tokens: outputTokens,
+                mcp_tools_available: mcpTools.length,
+                mcp_calls_made: mcpCalls,
+                mcp_tools_used: mcpToolsUsed,
+                base_cost: baseCost,
+                mcp_cost: mcpCost,
+                total_cost: totalCost,
+                cost_efficiency: mcpCalls > 0 ? (totalCost / mcpCalls).toFixed(6) : 'N/A'
+            });
+            return {
+                content: `[GPT-5分析 + 最適化MCP] ${content}`,
+                confidence: 0.88 + Math.random() * 0.08,
+                reasoning: `GPT-5による論理的推論と${mcpCalls}個のMCP呼び出しによる統合分析 (コスト最適化済み)`,
+                cost: totalCost,
+                tokens: { input: inputTokens, output: outputTokens }
+            };
+        }
+        catch (error) {
+            logger_1.logger.error('❌ GPT-5 API call failed', { error });
+            // Fallback to mock response if API fails
+            await this.simulateDelay(600, 1000);
+            return {
+                content: `[GPT-5 API Error] ${prompt.substring(0, 50)}...への分析中にエラーが発生しました`,
+                confidence: 0.3,
+                reasoning: 'API呼び出しに失敗しました',
+                cost: 0,
+                tokens: { input: prompt.length / 4, output: 50 }
+            };
+        }
     }
     async invokeClaude(prompt) {
-        // 実際の実装ではClaude APIを呼び出し
-        await this.simulateDelay(700, 1100);
-        return {
-            content: `[Claude Sonnet4分析] ${prompt.substring(0, 50)}...について詳細分析`,
-            confidence: 0.82 + Math.random() * 0.12,
-            reasoning: 'Claude Sonnet4による構造化分析',
-            cost: 0.008,
-            tokens: { input: prompt.length / 4, output: 200 }
-        };
+        const startTime = Date.now();
+        try {
+            const Anthropic = require('@anthropic-ai/sdk');
+            const anthropic = new Anthropic({
+                apiKey: process.env.ANTHROPIC_API_KEY,
+            });
+            const response = await anthropic.messages.create({
+                model: 'claude-3-5-sonnet-20241022',
+                max_tokens: 1500,
+                temperature: 0.7,
+                system: 'あなたは構造化された分析と実装指向のソリューションを提供する技術エキスパートです。詳細で実行可能な解決策を提案してください。',
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ]
+            });
+            const processingTime = Date.now() - startTime;
+            const content = response.content[0]?.text || 'No response generated';
+            // Claude pricing calculation
+            const inputTokens = response.usage?.input_tokens || 0;
+            const outputTokens = response.usage?.output_tokens || 0;
+            const cost = (inputTokens * 0.000003) + (outputTokens * 0.000015); // Claude 3.5 Sonnet pricing
+            logger_1.logger.info('✅ Claude API call successful', {
+                processing_time_ms: processingTime,
+                input_tokens: inputTokens,
+                output_tokens: outputTokens,
+                cost: cost
+            });
+            return {
+                content: `[Claude 3.5 Sonnet分析] ${content}`,
+                confidence: 0.82 + Math.random() * 0.12,
+                reasoning: 'Claude 3.5 Sonnetによる構造化分析と実装指向ソリューション',
+                cost: cost,
+                tokens: { input: inputTokens, output: outputTokens }
+            };
+        }
+        catch (error) {
+            logger_1.logger.error('❌ Claude API call failed', { error });
+            // Fallback to mock response if API fails
+            await this.simulateDelay(700, 1100);
+            return {
+                content: `[Claude API Error] ${prompt.substring(0, 50)}...への分析中にエラーが発生しました`,
+                confidence: 0.3,
+                reasoning: 'Claude API呼び出しに失敗しました',
+                cost: 0,
+                tokens: { input: prompt.length / 4, output: 50 }
+            };
+        }
     }
     async invokeOpenRouter(prompt) {
         // 実際の実装ではOpenRouter APIを呼び出し  

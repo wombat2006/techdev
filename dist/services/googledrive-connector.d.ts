@@ -62,8 +62,21 @@ export declare class GoogleDriveRAGConnector {
     /**
      * 🔍 RAG検索実行
      */
-    searchRAG(query: string, vectorStoreId: string, maxResults?: number): Promise<{
+    searchRAG(query: string, vectorStoreId?: string, maxResults?: number): Promise<{
         results: any[];
+        usage: any;
+    }>;
+    /**
+     * 🔗 MCP-Enhanced Google Drive Search
+     * Uses official Google Drive MCP connector for real-time document access
+     */
+    searchWithMCP(query: string, options?: {
+        searchRecent?: boolean;
+        maxResults?: number;
+        fileTypes?: string[];
+    }): Promise<{
+        results: any[];
+        mcp_calls: any[];
         usage: any;
     }>;
 }

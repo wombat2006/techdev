@@ -7,7 +7,36 @@
  * - Compile-time validation of generated object schemas
  * - Better IDE support for test data creation
  */
-import { CompletionPrompt, AnalysisPrompt, RefactoringPrompt, MockFile, TypeScriptStructure } from '../types/common.js';
+interface CompletionPrompt {
+    context: string;
+    expected: string;
+    complexity: string;
+}
+interface AnalysisPrompt {
+    code: string;
+    focus: string;
+    expectedInsights: string[];
+    analysisType?: string;
+}
+interface RefactoringPrompt {
+    original: string;
+    target: string;
+    constraints: string[];
+    code?: string;
+}
+interface MockFile {
+    id?: number;
+    name: string;
+    content: string;
+    type: string;
+    size?: number;
+}
+interface TypeScriptStructure {
+    classes: string[];
+    functions: string[];
+    interfaces: string[];
+    type?: string;
+}
 export declare class TestDataGenerator {
     /**
      * Generate code completion prompts with type safety
@@ -107,3 +136,4 @@ export declare class TestDataGenerator {
         codeTemplateCount: number;
     };
 }
+export {};
