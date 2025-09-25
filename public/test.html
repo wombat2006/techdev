@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSapo Test</title>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-link { margin: 10px; padding: 5px; background: #ddd; cursor: pointer; }
+        .nav-link.active { background: #007bff; color: white; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        textarea, input, select { width: 100%; padding: 5px; margin: 5px 0; }
+        .result-content { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>TechSapo Test Page</h1>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-link active" data-tab="home" onclick="switchTab('home')">ホーム</div>
+        <div class="nav-link" data-tab="support" onclick="switchTab('support')">IT支援</div>
+        <div class="nav-link" data-tab="logs" onclick="switchTab('logs')">ログ解析</div>
+    </nav>
+
+    <!-- Home Tab -->
+    <div id="home" class="tab-content active">
+        <h2>ホーム</h2>
+        <p>TechSapo Multi-LLM Wall-Bounce Analysis System</p>
+        <button onclick="testConnection()">接続テスト</button>
+        <div id="connection-result"></div>
+    </div>
+
+    <!-- Support Tab -->
+    <div id="support" class="tab-content">
+        <h2>IT技術支援</h2>
+        <select id="support-level">
+            <option value="basic">基本</option>
+            <option value="premium">プレミアム</option>
+            <option value="critical">クリティカル</option>
+        </select>
+        <textarea id="tech-query" rows="4" placeholder="技術的な問題を記述してください..."></textarea>
+        <button class="btn" onclick="analyzeTechProblem()">Multi-LLM Wall-Bounce分析</button>
+        <div id="support-output" class="result-content"></div>
+    </div>
+
+    <!-- Logs Tab -->
+    <div id="logs" class="tab-content">
+        <h2>ログ解析</h2>
+        <input id="user-command" placeholder="実行コマンド" />
+        <textarea id="error-output" rows="4" placeholder="エラー出力..."></textarea>
+        <textarea id="system-context" rows="2" placeholder="システム情報（オプション）"></textarea>
+        <button class="btn" onclick="analyzeLog()">ログ解析実行</button>
+        <div id="logs-output" class="result-content"></div>
+    </div>
+
+    <script>
+        console.log('🚀 Test page loaded');
+
+        function switchTab(tabName) {
+            console.log('🔄 Switching to tab:', tabName);
+
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show target tab
+            const targetTab = document.getElementById(tabName);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+
+            // Update nav
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            const targetLink = document.querySelector(`[data-tab="${tabName}"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
+        }
+
+        async function testConnection() {
+            console.log('🔍 Testing connection');
+            const resultDiv = document.getElementById('connection-result');
+            resultDiv.innerHTML = 'Testing connection...';
+
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                resultDiv.innerHTML = `✅ Connection OK: ${JSON.stringify(data)}`;
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Connection failed: ${error.message}`;
+            }
+        }
+
+        async function analyzeTechProblem() {
+            console.log('🔍 Analyzing tech problem');
+            const query = document.getElementById('tech-query').value;
+            const level = document.getElementById('support-level').value;
+            const outputDiv = document.getElementById('support-output');
+
+            if (!query.trim()) {
+                outputDiv.innerHTML = '❌ Please enter a question';
+                return;
+            }
+
+            outputDiv.innerHTML = '⏳ Multi-LLM Wall-Bounce analysis in progress...';
+
+            try {
+                const response = await fetch('/api/v1/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: query,
+                        task_type: level
+                    })
+                });
+
+                const result = await response.json();
+                outputDiv.innerHTML = `
+                    <h3>✅ Analysis Complete</h3>
+                    <p><strong>Response:</strong> ${result.response}</p>
+                    <p><strong>Confidence:</strong> ${Math.round(result.confidence * 100)}%</p>
+                    <p><strong>Providers:</strong> ${result.providers_used?.join(', ')}</p>
+                    <p><strong>Cost:</strong> $${result.total_cost}</p>
+                    <p><strong>Time:</strong> ${result.processing_time_ms}ms</p>
+                `;
+            } catch (error) {
+                outputDiv.innerHTML = `❌ Analysis failed: ${error.message}`;
+            }
+        }
+
+        async function analyzeLog() {
+            console.log('🔍 Analyzing logs');
+            const command = document.getElementById('user-command').value;
+            const errorOutput = document.getElementById('error-output').value;
+            const systemContext = document.getElementById('system-context').value;
+            const outputDiv = document.getElementById('logs-output');
+
+            if (!command.trim() || !errorOutput.trim()) {
+                outputDiv.innerHTML = '❌ Please enter command and error output';
+                return;
+            }
+
+            outputDiv.innerHTML = '⏳ Log analysis in progress...';
+
+            try {
+                const response = await fetch('/api/v1/analyze-logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_command: command,
+                        error_output: errorOutput,
+                        system_context: systemContext
+                    })
+                });
+
+                const result = await response.json();
+                if (result.error) {
+                    outputDiv.innerHTML = `❌ Analysis failed: ${result.error}`;
+                } else {
+                    const analysis = result.analysis_result;
+                    outputDiv.innerHTML = `
+                        <h3>✅ Log Analysis Complete</h3>
+                        <p><strong>Problem:</strong> ${analysis.problem_category}</p>
+                        <p><strong>Root Cause:</strong> ${analysis.root_cause}</p>
+                        <p><strong>Confidence:</strong> ${Math.round(analysis.confidence_score * 100)}%</p>
+                        <h4>Solution Steps:</h4>
+                        <ul>${analysis.solution_steps?.map(step => `<li>${step}</li>`).join('')}</ul>
+                    `;
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `❌ Analysis failed: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -3,9 +3,9 @@
  * 🔄 Multi-LLM collaborative analysis integration
  */
 /**
- * 🎯 o3-high MCP Client Integration
+ * 🎯 GPT-5 MCP Client Integration
  */
-export declare function mcp__o3_high__o3_search(params: {
+export declare function mcp__gpt_5__deep_analysis(params: {
     input: string;
 }): Promise<{
     rootCause: string;
@@ -30,12 +30,12 @@ export declare function mcp__gemini_cli__ask_gemini(params: {
  * Test MCP client availability
  */
 export declare function testMCPAvailability(): Promise<{
-    o3High: boolean;
+    gpt5: boolean;
     gemini: boolean;
     wallBounceReady: boolean;
     error?: undefined;
 } | {
-    o3High: boolean;
+    gpt5: boolean;
     gemini: boolean;
     wallBounceReady: boolean;
     error: string;

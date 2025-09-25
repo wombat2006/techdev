@@ -1,0 +1,2 @@
+🔍 Debug server running on port 3002
+Send POST request to /api/analysis/wall-bounce for detailed debugging

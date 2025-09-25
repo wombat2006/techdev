@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSapo デバッグ情報</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .section {
+            background: #111;
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid #0f0;
+            border-radius: 5px;
+        }
+        .highlight {
+            color: #ff0;
+            font-weight: bold;
+        }
+        .interactive-test {
+            background: #222;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #0f0;
+        }
+        textarea, input, button {
+            background: #333;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 10px;
+            margin: 5px;
+            font-family: monospace;
+        }
+        button {
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0f0;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1 class="highlight">🔍 TechSapo サーバー診断情報</h1>
+        <p><strong>タイムスタンプ:</strong> <span id="timestamp"></span></p>
+        <p><strong>ページタイトル:</strong> TechSapo デバッグ情報</p>
+        <p><strong>サーバーIP:</strong> 3.109.102.48</p>
+        <p><strong>ポート:</strong> 443 (HTTPS)</p>
+    </div>
+
+    <div class="section">
+        <h2 class="highlight">📍 アクセス情報</h2>
+        <p><strong>現在のURL:</strong> <span id="current-url"></span></p>
+        <p><strong>ホスト名:</strong> <span id="hostname"></span></p>
+        <p><strong>プロトコル:</strong> <span id="protocol"></span></p>
+        <p><strong>User-Agent:</strong> <span id="user-agent"></span></p>
+    </div>
+
+    <div class="section">
+        <h2 class="highlight">🧪 インタラクティブ要素テスト</h2>
+        <div class="interactive-test">
+            <p>以下の要素が表示され、操作できる場合、正しいページにアクセスしています：</p>
+
+            <div style="margin: 10px 0;">
+                <label>テストテキストエリア:</label><br>
+                <textarea id="test-textarea" placeholder="ここにテキストを入力してテストしてください" rows="3" cols="50"></textarea>
+            </div>
+
+            <div style="margin: 10px 0;">
+                <label>テスト入力フィールド:</label><br>
+                <input type="text" id="test-input" placeholder="ここに入力してテストしてください" style="width: 300px;">
+            </div>
+
+            <div style="margin: 10px 0;">
+                <button onclick="testInteractivity()">インタラクティビティテスト実行</button>
+                <div id="test-result" style="margin-top: 10px; color: #ff0;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="highlight">📊 期待される動作</h2>
+        <p><strong>✅ 正しい場合:</strong></p>
+        <ul>
+            <li>タイトルが「TechSapo - 次世代AI技術サポートプラットフォーム」</li>
+            <li>グラデーション背景アニメーション</li>
+            <li>インタラクティブな入力フィールド</li>
+            <li>「ライブデモ」セクション</li>
+            <li>Multi-LLM Wall-Bounce分析機能</li>
+        </ul>
+        <p><strong>❌ 間違っている場合:</strong></p>
+        <ul>
+            <li>「Wall Bounce Tech Support Helper MCP Server」タイトル</li>
+            <li>静的なHTMLのみ</li>
+            <li>インタラクティブ要素なし</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2 class="highlight">🔧 トラブルシューティング</h2>
+        <p><strong>問題が続く場合:</strong></p>
+        <ol>
+            <li>ブラウザーキャッシュを完全にクリア（Ctrl+Shift+Delete）</li>
+            <li>プライベート/シークレットモードで再度アクセス</li>
+            <li>IPアドレス直接アクセス: https://3.109.102.48/</li>
+            <li>DNS設定確認（8.8.8.8使用推奨）</li>
+        </ol>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString('ja-JP');
+            document.getElementById('current-url').textContent = window.location.href;
+            document.getElementById('hostname').textContent = window.location.hostname;
+            document.getElementById('protocol').textContent = window.location.protocol;
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+        });
+
+        function testInteractivity() {
+            const textarea = document.getElementById('test-textarea').value;
+            const input = document.getElementById('test-input').value;
+            const result = document.getElementById('test-result');
+
+            if (textarea || input) {
+                result.innerHTML = '✅ インタラクティブ要素は正常に動作しています！<br>入力値: "' + (textarea || input) + '"';
+                result.style.color = '#0f0';
+            } else {
+                result.innerHTML = '⚠️ テスト用に何かテキストを入力してください';
+                result.style.color = '#ff0';
+            }
+        }
+    </script>
+</body>
+</html>

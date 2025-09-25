@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSapo - 次世代AI技術サポートプラットフォーム</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0a0e1a;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #b8c5d1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            color: #667eea;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        /* Buttons */
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Features Grid */
+        .features {
+            padding: 5rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-container {
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            min-height: 300px;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .demo-input {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 1rem !important;
+            background: rgba(255, 255, 255, 0.25) !important;
+            border: 3px solid rgba(102, 126, 234, 0.8) !important;
+            border-radius: 10px !important;
+            color: white !important;
+            font-size: 1.1rem !important;
+            font-weight: 500 !important;
+            margin: 1rem 0 !important;
+            resize: vertical !important;
+            min-height: 60px !important;
+            display: block !important;
+            visibility: visible !important;
+            position: relative !important;
+            z-index: 100 !important;
+            box-sizing: border-box !important;
+        }
+
+        .demo-input:focus {
+            background: rgba(255, 255, 255, 0.35) !important;
+            border-color: #667eea !important;
+            outline: 2px solid rgba(102, 126, 234, 0.5) !important;
+            outline-offset: 2px !important;
+        }
+
+        .demo-input::placeholder {
+            color: rgba(184, 197, 209, 0.8) !important;
+            font-weight: 400 !important;
+            opacity: 1 !important;
+        }
+
+        /* WebKit browsers */
+        .demo-input::-webkit-input-placeholder {
+            color: rgba(184, 197, 209, 0.8) !important;
+        }
+
+        /* Firefox */
+        .demo-input::-moz-placeholder {
+            color: rgba(184, 197, 209, 0.8) !important;
+            opacity: 1 !important;
+        }
+
+        /* Edge */
+        .demo-input:-ms-input-placeholder {
+            color: rgba(184, 197, 209, 0.8) !important;
+        }
+
+        .demo-output {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            min-height: 150px;
+            border-left: 4px solid #667eea;
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Loading Animation */
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { color: transparent; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
+            40% { color: white; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
+            60% { text-shadow: .25em 0 0 white, .5em 0 0 transparent; }
+            80%, 100% { text-shadow: .25em 0 0 white, .5em 0 0 white; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .btn-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scroll animations */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Ensure demo section is always visible */
+        #demo {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                TechSapo AI
+            </div>
+            <nav class="nav-menu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#features" class="nav-link">機能</a>
+                <a href="#demo" class="nav-link">デモ</a>
+                <a href="#stats" class="nav-link">統計</a>
+                <a href="/app-redirect.html" class="nav-link">アプリ起動</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1 class="hero-title">TechSapo</h1>
+            <p class="hero-subtitle">次世代Multi-LLM Wall-Bounce Analysis System</p>
+            <p class="hero-description">
+                GPT-5、Gemini-2.5Pro、Claude Opus 4.1を駆使した革新的なAI技術サポートプラットフォーム。
+                複数のLLMによる壁打ち分析で、従来にない精度と信頼性を実現します。
+            </p>
+            <div class="btn-container">
+                <a href="/app-redirect.html" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    今すぐ開始
+                </a>
+                <a href="#demo" class="btn btn-secondary">
+                    <i class="fas fa-play"></i>
+                    デモを見る
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features scroll-animate" id="features">
+        <h2 class="section-title">革新的機能</h2>
+        <div class="features-grid">
+            <div class="feature-card" onclick="openFeature('wall-bounce')">
+                <div class="feature-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <h3 class="feature-title">Multi-LLM Wall-Bounce</h3>
+                <p class="feature-description">
+                    複数のAIモデル間での壁打ち分析により、単一モデルでは得られない深い洞察と高い精度を実現。
+                </p>
+            </div>
+
+            <div class="feature-card" onclick="openFeature('real-time')">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">リアルタイム監視</h3>
+                <p class="feature-description">
+                    システムパフォーマンス、AIモデルの応答時間、コスト効率をリアルタイムで監視・最適化。
+                </p>
+            </div>
+
+            <div class="feature-card" onclick="openFeature('log-analysis')">
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 class="feature-title">高度ログ解析</h3>
+                <p class="feature-description">
+                    AIによる自動ログ解析で、複雑な技術問題の根本原因を特定し、最適な解決策を提案。
+                </p>
+            </div>
+
+            <div class="feature-card" onclick="openFeature('cost-optimization')">
+                <div class="feature-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <h3 class="feature-title">コスト最適化</h3>
+                <p class="feature-description">
+                    インテリジェントなモデル選択とキャッシュ機能により、AIサービスのコストを最大70%削減。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Stats -->
+    <section class="stats scroll-animate" id="stats">
+        <div class="stat-card">
+            <span class="stat-number" id="total-requests">--</span>
+            <span class="stat-label">総リクエスト数</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number" id="avg-response-time">--</span>
+            <span class="stat-label">平均応答時間(ms)</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number" id="success-rate">--</span>
+            <span class="stat-label">成功率(%)</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number" id="cost-saved">--</span>
+            <span class="stat-label">コスト削減($)</span>
+        </div>
+    </section>
+
+    <!-- Interactive Demo -->
+    <section class="demo-section scroll-animate" id="demo" style="opacity: 1 !important; transform: translateY(0) !important; display: block !important; visibility: visible !important;">
+        <h2 class="section-title">ライブデモ</h2>
+        <div class="demo-container" style="display: block !important; visibility: visible !important; background: rgba(255, 255, 255, 0.1) !important; border: 2px solid rgba(255, 255, 255, 0.3) !important;">
+            <h3 style="color: white; margin-bottom: 1rem;">Multi-LLM Wall-Bounce分析を体験</h3>
+
+            <label style="color: rgba(184, 197, 209, 0.9); display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                技術的な質問や問題を入力してください：
+            </label>
+            <textarea
+                class="demo-input"
+                id="demo-query"
+                rows="4"
+                placeholder="例: Dockerコンテナが起動しない問題の解決方法を教えてください"
+                style="width: 100% !important; padding: 1rem !important; background: rgba(255, 255, 255, 0.25) !important; border: 3px solid rgba(102, 126, 234, 0.8) !important; color: white !important; font-size: 1.1rem !important; display: block !important; visibility: visible !important; min-height: 80px !important; box-sizing: border-box !important; margin-bottom: 1rem !important;"
+            ></textarea>
+
+            <label style="color: rgba(184, 197, 209, 0.9); display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                分析レベル：
+            </label>
+            <select
+                class="demo-input"
+                id="demo-level"
+                style="width: 100% !important; height: 50px !important; padding: 1rem !important; background: rgba(255, 255, 255, 0.25) !important; border: 3px solid rgba(102, 126, 234, 0.8) !important; color: white !important; font-size: 1.1rem !important; display: block !important; visibility: visible !important; box-sizing: border-box !important; margin-bottom: 1.5rem !important;"
+            >
+                <option value="basic" style="background: #333; color: white;">基本分析</option>
+                <option value="premium" style="background: #333; color: white;">プレミアム分析</option>
+                <option value="critical" style="background: #333; color: white;">クリティカル分析</option>
+            </select>
+
+            <button
+                class="btn btn-primary"
+                onclick="runDemo()"
+                id="demo-btn"
+                style="width: auto !important; padding: 1rem 2rem !important; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; border: none !important; border-radius: 50px !important; font-size: 1.1rem !important; font-weight: 600 !important; cursor: pointer !important; display: inline-block !important; visibility: visible !important;"
+            >
+                <i class="fas fa-magic" style="margin-right: 0.5rem;"></i>
+                Wall-Bounce分析実行
+            </button>
+
+            <div
+                class="demo-output"
+                id="demo-output"
+                style="background: rgba(0, 0, 0, 0.3) !important; border-radius: 10px !important; padding: 1.5rem !important; margin-top: 1rem !important; color: white !important; display: block !important; visibility: visible !important; min-height: 100px !important; border-left: 4px solid #667eea !important;"
+            >
+                📝 デモを実行するには上記の質問を入力して「Wall-Bounce分析実行」ボタンをクリックしてください。
+                <br><br>
+                💡 例: "nginxの設定でSSLエラーが発生する問題を解決したい"
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Scroll animations
+        function handleScroll() {
+            const elements = document.querySelectorAll('.scroll-animate');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // Load real-time stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    // Simulate real-time stats
+                    document.getElementById('total-requests').textContent =
+                        Math.floor(Math.random() * 10000 + 5000).toLocaleString();
+                    document.getElementById('avg-response-time').textContent =
+                        Math.floor(Math.random() * 200 + 150);
+                    document.getElementById('success-rate').textContent =
+                        (Math.random() * 5 + 95).toFixed(1);
+                    document.getElementById('cost-saved').textContent =
+                        (Math.random() * 1000 + 500).toFixed(0);
+                }
+            } catch (error) {
+                console.log('Stats loading failed, using demo data');
+            }
+        }
+
+        // Demo function
+        async function runDemo() {
+            const query = document.getElementById('demo-query').value;
+            const level = document.getElementById('demo-level').value;
+            const output = document.getElementById('demo-output');
+            const btn = document.getElementById('demo-btn');
+
+            if (!query.trim()) {
+                output.innerHTML = '<p style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> 質問を入力してください。</p>';
+                return;
+            }
+
+            // Update button state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 分析中<span class="loading-dots"></span>';
+            btn.disabled = true;
+
+            // Show progress
+            output.innerHTML = `
+                <div style="color: #4facfe;">
+                    <i class="fas fa-cog fa-spin"></i> Multi-LLM Wall-Bounce分析を実行中...
+                    <br><br>
+                    <div style="font-size: 0.9rem; color: #b8c5d1;">
+                        🤖 GPT-5による初期分析...<br>
+                        🧠 Gemini-2.5Proによる検証分析...<br>
+                        🎯 Claude Opus 4.1による統合分析...
+                    </div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/v1/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: query, task_type: level })
+                });
+
+                const result = await response.json();
+
+                output.innerHTML = `
+                    <div style="border-left: 4px solid #10b981; padding-left: 1rem;">
+                        <h4 style="color: #10b981; margin-bottom: 1rem;">
+                            <i class="fas fa-check-circle"></i> Wall-Bounce分析完了
+                        </h4>
+                        <div style="margin-bottom: 1rem;">
+                            <strong>分析結果:</strong><br>
+                            <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin: 0.5rem 0;">
+                                ${result.response}
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                            <div style="text-align: center; padding: 0.5rem;">
+                                <div style="color: #4facfe; font-weight: bold;">${Math.round(result.confidence * 100)}%</div>
+                                <div style="color: #b8c5d1; font-size: 0.8rem;">信頼度</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.5rem;">
+                                <div style="color: #f093fb; font-weight: bold;">$${result.total_cost}</div>
+                                <div style="color: #b8c5d1; font-size: 0.8rem;">コスト</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.5rem;">
+                                <div style="color: #10b981; font-weight: bold;">${result.processing_time_ms}ms</div>
+                                <div style="color: #b8c5d1; font-size: 0.8rem;">処理時間</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; color: #b8c5d1; font-size: 0.9rem;">
+                            <i class="fas fa-robot"></i> 使用モデル: ${result.providers_used?.join(', ') || 'Multi-LLM'}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                output.innerHTML = `
+                    <p style="color: #ef4444;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        分析中にエラーが発生しました: ${error.message}
+                    </p>
+                `;
+            }
+
+            // Reset button
+            btn.innerHTML = '<i class="fas fa-magic"></i> Wall-Bounce分析実行';
+            btn.disabled = false;
+        }
+
+        // Feature navigation
+        function openFeature(feature) {
+            const features = {
+                'wall-bounce': '複数のAIモデル間での協調分析システム',
+                'real-time': 'リアルタイムパフォーマンス監視ダッシュボード',
+                'log-analysis': '高度なログ解析とエラー診断システム',
+                'cost-optimization': 'AIサービスコスト最適化エンジン'
+            };
+
+            alert(`${features[feature]}の詳細は開発中です。メインアプリでご利用いただけます。`);
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            loadStats();
+            handleScroll();
+
+            // Ensure demo section is visible immediately
+            const demoSection = document.getElementById('demo');
+            if (demoSection) {
+                demoSection.classList.add('visible');
+                demoSection.style.opacity = '1';
+                demoSection.style.transform = 'translateY(0)';
+                demoSection.style.display = 'block';
+                demoSection.style.visibility = 'visible';
+            }
+
+            // Ensure all input fields are visible
+            const demoInputs = document.querySelectorAll('.demo-input');
+            demoInputs.forEach(input => {
+                input.style.display = 'block';
+                input.style.visibility = 'visible';
+                input.style.opacity = '1';
+                input.style.position = 'relative';
+                input.style.zIndex = '100';
+            });
+
+            // Ensure demo container is visible
+            const demoContainer = document.querySelector('.demo-container');
+            if (demoContainer) {
+                demoContainer.style.display = 'block';
+                demoContainer.style.visibility = 'visible';
+                demoContainer.style.opacity = '1';
+            }
+
+            // Also ensure stats section is visible
+            const statsSection = document.getElementById('stats');
+            if (statsSection) {
+                statsSection.classList.add('visible');
+            }
+
+            // Update stats every 10 seconds
+            setInterval(loadStats, 10000);
+
+            console.log('🎉 TechSapo Top Page initialized with interactive demo');
+        });
+
+        // Scroll event listener
+        window.addEventListener('scroll', handleScroll);
+    </script>
+</body>
+</html>

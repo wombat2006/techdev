@@ -5,6 +5,8 @@ import path from 'path';
 import { config } from './config/environment';
 import { getRedisService } from './services/redis-service';
 import { getSessionManager } from './services/session-manager';
+import { WallBounceAnalyzer } from './services/wall-bounce-analyzer';
+import { LogAnalyzer } from './services/log-analyzer';
 import ragEndpoints from './routes/rag-endpoint';
 
 export function createServer() {
@@ -125,18 +127,36 @@ export function createServer() {
         return res.status(400).json({ error: 'Invalid task_type' });
       }
 
-      // Mock response for testing
+      // Real Multi-LLM Wall-Bounce Analysis
+      const wallBounceAnalyzer = new WallBounceAnalyzer();
+      const wallBounceResult = await wallBounceAnalyzer.executeWallBounce(
+        prompt,
+        task_type as 'basic' | 'premium' | 'critical' || 'basic',
+        {
+          minProviders: task_type === 'critical' ? 3 : 2,
+          maxProviders: task_type === 'critical' ? 4 : 3,
+          requireConsensus: true,
+          confidenceThreshold: task_type === 'critical' ? 0.9 : 0.8
+        }
+      );
+
       const response = {
-        response: `Mock response for: ${prompt}`,
+        response: wallBounceResult.consensus.content,
+        confidence: wallBounceResult.consensus.confidence,
+        reasoning: wallBounceResult.consensus.reasoning,
         session_id: session_id || `sess_${Date.now()}`,
         task_type: task_type || 'basic',
+        total_cost: wallBounceResult.total_cost,
+        processing_time_ms: wallBounceResult.processing_time_ms,
+        providers_used: wallBounceResult.debug.providers_used,
+        wall_bounce_verified: wallBounceResult.debug.wall_bounce_verified,
         timestamp: new Date().toISOString()
       };
 
       res.json(response);
     } catch (error) {
       res.status(500).json({
-        error: 'Internal server error',
+        error: 'Wall-Bounce analysis failed',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -152,18 +172,24 @@ export function createServer() {
         });
       }
 
-      // Mock analysis response
+      // Real Multi-LLM Wall-Bounce Log Analysis
+      const logAnalysisResult = await LogAnalyzer.analyzeLogs({
+        user_command,
+        error_output,
+        system_context
+      });
+
       const analysis = {
         analysis_result: {
-          command: user_command,
-          error: error_output,
-          context: system_context,
-          suggestions: [
-            'Check service status',
-            'Verify configuration',
-            'Review logs'
-          ],
-          severity: 'medium'
+          issue_identified: logAnalysisResult.issue_identified,
+          problem_category: logAnalysisResult.problem_category,
+          root_cause: logAnalysisResult.root_cause,
+          solution_steps: logAnalysisResult.solution_steps,
+          related_services: logAnalysisResult.related_services,
+          severity_level: logAnalysisResult.severity_level,
+          confidence_score: logAnalysisResult.confidence_score,
+          additional_checks: logAnalysisResult.additional_checks,
+          collaboration_trace: logAnalysisResult.collaboration_trace
         },
         timestamp: new Date().toISOString()
       };
@@ -171,7 +197,7 @@ export function createServer() {
       res.json(analysis);
     } catch (error) {
       res.status(500).json({
-        error: 'Analysis failed',
+        error: 'Log analysis failed',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }

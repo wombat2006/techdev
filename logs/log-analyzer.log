@@ -154,3 +154,14 @@
 {"level":"info","message":"🔍 Integrated analysis and solution prioritization initiated","service":"techsapo-log-analyzer","timestamp":"2025-08-27T09:16:44.503Z"}
 {"confidenceScore":0.95,"level":"info","message":"🎉 Wall-bounce analysis successful","phases":["o3-high","gemini","integrated"],"service":"techsapo-log-analyzer","timestamp":"2025-08-27T09:16:44.503Z"}
 {"analysisType":"collaborative_multi_llm","confidenceScore":0.95,"level":"info","message":"🎯 Wall-Bounce Analysis completed successfully","problemCategory":"System Complex Infrastructure Failure - 🔄 Wall-Bounce Analysis","service":"techsapo-log-analyzer","timestamp":"2025-08-27T09:16:44.503Z"}
+{"hasUserCommand":true,"level":"info","logType":"general","message":"🔄 Starting UNIVERSAL MANDATORY Wall-Bounce Analysis","policy":"ALL_REQUESTS_REQUIRE_WALL_BOUNCE","service":"techsapo-log-analyzer","systemContext":"Ubuntu 22.04","timestamp":"2025-09-24T23:20:10.373Z","wallBounceRequired":true}
+{"level":"info","message":"🔄 Initiating mandatory wall-bounce analysis with multiple LLMs","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.373Z"}
+{"level":"info","message":"🔍 GPT-5 analysis initiated","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.374Z"}
+{"level":"info","message":"🔍 Gemini environment analysis initiated","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.374Z"}
+{"level":"info","message":"🔍 Integrated analysis and solution prioritization initiated","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.374Z"}
+{"claude_confidence":0.95,"codex_resolution_steps":1,"codex_root_cause":"Advanced technical root cause analysis completed","gemini_environment_factors":2,"level":"info","message":"🧭 Multi-LLM collaboration trace captured","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.375Z"}
+{"error":{},"level":"error","message":"Integrated analysis failed","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.375Z"}
+{"error":"Cannot read properties of undefined (reading 'match')","level":"error","message":"🚨 Wall-bounce analysis failed","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.375Z"}
+{"error":"Cannot read properties of undefined (reading 'match')","level":"error","message":"🚨 Wall-Bounce Analysis failed - attempting fallback","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.375Z"}
+{"level":"error","message":"🚨 EMERGENCY: Using fallback single-LLM analysis - Wall-bounce system failed","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.375Z"}
+{"level":"error","message":"⚠️  WARNING: Analysis quality significantly reduced without wall-bounce collaboration","service":"techsapo-log-analyzer","timestamp":"2025-09-24T23:20:10.375Z"}

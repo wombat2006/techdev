@@ -8,6 +8,27 @@ interface LogAnalysisRequest {
     system_context?: string;
     log_type?: 'systemd' | 'application' | 'kernel' | 'nginx' | 'mysql' | 'general';
 }
+interface CollaborationTrace {
+    openai_codex_gpt_5?: {
+        root_cause: string;
+        mechanism: string;
+        resolution: string[];
+        prevention: string[];
+    };
+    gemini_environment?: {
+        environment_factors: string[];
+        configuration_issues: string[];
+        adjusted_resolution: string[];
+    };
+    claude_integration?: {
+        integrated_root_cause: string;
+        prioritized_solutions: string[];
+        confidence: number;
+    };
+    fallback?: {
+        reason: string;
+    };
+}
 interface LogAnalysisResult {
     issue_identified: boolean;
     problem_category: string;
@@ -17,6 +38,7 @@ interface LogAnalysisResult {
     severity_level: 'low' | 'medium' | 'high' | 'critical';
     confidence_score: number;
     additional_checks: string[];
+    collaboration_trace?: CollaborationTrace;
 }
 export declare class LogAnalyzer {
     /**
@@ -47,9 +69,9 @@ export declare class LogAnalyzer {
      */
     private static performMandatoryWallBounceAnalysis;
     /**
-     * 🎯 Phase 1: o3-high High-Precision Technical Analysis
+     * 🎯 Phase 1: GPT-5 High-Precision Technical Analysis
      */
-    private static performO3HighAnalysis;
+    private static performGpt5Analysis;
     /**
      * 🎯 Phase 2: Gemini Environment-Dependency Analysis
      */

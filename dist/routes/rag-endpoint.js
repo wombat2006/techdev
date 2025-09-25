@@ -144,7 +144,7 @@ router.get('/documents', async (req, res) => {
  */
 router.post('/search', async (req, res) => {
     try {
-        const { query, vector_store_id, max_results = 5, enable_wall_bounce = true, wall_bounce_models = ['o3-high', 'gemini'] } = req.body;
+        const { query, vector_store_id, max_results = 5, enable_wall_bounce = true, wall_bounce_models = ['gpt-5', 'gemini'] } = req.body;
         if (!query || !vector_store_id) {
             return res.status(400).json({
                 error: 'query and vector_store_id are required',
@@ -165,18 +165,18 @@ router.post('/search', async (req, res) => {
         if (enable_wall_bounce && wall_bounce_models.length > 0) {
             logger_1.logger.info('🏓 壁打ち分析開始', { models: wall_bounce_models });
             const wallBouncePromises = [];
-            // o3-high分析
-            if (wall_bounce_models.includes('o3-high')) {
-                wallBouncePromises.push((0, mcp_clients_1.mcp__o3_high__o3_search)({
+            // GPT-5分析
+            if (wall_bounce_models.includes('gpt-5')) {
+                wallBouncePromises.push((0, mcp_clients_1.mcp__gpt_5__deep_analysis)({
                     input: `以下のRAG検索結果を分析し、より詳細で正確な回答を生成してください。
-            
+
 質問: ${query}
 
 RAG検索結果:
 ${ragResult.results.map(r => r.content).join('\n\n---\n\n')}
 
 日本語で回答し、情報の信頼性と追加の洞察を提供してください。`
-                }).then(result => ({ model: 'o3-high', result })).catch(err => ({ model: 'o3-high', error: err.message })));
+                }).then(result => ({ model: 'gpt-5', result })).catch(err => ({ model: 'gpt-5', error: err.message })));
             }
             // Gemini分析
             if (wall_bounce_models.includes('gemini')) {

@@ -1,0 +1,409 @@
+
+> techsapo-devel@1.0.0 wall-bounce:quick
+> NODE_OPTIONS='--max-old-space-size=2048 --expose-gc' node src/examples/real-llm-demo.js -- --quick
+
+[dotenv@17.2.2] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+✅ API keys validated for OpenAI and Gemini (Claude Code direct integration available)
+
+🏃 QUICK WALL-BOUNCE TEST
+========================
+🚀 Launching wall-bounce analysis...
+🧠 Starting Wall-Bounce Multi-LLM Analysis
+==========================================
+🎯 Phase 1: GPT-5 Technical Analysis
+🔄 Fetching OpenAI models dynamically...
+✅ Retrieved 90 OpenAI models
+💬 Think Deeper priority: gpt-4-0613 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-0613 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4 = 3400 (standard model)
+💬 Think Deeper priority: gpt-4 = 3400 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo = 2800 (standard model)
+💬 Think Deeper priority: gpt-audio = 0 (standard model)
+💬 Think Deeper priority: gpt-audio = 0 (standard model)
+💬 Think Deeper priority: gpt-5-nano = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano = 6000 (standard model)
+💬 Think Deeper priority: gpt-audio-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-audio-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-4-1106-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-1106-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-1106 = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-1106 = 2800 (standard model)
+💬 Think Deeper priority: gpt-4-0125-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-0125-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-0125 = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-0125 = 2800 (standard model)
+💬 Think Deeper priority: gpt-4-turbo = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-2024-04-09 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-2024-04-09 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-05-13 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-05-13 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-2024-07-18 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-2024-07-18 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-08-06 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-08-06 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-11-20 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-11-20 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-tts = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-tts = 3200 (standard model)
+💬 Think Deeper priority: gpt-4.1-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1 = 4200 (standard model)
+💬 Think Deeper priority: gpt-4.1 = 4200 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano = 4000 (standard model)
+💬 Think Deeper priority: gpt-image-1 = 0 (standard model)
+💬 Think Deeper priority: gpt-image-1 = 0 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-5-chat-latest = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-chat-latest = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5 = 6200 (standard model)
+💬 Think Deeper priority: gpt-5 = 6200 (standard model)
+💬 Think Deeper priority: gpt-5-mini-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano-2025-08-07 = 6000 (standard model)
+🎲 Model selection with variance: gpt-5-chat-latest
+   Base priority: 6000, Variance: +321, Final: 6321
+🔍 OpenAI API Response Status: 200
+🔍 OpenAI API Response Data: {
+  "id": "chatcmpl-CGIDv2uM7ZazAQodgDWtrhqcD7kbW",
+  "object": "chat.completion",
+  "created": 1757999335,
+  "model": "gpt-5-chat-latest",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "承知しました。それでは、technical_analystの視点から「Node.js 3-worker構成でのTypeScript移行優先度 vs 現行JavaScript維持」について、与えられた条件を踏まえ詳細に評価します。\n\n---\n\n## 1. 技術的実現可能性と実装の複雑さ\n- **TypeScript移行の実現可能性**:  \n  - ファイル数が45と比較的少ないため、全面移行は開発組織規模を考慮すると現実的ではあります。  \n  - Single Responsibili
+💰 Token Usage: Input=324, Output=1542, Total=1866, Model=gpt-5-chat-latest
+✅ GPT-5 technical analysis complete
+
+🧠 Phase 2: Gemini Strategic Analysis
+📊 gemini-2.5-pro non-OpenAI priority = 1100
+📊 gemini-2.5-pro non-OpenAI priority = 1100
+📊 gemini-1.5-pro non-OpenAI priority = 700
+📊 gemini-1.5-pro non-OpenAI priority = 700
+🎲 GOOGLE model selection with variance: gemini-2.5-pro
+   Base priority: 1100, Variance: +160, Final: 1260
+💰 Gemini Token Usage: Input=7, Output=308, Total=315, Model=gemini-2.5-pro
+✅ Gemini analysis complete
+
+🔍 Phase 3: GPT-5 Cross-Validation & Risk Assessment
+📋 Using cached OpenAI models
+💬 Think Deeper priority: gpt-4-0613 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-0613 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4 = 3400 (standard model)
+💬 Think Deeper priority: gpt-4 = 3400 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo = 2800 (standard model)
+💬 Think Deeper priority: gpt-audio = 0 (standard model)
+💬 Think Deeper priority: gpt-audio = 0 (standard model)
+💬 Think Deeper priority: gpt-5-nano = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano = 6000 (standard model)
+💬 Think Deeper priority: gpt-audio-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-audio-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-4-1106-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-1106-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-1106 = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-1106 = 2800 (standard model)
+💬 Think Deeper priority: gpt-4-0125-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-0125-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-0125 = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-0125 = 2800 (standard model)
+💬 Think Deeper priority: gpt-4-turbo = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-2024-04-09 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-2024-04-09 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-05-13 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-05-13 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-2024-07-18 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-2024-07-18 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-08-06 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-08-06 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-11-20 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-11-20 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-tts = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-tts = 3200 (standard model)
+💬 Think Deeper priority: gpt-4.1-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1 = 4200 (standard model)
+💬 Think Deeper priority: gpt-4.1 = 4200 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano = 4000 (standard model)
+💬 Think Deeper priority: gpt-image-1 = 0 (standard model)
+💬 Think Deeper priority: gpt-image-1 = 0 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-5-chat-latest = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-chat-latest = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5 = 6200 (standard model)
+💬 Think Deeper priority: gpt-5 = 6200 (standard model)
+💬 Think Deeper priority: gpt-5-mini-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano-2025-08-07 = 6000 (standard model)
+🎲 Model selection with variance: gpt-5-chat-latest
+   Base priority: 6000, Variance: +593, Final: 6593
+🔍 OpenAI API Response Status: 200
+🔍 OpenAI API Response Data: {
+  "id": "chatcmpl-CGIEMmKJu2bfce9bhWVT8v07YnGcG",
+  "object": "chat.completion",
+  "created": 1757999362,
+  "model": "gpt-5-chat-latest",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "了解しました。risk_assessor_validatorとして、提示されている条件を踏まえ、TypeScript移行優先 vs 現行JavaScript維持 の選択肢を、客観的リスク評価の観点で分析します。  \n\n---\n\n## 1. 前回の技術分析と戦略分析の妥当性評価\n- **技術分析:** 既に 34.56% のパフォーマンス改善が確認されているとのことですが、これは設計改善や Node.js ワーカー分離による恩恵であり、言語移行（JS→TS）そのものによる性能改善ではない点を踏
+💰 Token Usage: Input=377, Output=1711, Total=2088, Model=gpt-5-chat-latest
+✅ GPT-5 cross-validation complete
+
+⚖️ Phase 4: Claude Code Final Judgment & Decision
+🤖 Using Claude Code direct integration for role-based analysis
+🔮 Performing Claude Code direct analysis...
+✅ Claude Code judgment complete
+
+🤝 Phase 5: Building Multi-Model Consensus
+🤝 Building consensus from multiple LLM perspectives...
+📋 Using cached OpenAI models
+💬 Think Deeper priority: gpt-4-0613 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-0613 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4 = 3400 (standard model)
+💬 Think Deeper priority: gpt-4 = 3400 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo = 2800 (standard model)
+💬 Think Deeper priority: gpt-audio = 0 (standard model)
+💬 Think Deeper priority: gpt-audio = 0 (standard model)
+💬 Think Deeper priority: gpt-5-nano = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano = 6000 (standard model)
+💬 Think Deeper priority: gpt-audio-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-audio-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-realtime-2025-08-28 = 0 (standard model)
+💬 Think Deeper priority: gpt-4-1106-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-1106-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-1106 = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-1106 = 2800 (standard model)
+💬 Think Deeper priority: gpt-4-0125-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-0125-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-0125 = 2800 (standard model)
+💬 Think Deeper priority: gpt-3.5-turbo-0125 = 2800 (standard model)
+💬 Think Deeper priority: gpt-4-turbo = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-2024-04-09 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4-turbo-2024-04-09 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-05-13 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-05-13 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-2024-07-18 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-2024-07-18 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-08-06 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-08-06 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-10-01 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview-2024-12-17 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-realtime-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-audio-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-11-20 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-2024-11-20 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview-2025-03-11 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-search-preview = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-transcribe = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-tts = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-mini-tts = 3200 (standard model)
+💬 Think Deeper priority: gpt-4.1-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1 = 4200 (standard model)
+💬 Think Deeper priority: gpt-4.1 = 4200 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-mini = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano-2025-04-14 = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano = 4000 (standard model)
+💬 Think Deeper priority: gpt-4.1-nano = 4000 (standard model)
+💬 Think Deeper priority: gpt-image-1 = 0 (standard model)
+💬 Think Deeper priority: gpt-image-1 = 0 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-realtime-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-4o-audio-preview-2025-06-03 = 3200 (standard model)
+💬 Think Deeper priority: gpt-5-chat-latest = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-chat-latest = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5 = 6200 (standard model)
+💬 Think Deeper priority: gpt-5 = 6200 (standard model)
+💬 Think Deeper priority: gpt-5-mini-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-mini = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano-2025-08-07 = 6000 (standard model)
+💬 Think Deeper priority: gpt-5-nano-2025-08-07 = 6000 (standard model)
+🎲 Model selection with variance: gpt-5-chat-latest
+   Base priority: 6000, Variance: +590, Final: 6590
+🔍 OpenAI API Response Status: 200
+🔍 OpenAI API Response Data: {
+  "id": "chatcmpl-CGIEjiJc6yZAKYDMSP5XJVSFfsc7c",
+  "object": "chat.completion",
+  "created": 1757999385,
+  "model": "gpt-5-chat-latest",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\n  \"consensus\": \"In the short term, maintain the current JavaScript codebase and continue focusing on performance optimization of the 3-worker Node.js architecture. Adopt TypeScript gradually, starting with new files and critical API inter
+💰 Token Usage: Input=4184, Output=558, Total=4742, Model=gpt-5-chat-latest
+✅ Consensus building complete
+
+⚡ QUICK RESULTS:
+================
+Final Recommendation: Review detailed analysis above
+Confidence Level: 75%
+Reasoning: Consensus built from multiple AI models

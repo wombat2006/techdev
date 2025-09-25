@@ -12,6 +12,7 @@ export interface MagicNumberPattern {
     pattern: number[];
     offset: number;
     fileType: FileTypeInfo;
+    minLength?: number;
 }
 /**
  * バッファからファイル形式を検出

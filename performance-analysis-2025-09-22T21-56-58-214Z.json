@@ -1,0 +1,423 @@
+{
+  "timestamp": "2025-09-22T21:56:53.541Z",
+  "tests": {
+    "singleThread": {
+      "testType": "single-thread",
+      "duration": 896,
+      "result": {
+        "processedItems": 10000,
+        "iterations": 100,
+        "finalResult": 332036823.03584725
+      },
+      "testParams": {
+        "dataSize": 10000,
+        "iterations": 100
+      },
+      "memoryReport": {
+        "summary": {
+          "measurementCount": 4,
+          "totalElapsed": 1207,
+          "peakOldSpaceUsage": 96.1
+        },
+        "initial": {
+          "oldSpaceUsage": 90.4,
+          "heapUsed": 6.37,
+          "rss": 56.52
+        },
+        "final": {
+          "oldSpaceUsage": 58.9,
+          "heapUsed": 5.38,
+          "rss": 106.32
+        },
+        "changes": {
+          "timeElapsed": 1207,
+          "memoryChanges": {
+            "rss": 49.8,
+            "heapUsed": -0.99,
+            "oldSpaceUsed": 0.2,
+            "oldSpaceUsagePercent": -31.5
+          }
+        },
+        "measurements": [
+          {
+            "label": "Test Start",
+            "timestamp": 1758578213542,
+            "elapsed": 0,
+            "process": {
+              "rss": 56.52,
+              "heapTotal": 9.73,
+              "heapUsed": 6.37,
+              "external": 1.84,
+              "arrayBuffers": 0.01
+            },
+            "v8": {
+              "totalHeapSize": 9.73,
+              "usedHeapSize": 6.35,
+              "heapSizeLimit": 560,
+              "totalPhysicalSize": 8.54
+            },
+            "oldSpace": {
+              "spaceName": "old_space",
+              "sizeUsed": 4.07,
+              "sizeAvailable": 0.28,
+              "physicalSize": 4.5,
+              "usagePercent": 90.4
+            },
+            "calculated": {
+              "totalHeapUsagePercent": 1.13,
+              "processHeapUsagePercent": 66
+            }
+          },
+          {
+            "label": "Before Operation",
+            "timestamp": 1758578213648,
+            "elapsed": 106,
+            "process": {
+              "rss": 56.83,
+              "heapTotal": 10.23,
+              "heapUsed": 5.43,
+              "external": 1.84,
+              "arrayBuffers": 0.01
+            },
+            "v8": {
+              "totalHeapSize": 10.23,
+              "usedHeapSize": 5.41,
+              "heapSizeLimit": 560,
+              "totalPhysicalSize": 8.8
+            },
+            "oldSpace": {
+              "spaceName": "old_space",
+              "sizeUsed": 4.29,
+              "sizeAvailable": 0.2,
+              "physicalSize": 5,
+              "usagePercent": 85.8
+            },
+            "calculated": {
+              "totalHeapUsagePercent": 0.97,
+              "processHeapUsagePercent": 53
+            }
+          },
+          {
+            "label": "After Operation",
+            "timestamp": 1758578214544,
+            "elapsed": 1002,
+            "process": {
+              "rss": 106.32,
+              "heapTotal": 57.73,
+              "heapUsed": 36.12,
+              "external": 1.84,
+              "arrayBuffers": 0.01
+            },
+            "v8": {
+              "totalHeapSize": 57.73,
+              "usedHeapSize": 36.1,
+              "heapSizeLimit": 560,
+              "totalPhysicalSize": 57.99
+            },
+            "oldSpace": {
+              "spaceName": "old_space",
+              "sizeUsed": 23.55,
+              "sizeAvailable": 0.35,
+              "physicalSize": 24.5,
+              "usagePercent": 96.1
+            },
+            "calculated": {
+              "totalHeapUsagePercent": 6.45,
+              "processHeapUsagePercent": 63
+            }
+          },
+          {
+            "label": "After GC",
+            "timestamp": 1758578214749,
+            "elapsed": 1207,
+            "process": {
+              "rss": 106.32,
+              "heapTotal": 40.48,
+              "heapUsed": 5.38,
+              "external": 1.84,
+              "arrayBuffers": 0.01
+            },
+            "v8": {
+              "totalHeapSize": 40.48,
+              "usedHeapSize": 5.36,
+              "heapSizeLimit": 560,
+              "totalPhysicalSize": 40.74
+            },
+            "oldSpace": {
+              "spaceName": "old_space",
+              "sizeUsed": 4.27,
+              "sizeAvailable": 0.22,
+              "physicalSize": 7.25,
+              "usagePercent": 58.9
+            },
+            "calculated": {
+              "totalHeapUsagePercent": 0.96,
+              "processHeapUsagePercent": 13
+            }
+          }
+        ]
+      },
+      "comparisons": {
+        "beforeToAfter": {
+          "timeElapsed": 896,
+          "memoryChanges": {
+            "rss": 49.49,
+            "heapUsed": 30.69,
+            "oldSpaceUsed": 19.26,
+            "oldSpaceUsagePercent": 10.3
+          }
+        },
+        "afterToGC": {
+          "timeElapsed": 205,
+          "memoryChanges": {
+            "rss": 0,
+            "heapUsed": -30.74,
+            "oldSpaceUsed": -19.28,
+            "oldSpaceUsagePercent": -37.2
+          }
+        }
+      }
+    },
+    "workerThread": {
+      "testType": "worker-thread",
+      "duration": 629,
+      "maxWorkerDuration": 574,
+      "result": {
+        "processedItems": 10000,
+        "finalResult": 338933485.3539506,
+        "maxWorkerDuration": 574,
+        "iterations": 100,
+        "numWorkers": 2
+      },
+      "testParams": {
+        "dataSize": 10000,
+        "iterations": 100,
+        "numWorkers": 2
+      },
+      "memoryReport": {
+        "summary": {
+          "measurementCount": 4,
+          "totalElapsed": 941,
+          "peakOldSpaceUsage": 87
+        },
+        "initial": {
+          "oldSpaceUsage": 85.3,
+          "heapUsed": 5.4,
+          "rss": 106.32
+        },
+        "final": {
+          "oldSpaceUsage": 87,
+          "heapUsed": 5.62,
+          "rss": 110.92
+        },
+        "changes": {
+          "timeElapsed": 941,
+          "memoryChanges": {
+            "rss": 4.6,
+            "heapUsed": 0.22,
+            "oldSpaceUsed": 0.09,
+            "oldSpaceUsagePercent": 1.7
+          }
+        },
+        "measurements": [
+          {
+            "label": "Test Start",
+            "timestamp": 1758578217257,
+            "elapsed": 0,
+            "process": {
+              "rss": 106.32,
+              "heapTotal": 38.23,
+              "heapUsed": 5.4,
+              "external": 1.84,
+              "arrayBuffers": 0.01
+            },
+            "v8": {
+              "totalHeapSize": 38.23,
+              "usedHeapSize": 5.38,
+              "heapSizeLimit": 560,
+              "totalPhysicalSize": 38.49
+            },
+            "oldSpace": {
+              "spaceName": "old_space",
+              "sizeUsed": 4.26,
+              "sizeAvailable": 0.12,
+              "physicalSize": 5,
+              "usagePercent": 85.3
+            },
+            "calculated": {
+              "totalHeapUsagePercent": 0.96,
+              "processHeapUsagePercent": 14
+            }
+          },
+          {
+            "label": "Before Worker Creation",
+            "timestamp": 1758578217362,
+            "elapsed": 105,
+            "process": {
+              "rss": 106.32,
+              "heapTotal": 38.23,
+              "heapUsed": 5.41,
+              "external": 1.84,
+              "arrayBuffers": 0.01
+            },
+            "v8": {
+              "totalHeapSize": 38.23,
+              "usedHeapSize": 5.39,
+              "heapSizeLimit": 560,
+              "totalPhysicalSize": 38.49
+            },
+            "oldSpace": {
+              "spaceName": "old_space",
+              "sizeUsed": 4.29,
+              "sizeAvailable": 0.1,
+              "physicalSize": 5,
+              "usagePercent": 85.7
+            },
+            "calculated": {
+              "totalHeapUsagePercent": 0.96,
+              "processHeapUsagePercent": 14
+            }
+          },
+          {
+            "label": "After Workers Complete",
+            "timestamp": 1758578217991,
+            "elapsed": 734,
+            "process": {
+              "rss": 155,
+              "heapTotal": 38.48,
+              "heapUsed": 6.22,
+              "external": 1.85,
+              "arrayBuffers": 0.02
+            },
+            "v8": {
+              "totalHeapSize": 38.48,
+              "usedHeapSize": 6.22,
+              "heapSizeLimit": 560,
+              "totalPhysicalSize": 38.74
+            },
+            "oldSpace": {
+              "spaceName": "old_space",
+              "sizeUsed": 4.34,
+              "sizeAvailable": 0.04,
+              "physicalSize": 5,
+              "usagePercent": 86.9
+            },
+            "calculated": {
+              "totalHeapUsagePercent": 1.11,
+              "processHeapUsagePercent": 16
+            }
+          },
+          {
+            "label": "After GC",
+            "timestamp": 1758578218198,
+            "elapsed": 941,
+            "process": {
+              "rss": 110.92,
+              "heapTotal": 38.48,
+              "heapUsed": 5.62,
+              "external": 1.85,
+              "arrayBuffers": 0.02
+            },
+            "v8": {
+              "totalHeapSize": 38.48,
+              "usedHeapSize": 5.6,
+              "heapSizeLimit": 560,
+              "totalPhysicalSize": 38.74
+            },
+            "oldSpace": {
+              "spaceName": "old_space",
+              "sizeUsed": 4.35,
+              "sizeAvailable": 0.02,
+              "physicalSize": 5,
+              "usagePercent": 87
+            },
+            "calculated": {
+              "totalHeapUsagePercent": 1,
+              "processHeapUsagePercent": 15
+            }
+          }
+        ]
+      },
+      "comparisons": {
+        "beforeToAfter": {
+          "timeElapsed": 629,
+          "memoryChanges": {
+            "rss": 48.68,
+            "heapUsed": 0.81,
+            "oldSpaceUsed": 0.05,
+            "oldSpaceUsagePercent": 1.2
+          }
+        },
+        "afterToGC": {
+          "timeElapsed": 207,
+          "memoryChanges": {
+            "rss": -44.08,
+            "heapUsed": -0.6,
+            "oldSpaceUsed": 0.01,
+            "oldSpaceUsagePercent": 0.1
+          }
+        }
+      },
+      "workerResults": [
+        {
+          "workerId": 1,
+          "result": {
+            "processedItems": 5000,
+            "iterations": 100,
+            "finalResult": 169421001.68552563
+          },
+          "duration": 525
+        },
+        {
+          "workerId": 2,
+          "result": {
+            "processedItems": 5000,
+            "iterations": 100,
+            "finalResult": 169512483.66842502
+          },
+          "duration": 574
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "execution": {
+      "singleThreadDuration": 896,
+      "workerThreadDuration": 629,
+      "maxWorkerDuration": 574,
+      "speedImprovement": "29.80",
+      "parallelEfficiency": "35.94"
+    },
+    "memory": {
+      "singleThread": {
+        "peakOldSpace": 96.1,
+        "finalOldSpace": 58.9,
+        "heapGrowth": 30.69,
+        "rssGrowth": 49.49,
+        "gcEffectiveness": 30.74
+      },
+      "workerThread": {
+        "peakOldSpace": 87,
+        "finalOldSpace": 87,
+        "heapGrowth": 0.81,
+        "rssGrowth": 48.68,
+        "gcEffectiveness": 0.6
+      }
+    },
+    "efficiency": {
+      "singleThreadMemoryEfficiency": "202.06",
+      "workerThreadMemoryEfficiency": "205.42",
+      "memoryEfficiencyImprovement": "1.66",
+      "itemsPerSecond": {
+        "singleThread": "11161",
+        "workerThread": "15898"
+      }
+    },
+    "recommendations": [
+      "✅ Worker threads provide 29.80% speed improvement",
+      "✅ Worker threads are 1.66% more memory efficient",
+      "✅ Worker threads reduce peak old space usage by 9.1%",
+      "⚠️ Single thread shows better garbage collection effectiveness"
+    ]
+  }
+}

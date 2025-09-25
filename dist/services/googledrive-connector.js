@@ -48,6 +48,7 @@ const fs_1 = require("fs");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs/promises"));
 const logger_1 = require("../utils/logger");
+const security_1 = require("../utils/security");
 class GoogleDriveRAGConnector {
     googleDriveConfig;
     openaiConfig;
@@ -97,7 +98,7 @@ class GoogleDriveRAGConnector {
             });
             const documents = response.data.files.map((file) => ({
                 id: file.id,
-                name: file.name,
+                name: (0, security_1.sanitizeFileName)(file.name || ''),
                 mimeType: file.mimeType,
                 size: parseInt(file.size || '0'),
                 modifiedTime: file.modifiedTime,
@@ -124,7 +125,7 @@ class GoogleDriveRAGConnector {
             });
             const metadata = {
                 id: fileResponse.data.id,
-                name: fileResponse.data.name,
+                name: (0, security_1.sanitizeFileName)(fileResponse.data.name || ''),
                 mimeType: fileResponse.data.mimeType,
                 size: parseInt(fileResponse.data.size || '0'),
                 modifiedTime: fileResponse.data.modifiedTime,
@@ -241,7 +242,7 @@ class GoogleDriveRAGConnector {
                         }
                     }
                 }
-                // 一時ファイル作成（o3-high推奨パターンC）
+                // 一時ファイル作成（GPT-5推奨パターンC）
                 const tmpDir = '/tmp/googledrive-rag';
                 await fs.mkdir(tmpDir, { recursive: true });
                 const fileExtension = metadata.mimeType === 'application/pdf' ? '.pdf' :
@@ -341,25 +342,33 @@ class GoogleDriveRAGConnector {
      * 📚 ドキュメントをVector Storeに追加
      */
     async addDocumentToVectorStore(vectorStoreId, document) {
+        const sanitizedDocument = {
+            ...document,
+            name: (0, security_1.sanitizeFileName)(document.name),
+            metadata: {
+                ...document.metadata,
+                name: (0, security_1.sanitizeFileName)(document.metadata.name)
+            }
+        };
         try {
             logger_1.logger.info('📚 Vector Storeにドキュメント追加開始', {
                 vectorStoreId,
-                documentName: document.name
+                documentName: sanitizedDocument.name
             });
             // 一時ファイル作成
             const tempDir = '/tmp/googledrive-rag';
             await fs.mkdir(tempDir, { recursive: true });
             // ファイル拡張子を適切に設定
-            const fileExtension = document.metadata.mimeType === 'application/pdf' ? '.pdf' : '.txt';
-            const tempFilePath = path.join(tempDir, `${document.id}${fileExtension}`);
+            const fileExtension = sanitizedDocument.metadata.mimeType === 'application/pdf' ? '.pdf' : '.txt';
+            const tempFilePath = path.join(tempDir, `${sanitizedDocument.id}${fileExtension}`);
             // Bufferかプレーンテキストかを判定して適切に書き込み
-            if (Buffer.isBuffer(document.content)) {
+            if (Buffer.isBuffer(sanitizedDocument.content)) {
                 // バイナリファイルの場合、Bufferとして直接書き込み
-                await fs.writeFile(tempFilePath, document.content);
+                await fs.writeFile(tempFilePath, sanitizedDocument.content);
             }
             else {
                 // テキストファイルの場合、UTF-8で書き込み
-                await fs.writeFile(tempFilePath, document.content, 'utf-8');
+                await fs.writeFile(tempFilePath, sanitizedDocument.content, 'utf-8');
             }
             try {
                 // OpenAI Files APIにアップロード
@@ -376,7 +385,7 @@ class GoogleDriveRAGConnector {
                 await fs.unlink(tempFilePath);
                 logger_1.logger.info('✅ Vector Storeにドキュメント追加完了', {
                     fileId: file.id,
-                    documentName: document.name
+                    documentName: sanitizedDocument.name
                 });
                 return file.id;
             }
@@ -389,7 +398,7 @@ class GoogleDriveRAGConnector {
         catch (error) {
             logger_1.logger.error('❌ Vector Storeドキュメント追加エラー', {
                 vectorStoreId,
-                documentName: document.name,
+                documentName: sanitizedDocument.name,
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
             throw error;

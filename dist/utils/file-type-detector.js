@@ -7,8 +7,40 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.detectFileType = detectFileType;
 exports.isSupportedFileType = isSupportedFileType;
 exports.debugMagicNumber = debugMagicNumber;
+const security_1 = require("./security");
 // マジックナンバーパターン定義
 const MAGIC_PATTERNS = [
+    // Executable formats (treated as unsupported for security)
+    {
+        pattern: [0x4D, 0x5A], // MZ header for PE executables
+        offset: 0,
+        fileType: {
+            extension: '.bin',
+            mimeType: 'application/octet-stream',
+            encoding: 'binary',
+            isSupported: false
+        }
+    },
+    {
+        pattern: [0x7F, 0x45, 0x4C, 0x46], // ELF header
+        offset: 0,
+        fileType: {
+            extension: '.bin',
+            mimeType: 'application/octet-stream',
+            encoding: 'binary',
+            isSupported: false
+        }
+    },
+    {
+        pattern: [0xCA, 0xFE, 0xBA, 0xBE], // Java class file
+        offset: 0,
+        fileType: {
+            extension: '.bin',
+            mimeType: 'application/octet-stream',
+            encoding: 'binary',
+            isSupported: false
+        }
+    },
     // PDF ファイル
     {
         pattern: [0x25, 0x50, 0x44, 0x46], // %PDF
@@ -255,6 +287,7 @@ const MAGIC_PATTERNS = [
     {
         pattern: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], // PNG signature
         offset: 0,
+        minLength: 4,
         fileType: {
             extension: '.png',
             mimeType: 'image/png',
@@ -456,6 +489,14 @@ function detectFileType(buffer) {
             }
         }
     }
+    if (buffer.length < 4) {
+        return {
+            extension: '.bin',
+            mimeType: 'application/octet-stream',
+            encoding: 'binary',
+            isSupported: false
+        };
+    }
     // 特殊なテキスト形式の検出
     const textFileType = detectTextFileType(buffer);
     if (textFileType) {
@@ -506,9 +547,11 @@ function isEpubFile(buffer) {
  * 特殊なテキスト形式の検出
  */
 function detectTextFileType(buffer) {
-    const content = buffer.toString('utf8', 0, Math.min(512, buffer.length));
+    const previewLength = Math.min(4096, buffer.length);
+    const preview = buffer.toString('utf8', 0, previewLength);
+    const trimmedPreview = preview.trimStart();
     // RTF ファイル
-    if (content.startsWith('{\\rtf')) {
+    if (trimmedPreview.startsWith('{\\rtf')) {
         return {
             extension: '.rtf',
             mimeType: 'text/rtf',
@@ -517,22 +560,25 @@ function detectTextFileType(buffer) {
         };
     }
     // JSON ファイル
-    if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
-        try {
-            JSON.parse(content.trim());
-            return {
-                extension: '.json',
-                mimeType: 'application/json',
-                encoding: 'utf8',
-                isSupported: true
-            };
-        }
-        catch {
-            // JSON Parse エラーは無視
+    if (trimmedPreview.startsWith('{') || trimmedPreview.startsWith('[')) {
+        const fullContent = buffer.toString('utf8').trim();
+        if (hasMatchingJsonBoundary(fullContent)) {
+            try {
+                JSON.parse(fullContent);
+                return {
+                    extension: '.json',
+                    mimeType: 'application/json',
+                    encoding: 'utf8',
+                    isSupported: true
+                };
+            }
+            catch {
+                // JSON Parse エラーは無視
+            }
         }
     }
     // YAML ファイル
-    if (content.includes('---\n') || content.match(/^[a-zA-Z_][a-zA-Z0-9_]*:\s/m)) {
+    if (preview.includes('---\n') || preview.match(/^[a-zA-Z_][a-zA-Z0-9_]*:\s/m)) {
         return {
             extension: '.yml',
             mimeType: 'application/x-yaml',
@@ -541,7 +587,7 @@ function detectTextFileType(buffer) {
         };
     }
     // TSV ファイル（タブ区切り）
-    const lines = content.split('\n').slice(0, 5); // 最初の5行をチェック
+    const lines = preview.split('\n').slice(0, 5); // 最初の5行をチェック
     const tabCount = lines.filter(line => line.includes('\t')).length;
     if (tabCount >= 2 && tabCount / lines.length > 0.5) {
         return {
@@ -552,7 +598,7 @@ function detectTextFileType(buffer) {
         };
     }
     // C言語ソースファイル
-    if (content.includes('#include') && (content.includes('int main') || content.includes('void ') || content.includes('return '))) {
+    if (preview.includes('#include') && (preview.includes('int main') || preview.includes('void ') || preview.includes('return '))) {
         return {
             extension: '.c',
             mimeType: 'text/x-csrc',
@@ -561,7 +607,7 @@ function detectTextFileType(buffer) {
         };
     }
     // C++ ソースファイル
-    if (content.includes('#include') && (content.includes('std::') || content.includes('namespace') || content.includes('class '))) {
+    if (preview.includes('#include') && (preview.includes('std::') || preview.includes('namespace') || preview.includes('class '))) {
         return {
             extension: '.cpp',
             mimeType: 'text/x-c++src',
@@ -570,7 +616,7 @@ function detectTextFileType(buffer) {
         };
     }
     // JavaScript ファイル
-    if (content.includes('function') && (content.includes('var ') || content.includes('let ') || content.includes('const '))) {
+    if (preview.includes('function') && (preview.includes('var ') || preview.includes('let ') || preview.includes('const '))) {
         return {
             extension: '.js',
             mimeType: 'text/javascript',
@@ -579,7 +625,7 @@ function detectTextFileType(buffer) {
         };
     }
     // Python ファイル
-    if (content.includes('def ') && (content.includes('import ') || content.includes('from ') || content.includes('if __name__'))) {
+    if (preview.includes('def ') && (preview.includes('import ') || preview.includes('from ') || preview.includes('if __name__'))) {
         return {
             extension: '.py',
             mimeType: 'text/x-python',
@@ -588,7 +634,7 @@ function detectTextFileType(buffer) {
         };
     }
     // Shell スクリプト
-    if (content.startsWith('#!/bin/bash') || content.startsWith('#!/bin/sh') || content.startsWith('#!/usr/bin/env')) {
+    if (trimmedPreview.startsWith('#!/bin/bash') || trimmedPreview.startsWith('#!/bin/sh') || trimmedPreview.startsWith('#!/usr/bin/env')) {
         return {
             extension: '.sh',
             mimeType: 'text/x-shellscript',
@@ -597,7 +643,8 @@ function detectTextFileType(buffer) {
         };
     }
     // SQL ファイル
-    if (content.toUpperCase().includes('SELECT') || content.toUpperCase().includes('CREATE TABLE') || content.toUpperCase().includes('INSERT INTO')) {
+    const upperPreview = preview.toUpperCase();
+    if (upperPreview.includes('SELECT') || upperPreview.includes('CREATE TABLE') || upperPreview.includes('INSERT INTO')) {
         return {
             extension: '.sql',
             mimeType: 'text/x-sql',
@@ -617,14 +664,46 @@ function detectTextFileType(buffer) {
     }
     return null;
 }
+function hasMatchingJsonBoundary(content) {
+    if (!content) {
+        return false;
+    }
+    const firstChar = content[0];
+    const lastChar = content[content.length - 1];
+    if (firstChar === '{') {
+        return lastChar === '}';
+    }
+    if (firstChar === '[') {
+        return lastChar === ']';
+    }
+    return false;
+}
+function getUtf8SequenceLength(firstByte) {
+    if ((firstByte & 0b10000000) === 0) {
+        return 1;
+    }
+    if ((firstByte & 0b11100000) === 0b11000000 && firstByte >= 0xC2 && firstByte <= 0xDF) {
+        return 2;
+    }
+    if ((firstByte & 0b11110000) === 0b11100000 && firstByte <= 0xEF) {
+        return 3;
+    }
+    if ((firstByte & 0b11111000) === 0b11110000 && firstByte <= 0xF4) {
+        return 4;
+    }
+    return 0;
+}
 /**
  * マジックナンバーパターンマッチング
  */
 function matchesPattern(buffer, pattern) {
-    if (buffer.length < pattern.offset + pattern.pattern.length) {
+    const requiredLength = pattern.offset + (pattern.minLength ?? pattern.pattern.length);
+    if (buffer.length < requiredLength) {
         return false;
     }
-    for (let i = 0; i < pattern.pattern.length; i++) {
+    const availableLength = buffer.length - pattern.offset;
+    const compareLength = Math.min(pattern.pattern.length, availableLength);
+    for (let i = 0; i < compareLength; i++) {
         if (buffer[pattern.offset + i] !== pattern.pattern[i]) {
             return false;
         }
@@ -709,31 +788,45 @@ function isOLEOfficeFile(buffer, type) {
  * テキストファイル判定
  */
 function isTextFile(buffer) {
-    const sampleSize = Math.min(512, buffer.length);
+    if (buffer.length === 0) {
+        return true;
+    }
+    const sampleSize = Math.min(4096, buffer.length);
     const sample = buffer.slice(0, sampleSize);
     let textBytes = 0;
-    let totalBytes = 0;
-    for (const byte of sample) {
-        totalBytes++;
-        // ASCII範囲 + 一般的な制御文字
-        if ((byte >= 0x20 && byte <= 0x7E) || // 印刷可能ASCII
-            byte === 0x09 || // タブ
-            byte === 0x0A || // LF
-            byte === 0x0D || // CR
-            byte === 0x20) { // スペース
+    let index = 0;
+    while (index < sample.length) {
+        const byte = sample[index];
+        if ((byte >= 0x20 && byte <= 0x7E) || byte === 0x09 || byte === 0x0A || byte === 0x0D) {
             textBytes++;
+            index++;
+            continue;
         }
-        else if (byte >= 0xC0 && byte <= 0xDF) {
-            // UTF-8 2バイト文字の開始
-            textBytes++;
+        if (byte === 0x00) {
+            return false;
         }
-        else if (byte >= 0xE0 && byte <= 0xEF) {
-            // UTF-8 3バイト文字の開始
-            textBytes++;
+        const sequenceLength = getUtf8SequenceLength(byte);
+        if (sequenceLength > 1) {
+            if (index + sequenceLength > sample.length) {
+                break;
+            }
+            let isValidSequence = true;
+            for (let i = 1; i < sequenceLength; i++) {
+                const continuationByte = sample[index + i];
+                if ((continuationByte & 0b11000000) !== 0b10000000) {
+                    isValidSequence = false;
+                    break;
+                }
+            }
+            if (isValidSequence) {
+                textBytes += sequenceLength;
+                index += sequenceLength;
+                continue;
+            }
         }
+        index++;
     }
-    // 80%以上がテキスト文字の場合はテキストファイルと判定
-    return totalBytes > 0 && (textBytes / totalBytes) > 0.8;
+    return (textBytes / sample.length) > 0.8;
 }
 /**
  * ファイル形式が処理サポート対象かを確認
@@ -752,6 +845,7 @@ function debugMagicNumber(buffer) {
     const ascii = Array.from(buffer.slice(0, size))
         .map(b => (b >= 0x20 && b <= 0x7E) ? String.fromCharCode(b) : '.')
         .join('');
-    return `HEX: ${hex}\nASCII: ${ascii}`;
+    const sanitizedAscii = (0, security_1.redactSensitiveContent)(ascii);
+    return `HEX: ${hex}\nASCII: ${sanitizedAscii}`;
 }
 //# sourceMappingURL=file-type-detector.js.map

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSapo - 次世代AI技術サポートプラットフォーム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #020617;
+            color: #cbd5e1;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 70%;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: #3b82f6;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            color: #e2e8f0;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .description {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            color: #cbd5e1;
+            max-width: 100%;
+            line-height: 1.6;
+        }
+
+        .demo-section {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid #334155;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .submit-btn {
+                padding: 0.875rem 2rem;
+                font-size: 0.95rem;
+                margin: 1rem auto;
+            }
+
+            .form-input, .form-select, .form-textarea {
+                padding: 0.75rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .submit-btn {
+                width: 100%;
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .form-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #f8fafc;
+            line-height: 1.4;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.875rem;
+            font-size: 1rem;
+            border: 2px solid #475569;
+            border-radius: 8px;
+            background: #1e293b;
+            color: #f1f5f9;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #1e293b;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+
+        .form-select option {
+            background: #333;
+            color: white;
+            padding: 10px;
+        }
+
+        .submit-btn {
+            width: auto;
+            padding: 0.7rem 1.8rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            display: block;
+            margin: 1rem auto;
+            letter-spacing: 0.025em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+            border-color: #2563eb;
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #64748b;
+            border-color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .submit-btn.loading {
+            cursor: not-allowed;
+            background: #64748b;
+            border-color: #64748b;
+        }
+
+        .submit-btn.loading::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin-top: -10px;
+            margin-left: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-area {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid #334155;
+            height: 400px;
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            overflow-y: auto;
+            transition: border-color 0.3s ease;
+        }
+
+        .result-area.success {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .result-area.error {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .result-area.loading {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .message-icon {
+            display: inline-block;
+            font-size: 1.2em;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+
+
+        /* Enhanced responsive design for better mobile experience */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+                padding: 1rem;
+                margin: 0 1rem;
+            }
+
+            .logo {
+                font-size: 1.6rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+
+            .demo-section {
+                padding: 1.5rem;
+                margin: 1rem 0;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+                line-height: 1.3;
+            }
+
+
+            .result-area {
+                height: 350px;
+                padding: 1.2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.4rem;
+            }
+
+            .demo-section {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .result-area {
+                height: 300px;
+                padding: 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Accessibility improvements */
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        .submit-btn:focus {
+            outline: 2px solid #ffffff;
+            outline-offset: 2px;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .form-input, .form-select, .form-textarea {
+                border-width: 3px;
+            }
+
+            .submit-btn {
+                border-width: 3px;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">TechSapo</div>
+        </div>
+
+        <!-- インタラクティブデモ -->
+        <div class="demo-section">
+            <h2 class="section-title">ライブデモ</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="demo-query">技術的な質問や問題を入力してください：</label>
+                <textarea
+                    id="demo-query"
+                    class="form-textarea"
+                    placeholder="例: Dockerコンテナが起動しない問題の解決方法を教えてください&#10;例: nginxの設定でSSLエラーが発生する問題を解決したい&#10;例: Python環境でパッケージのインストールが失敗する"
+                    rows="4"
+                    aria-label="技術的な質問や問題を入力"
+                    aria-describedby="query-help"
+                ></textarea>
+                <div id="query-help" class="sr-only">Ctrl+Enterで分析を実行できます</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="demo-level">分析レベル：</label>
+                <select id="demo-level" class="form-select" aria-label="分析レベルを選択">
+                    <option value="basic">基本分析 - 迅速な回答</option>
+                    <option value="premium">プレミアム分析 - 詳細な分析</option>
+                    <option value="critical">クリティカル分析 - 最高精度</option>
+                </select>
+            </div>
+
+            <button
+                id="demo-btn"
+                class="submit-btn"
+                onclick="runDemo()"
+                aria-describedby="button-help"
+                type="button"
+            >
+                Multi-LLM Wall-Bounce分析実行
+            </button>
+            <div id="button-help" class="sr-only">複数のAIモデルを使用して技術的問題を分析します</div>
+
+            <div id="demo-output" class="result-area"></div>
+        </div>
+
+    </div>
+
+    <script>
+        console.log('TechSapo Standalone Top Page loaded');
+
+        // デモ実行関数
+        async function runDemo() {
+            const query = document.getElementById('demo-query').value.trim();
+            const level = document.getElementById('demo-level').value;
+            const output = document.getElementById('demo-output');
+            const btn = document.getElementById('demo-btn');
+
+            console.log('Demo execution started', { query, level });
+
+            if (!query) {
+                output.className = 'result-area error';
+                output.innerHTML = '<strong>エラー:</strong> 質問を入力してください。';
+                return;
+            }
+
+            // ボタン状態更新
+            btn.classList.add('loading');
+            btn.innerHTML = '分析中...';
+            btn.disabled = true;
+
+            // プログレス表示
+            output.className = 'result-area loading';
+            output.innerHTML = `
+                <div style="color: #f59e0b; font-weight: 600;">
+                    Multi-LLM Wall-Bounce分析を実行中...
+                    <br><br>
+                    <div style="font-size: 0.9rem; line-height: 1.8; opacity: 0.9; color: #cbd5e1;">
+                        <strong style="color: #f1f5f9;">GPT-5:</strong> 初期分析・問題特定...<br>
+                        <strong style="color: #f1f5f9;">Gemini-2.5Pro:</strong> 検証・追加分析...<br>
+                        <strong style="color: #f1f5f9;">Claude Opus 4.1:</strong> 統合・最終回答生成...
+                    </div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/v1/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: query,
+                        task_type: level
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('Demo API response received', result);
+
+                // 成功結果表示
+                output.innerHTML = `
+                    <div style="border-left: 4px solid #10b981; padding-left: 1.5rem;">
+                        <h3 style="color: #10b981; margin-bottom: 1.5rem; font-size: 1.3rem;">
+                            Multi-LLM Wall-Bounce分析完了
+                        </h3>
+
+                        <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                            <h4 style="margin-bottom: 1rem; color: #fff; font-size: 1.1rem;">📋 分析結果:</h4>
+                            <div style="line-height: 1.7; font-size: 1rem; color: rgba(255,255,255,0.95);">
+                                ${result.response}
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                            <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                                <div style="color: #4facfe; font-weight: bold; font-size: 1.4rem;">${Math.round(result.confidence * 100)}%</div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-top: 0.25rem;">信頼度</div>
+                            </div>
+                            <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                                <div style="color: #f093fb; font-weight: bold; font-size: 1.4rem;">$${result.total_cost}</div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-top: 0.25rem;">コスト</div>
+                            </div>
+                            <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px;">
+                                <div style="color: #10b981; font-weight: bold; font-size: 1.4rem;">${result.processing_time_ms}ms</div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-top: 0.25rem;">処理時間</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                            <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                                🤖 <strong>使用モデル:</strong> ${result.providers_used?.join(' → ') || 'Multi-LLM'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                output.className = 'result-area success';
+
+            } catch (error) {
+                console.error('Demo API error', error);
+
+                output.className = 'result-area error';
+                output.innerHTML = `
+                    <div style="color: #ef4444;">
+                        <h3 style="margin-bottom: 1rem;">分析エラー</h3>
+                        <div style="background: rgba(239,68,68,0.2); padding: 1rem; border-radius: 8px; border: 1px solid rgba(239,68,68,0.3);">
+                            <strong>エラー詳細:</strong> ${error.message}
+                        </div>
+                        <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8; color: #cbd5e1;">
+                            ネットワーク接続を確認するか、しばらく時間をおいて再試行してください。
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ボタン状態リセット
+            btn.classList.remove('loading');
+            btn.innerHTML = 'Multi-LLM Wall-Bounce分析実行';
+            btn.disabled = false;
+        }
+
+        // エンターキーでの実行
+        document.getElementById('demo-query').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                runDemo();
+            }
+        });
+
+        // ページ読み込み完了
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('TechSapo Standalone Page initialized');
+
+            // フォーカス設定
+            const textarea = document.getElementById('demo-query');
+            if (textarea) {
+                textarea.focus();
+            }
+        });
+    </script>
+</body>
+</html>

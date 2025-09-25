@@ -190,8 +190,8 @@ exports.default = router;
 async function performTechnicalWallBounceAnalysis(prompt, context, supportLevel) {
     try {
         logger.info('🔄 Technical Support Wall-Bounce Analysis started', { supportLevel });
-        // 🎯 Phase 1: o3-high 高精度技術分析
-        const technicalAnalysis = await performO3HighTechnicalAnalysis(prompt, context, supportLevel);
+        // 🎯 Phase 1: GPT-5 高精度技術分析
+        const technicalAnalysis = await performGpt5TechnicalAnalysis(prompt, context, supportLevel);
         // 🎯 Phase 2: Gemini 環境依存性分析
         const environmentAnalysis = await performGeminiTechnicalAnalysis(prompt, context, technicalAnalysis);
         // 🎯 Phase 3: 統合技術支援レスポンス生成
@@ -211,9 +211,9 @@ async function performTechnicalWallBounceAnalysis(prompt, context, supportLevel)
     }
 }
 /**
- * o3-highによる高精度技術分析
+ * GPT-5による高精度技術分析
  */
-async function performO3HighTechnicalAnalysis(prompt, context, level) {
+async function performGpt5TechnicalAnalysis(prompt, context, level) {
     try {
         const analysisPrompt = `Technical support analysis (${level} level):
 
@@ -228,7 +228,7 @@ Provide detailed technical analysis:
 5. Best practices recommendations
 
 Focus on accuracy, safety, and industry standards.`;
-        // MCP o3-high呼び出し (シミュレート)
+        // MCP GPT-5呼び出し (シミュレート)
         return {
             problemScope: 'Technical issue requiring systematic approach',
             rootCause: 'Multi-factor technical challenge identified',
@@ -237,20 +237,20 @@ Focus on accuracy, safety, and industry standards.`;
         };
     }
     catch (error) {
-        logger.error('o3-high technical analysis failed', { error });
+        logger.error('GPT-5 technical analysis failed', { error });
         throw error;
     }
 }
 /**
  * Geminiによる環境依存性分析
  */
-async function performGeminiTechnicalAnalysis(prompt, context, o3Analysis) {
+async function performGeminiTechnicalAnalysis(prompt, context, gpt5Analysis) {
     try {
         const environmentPrompt = `Environment-specific technical analysis:
 
 Original Query: ${prompt}
 Context: ${context}
-Technical Analysis: ${JSON.stringify(o3Analysis, null, 2)}
+Technical Analysis: ${JSON.stringify(gpt5Analysis, null, 2)}
 
 Analyze environment factors:
 1. Platform/OS considerations
@@ -273,7 +273,7 @@ Analyze environment factors:
 /**
  * 統合技術支援レスポンス生成
  */
-function generateIntegratedTechnicalResponse(prompt, context, supportLevel, o3Analysis, environmentAnalysis) {
+function generateIntegratedTechnicalResponse(prompt, context, supportLevel, gpt5Analysis, environmentAnalysis) {
     const levelEmojis = {
         critical: '🚨',
         premium: '🔧',
@@ -290,23 +290,23 @@ function generateIntegratedTechnicalResponse(prompt, context, supportLevel, o3An
 ${prompt}
 
 **🎯 根本原因分析 (Multi-LLM):**
-${o3Analysis.rootCause}
+${gpt5Analysis.rootCause}
 
 **🌐 環境依存性考慮:**
 ${environmentAnalysis.platformConsiderations?.join(', ')}
 
 **🔄 統合解決手順:**
-${o3Analysis.resolution?.map((step, i) => `${i + 1}. ${step}`).join('\n')}
+${gpt5Analysis.resolution?.map((step, i) => `${i + 1}. ${step}`).join('\n')}
 
 **🛡️ リスク評価:**
-リスクレベル: ${o3Analysis.riskLevel}
+リスクレベル: ${gpt5Analysis.riskLevel}
 
 **📊 品質保証:**
 ✓ 複数LLMによる壁打ち分析完了
 ✓ 環境依存性を考慮した解決策
 ✓ リスクアセスメント完了
 
-*処理モデル: Multi-LLM Wall-Bounce Analysis (o3-high + Gemini + Claude)*`;
+*処理モデル: Multi-LLM Wall-Bounce Analysis (gpt-5 + Gemini + Claude)*`;
 }
 /**
  * Handle critical support requests with Claude Opus 4.1

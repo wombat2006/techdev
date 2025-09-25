@@ -11,24 +11,34 @@ let isRealTimeMetricsEnabled = false;
 
 // DOM loaded event
 document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
-    loadSystemStatus();
-    setupEventListeners();
+    console.log('🚀 TechSapo WebApp: DOM Content Loaded');
+    try {
+        initializeApp();
+        loadSystemStatus();
+        setupEventListeners();
+        console.log('✅ TechSapo WebApp: Initialization complete');
+    } catch (error) {
+        console.error('❌ TechSapo WebApp: Initialization failed', error);
+    }
 });
 
 /**
  * Initialize the application
  */
 function initializeApp() {
-    console.log('TechSapo WebApp initialized');
+    console.log('📱 TechSapo WebApp: Initializing app');
 
     // Set initial active tab
     const hash = window.location.hash || '#home';
     const tabName = hash.substring(1);
+    console.log('🔄 TechSapo WebApp: Switching to tab:', tabName);
     switchTab(tabName);
 
     // Load initial system metrics
+    console.log('📊 TechSapo WebApp: Loading metrics');
     refreshMetrics();
+
+    console.log('✨ TechSapo WebApp: App initialization complete');
 }
 
 /**
@@ -62,18 +72,26 @@ function setupEventListeners() {
  * Switch between tabs
  */
 function switchTab(tabName) {
+    console.log('🔄 SwitchTab: Switching to', tabName);
+
     // Update URL hash
     window.location.hash = '#' + tabName;
 
     // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(tab => {
+    const allTabs = document.querySelectorAll('.tab-content');
+    console.log('🔄 SwitchTab: Found', allTabs.length, 'tabs');
+    allTabs.forEach(tab => {
         tab.classList.remove('active');
     });
 
     // Show selected tab
     const targetTab = document.getElementById(tabName);
+    console.log('🔄 SwitchTab: Target tab element:', targetTab);
     if (targetTab) {
         targetTab.classList.add('active');
+        console.log('✅ SwitchTab: Activated tab', tabName);
+    } else {
+        console.error('❌ SwitchTab: Tab not found:', tabName);
     }
 
     // Update navigation active state
@@ -122,6 +140,7 @@ async function loadSystemStatus() {
  * Analyze technical problem using Multi-LLM Wall-Bounce
  */
 async function analyzeTechProblem() {
+    console.log('🔍 AnalyzeTechProblem: Starting Multi-LLM analysis');
     const queryText = document.getElementById('tech-query').value.trim();
     const supportLevel = document.getElementById('support-level').value;
     const outputDiv = document.getElementById('support-output');

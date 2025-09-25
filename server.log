@@ -1,0 +1,4 @@
+[2025-09-24T04:51:33.264Z] INFO: 🚀 TechSapo WebApp Backend (Simple Mode) running on http://0.0.0.0:3000 {}
+[2025-09-24T04:51:33.266Z] INFO: 📱 Frontend available at: http://localhost:3000 {}
+[2025-09-24T04:51:33.266Z] INFO: 🔧 API endpoints: http://localhost:3000/api/* {}
+[2025-09-24T04:51:33.266Z] INFO: ⚠️  Running in SIMPLE MODE - TypeScript services disabled {}

@@ -1,0 +1,109 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# Project Overview
+
+**TechSapo MCP Architecture** - A hybrid Node.js system implementing Model Context Protocol (MCP) with dual operation modes: a comprehensive TypeScript-based MCP architecture and a production-ready simplified CommonJS webapp server. The system achieves optimal performance through memory-optimized worker threads and secure web service deployment.
+
+# CRITICAL: Multi-LLM Wall-Bounce Workflow
+
+**ABSOLUTE PRINCIPLE**: All problem-solving MUST use 2+ LLM models with wall-bounce validation.
+- Minimum 3 wall-bounces, maximum 5 rounds
+- Route: User → Claude Code → GPT-5 → Sonnet4 or Opus4.1 → Gemini-2.5Pro → Final response
+- For coding tasks: Prioritize GPT-5, use 50/50 split with Qwen3 Coder when available
+
+**See**: [docs/LLM-WORKFLOW.md](docs/LLM-WORKFLOW.md) for complete workflow requirements.
+
+# Essential Commands
+
+**Development:**
+- **See**: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for development guidelines and commands
+- `npm start` - Run main MCP analysis system
+- `npm run build` / `npm run type-check` - Build and type checking
+
+**Testing:**
+- **See**: [docs/TESTING.md](docs/TESTING.md) for comprehensive testing guide and commands
+- `npm test` - Jest testing suite
+- `npm run wall-bounce` - Multi-LLM analysis workflow
+
+**AI Integration:**
+- **GPT-5**: Replaces deprecated Codex via OpenAI API
+- **Wall-Bounce**: Multi-LLM coordination through MCP services
+- **Models**: GPT-5, Claude, Gemini integration for development tasks
+**Production WebApp Server:**
+- See [docs/WEBAPP.md](docs/WEBAPP.md) for comprehensive production deployment guide
+
+All MCP commands use `NODE_OPTIONS='--max-old-space-size=2048 --expose-gc'`.
+
+# System Architecture
+
+**See**: [docs/MCP-ARCHITECTURE.md](docs/MCP-ARCHITECTURE.md) for comprehensive MCP implementation details, services architecture, and integration patterns.
+
+**Quick Reference**:
+- **Dual Architecture**: TypeScript development + CommonJS production
+- **MCP Protocol**: Model Context Protocol for AI service integration
+- **Wall-Bounce**: Multi-LLM coordination through MCP services
+- **Production Stack**: nginx (443) → webapp-server-simple.cjs (3000) with MCP integration
+
+**Production WebApp Features:**
+- See [docs/WEBAPP.md](docs/WEBAPP.md) for authentication, API endpoints, and security implementation
+
+# Development Guidelines
+
+**See**: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for comprehensive development guidelines, code architecture patterns, and best practices.
+
+**Quick Reference**:
+- Hybrid TypeScript/CommonJS architecture
+- Memory optimization with 2GiB V8 heap allocation  
+- Multi-LLM integration with wall-bounce workflow
+- Service separation and type safety throughout
+
+## Security Implementation
+
+**See**: [docs/SECURITY.md](docs/SECURITY.md) for comprehensive security guide and implementation details.
+
+**Quick Reference**: Grade A security (93/100) with HTTPS/TLS, rate limiting, input validation, and comprehensive security headers.
+
+# Testing & Quality Assurance
+
+**See**: [docs/TESTING.md](docs/TESTING.md) for comprehensive testing guide, commands, and quality assurance procedures.
+
+**Quick Reference**:
+- Grade A security achievement (93/100 score)
+- 80% integration testing success rate baseline
+- Complete system validation and performance testing available
+
+# Core Dependencies & Integrations
+
+**See**: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) for comprehensive dependencies guide, version compatibility, and package management details.
+
+**Quick Reference**:
+- **MCP & LLM**: @anthropic-ai/sdk, @modelcontextprotocol/sdk, openai (GPT-5)
+- **Production**: express, helmet, express-rate-limit, validator
+- **Development**: winston, prom-client, typescript
+- **Node.js**: 18.0.0+ with 2GiB heap allocation
+
+# Production Deployment
+
+**See**: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for comprehensive production deployment guide, server configuration, and operational procedures.
+
+**Quick Reference**:
+- **Service**: techsapo-webapp.service (SystemD managed)
+- **Stack**: nginx (443) → webapp-server-simple.cjs (3000)
+- **Access**: https://techsapo.com (primary), https://3.109.102.48 (secondary)
+- **Security**: Grade A SSL/TLS with auto-restart and monitoring
+
+# Documentation Reference
+
+**See**: [docs/REFERENCES.md](docs/REFERENCES.md) for complete documentation guide, cross-references, and navigation structure.
+
+**WebApp Documentation**: [docs/WEBAPP.md](docs/WEBAPP.md) for production deployment, authentication, and API implementation.
+
+**Key Implementation Notes**:
+- Prefer editing existing files over creating new ones
+- Use CommonJS for production, TypeScript for development  
+- Always implement Multi-LLM wall-bounce workflow for user queries
+- Security Grade A - see [docs/SECURITY.md](docs/SECURITY.md) for implementation details
+- Memory optimization critical for 4vCPU performance
+- Dual architecture supports both development flexibility and production stability

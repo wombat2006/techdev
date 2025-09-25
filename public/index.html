@@ -7,6 +7,17 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Fallback styles to ensure interactive elements are visible */
+        .tab-content { display: none !important; }
+        .tab-content.active { display: block !important; }
+        .nav-link { cursor: pointer; padding: 10px; margin: 5px; background: #ddd; }
+        .nav-link.active { background: #007bff; color: white; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #0056b3; }
+        textarea, input, select { width: 100%; max-width: 500px; padding: 8px; margin: 5px 0; border: 1px solid #ccc; }
+        .result-content { border: 1px solid #ccc; padding: 15px; margin: 10px 0; background: #f9f9f9; }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -265,5 +276,140 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Fallback initialization if app.js fails
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if main app initialized
+            setTimeout(function() {
+                if (!window.initializeApp || typeof switchTab !== 'function') {
+                    console.log('🔧 Main app failed, loading fallback...');
+                    loadFallbackApp();
+                }
+            }, 1000);
+        });
+
+        function loadFallbackApp() {
+            console.log('🚨 Loading fallback interactive functionality');
+
+            // Simple tab switching
+            window.switchTab = function(tabName) {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content, section[id]').forEach(tab => {
+                    tab.style.display = 'none';
+                    tab.classList.remove('active');
+                });
+
+                // Show target tab
+                const targetTab = document.getElementById(tabName);
+                if (targetTab) {
+                    targetTab.style.display = 'block';
+                    targetTab.classList.add('active');
+                }
+
+                // Update nav
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                const targetLink = document.querySelector(`[data-tab="${tabName}"]`);
+                if (targetLink) {
+                    targetLink.classList.add('active');
+                }
+            };
+
+            // Initialize home tab
+            switchTab('home');
+
+            // Set up nav clicks
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const tab = this.getAttribute('data-tab');
+                    if (tab) switchTab(tab);
+                });
+            });
+
+            // Basic functionality for buttons
+            window.analyzeTechProblem = async function() {
+                const query = document.getElementById('tech-query').value;
+                const level = document.getElementById('support-level').value;
+                const output = document.getElementById('support-output');
+
+                if (!query.trim()) {
+                    output.innerHTML = '<p style="color: red;">❌ Please enter a question</p>';
+                    return;
+                }
+
+                output.innerHTML = '<p>⏳ Multi-LLM Wall-Bounce analysis in progress...</p>';
+
+                try {
+                    const response = await fetch('/api/v1/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: query, task_type: level })
+                    });
+                    const result = await response.json();
+                    output.innerHTML = `
+                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0;">
+                            <h3 style="color: green;">✅ Analysis Complete</h3>
+                            <p><strong>Response:</strong> ${result.response}</p>
+                            <p><strong>Confidence:</strong> ${Math.round(result.confidence * 100)}%</p>
+                            <p><strong>Providers:</strong> ${result.providers_used?.join(', ')}</p>
+                            <p><strong>Cost:</strong> $${result.total_cost}</p>
+                            <p><strong>Time:</strong> ${result.processing_time_ms}ms</p>
+                        </div>
+                    `;
+                } catch (error) {
+                    output.innerHTML = `<p style="color: red;">❌ Analysis failed: ${error.message}</p>`;
+                }
+            };
+
+            window.analyzeLog = async function() {
+                const command = document.getElementById('user-command').value;
+                const errorOutput = document.getElementById('error-output').value;
+                const systemContext = document.getElementById('system-context').value;
+                const output = document.getElementById('logs-output');
+
+                if (!command.trim() || !errorOutput.trim()) {
+                    output.innerHTML = '<p style="color: red;">❌ Please enter command and error output</p>';
+                    return;
+                }
+
+                output.innerHTML = '<p>⏳ Log analysis in progress...</p>';
+
+                try {
+                    const response = await fetch('/api/v1/analyze-logs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_command: command,
+                            error_output: errorOutput,
+                            system_context: systemContext
+                        })
+                    });
+                    const result = await response.json();
+                    if (result.error) {
+                        output.innerHTML = `<p style="color: red;">❌ Analysis failed: ${result.error}</p>`;
+                    } else {
+                        const analysis = result.analysis_result;
+                        output.innerHTML = `
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0;">
+                                <h3 style="color: green;">✅ Log Analysis Complete</h3>
+                                <p><strong>Problem:</strong> ${analysis.problem_category}</p>
+                                <p><strong>Root Cause:</strong> ${analysis.root_cause}</p>
+                                <p><strong>Confidence:</strong> ${Math.round(analysis.confidence_score * 100)}%</p>
+                                <h4>Solution Steps:</h4>
+                                <ul>${analysis.solution_steps?.map(step => `<li>${step}</li>`).join('')}</ul>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    output.innerHTML = `<p style="color: red;">❌ Analysis failed: ${error.message}</p>`;
+                }
+            };
+
+            console.log('✅ Fallback app loaded successfully');
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外部アクセス検証 - TechSapo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #222;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            border: 2px solid #4a90e2;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            background: #333;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #555;
+            color: white;
+            border: 2px solid #4a90e2;
+            border-radius: 5px;
+            font-size: 16px;
+            min-height: 40px;
+        }
+        .test-button {
+            background: #4a90e2;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #357abd;
+        }
+        .result {
+            background: #444;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4a90e2;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+        .error { border-left-color: #e74c3c; }
+        .success { border-left-color: #2ecc71; }
+        .info-box {
+            background: #2c3e50;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 TechSapo 外部アクセス検証</h1>
+
+    <div class="info-box">
+        <h3>📊 アクセス情報</h3>
+        <p id="access-info">情報取得中...</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 テスト1: 基本的なHTTPリクエスト</h2>
+        <button class="test-button" onclick="testBasicRequest()">基本リクエスト実行</button>
+        <div id="basic-result" class="result">テスト未実行</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 テスト2: Multi-LLM API接続</h2>
+        <textarea
+            class="test-input"
+            id="api-test-query"
+            placeholder="テスト用のクエリを入力してください..."
+            rows="3"
+        >外部アクセス検証テスト - インタラクティブ機能の確認</textarea>
+        <select class="test-input" id="api-test-level">
+            <option value="basic">基本分析</option>
+            <option value="premium">プレミアム分析</option>
+            <option value="critical">クリティカル分析</option>
+        </select>
+        <button class="test-button" onclick="testApiRequest()">Multi-LLM API テスト</button>
+        <div id="api-result" class="result">テスト未実行</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🌐 テスト3: 外部リソース読み込み</h2>
+        <button class="test-button" onclick="testExternalResources()">外部リソーステスト</button>
+        <div id="resources-result" class="result">テスト未実行</div>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 テスト4: DOM要素確認</h2>
+        <button class="test-button" onclick="testDomElements()">DOM要素チェック</button>
+        <div id="dom-result" class="result">テスト未実行</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 ナビゲーション</h2>
+        <button class="test-button" onclick="goToMain()">メインページ (index.html)</button>
+        <button class="test-button" onclick="goToTop()">トップページ (top.html)</button>
+        <button class="test-button" onclick="goToTest()">簡易テスト (test.html)</button>
+    </div>
+
+    <script>
+        // アクセス情報表示
+        function displayAccessInfo() {
+            const info = {
+                'User Agent': navigator.userAgent,
+                'URL': window.location.href,
+                'Referrer': document.referrer || '直接アクセス',
+                'Screen Size': `${screen.width}x${screen.height}`,
+                'Viewport': `${window.innerWidth}x${window.innerHeight}`,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host,
+                'Path': window.location.pathname
+            };
+
+            let infoHtml = '';
+            for (const [key, value] of Object.entries(info)) {
+                infoHtml += `<strong>${key}:</strong> ${value}<br>`;
+            }
+            document.getElementById('access-info').innerHTML = infoHtml;
+        }
+
+        // 基本リクエストテスト
+        async function testBasicRequest() {
+            const resultDiv = document.getElementById('basic-result');
+            resultDiv.innerHTML = '🔄 テスト実行中...';
+
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ 基本リクエスト成功<br>データ: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 基本リクエスト失敗<br>エラー: ${error.message}`;
+            }
+        }
+
+        // API接続テスト
+        async function testApiRequest() {
+            const resultDiv = document.getElementById('api-result');
+            const query = document.getElementById('api-test-query').value;
+            const level = document.getElementById('api-test-level').value;
+
+            if (!query.trim()) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '❌ クエリを入力してください';
+                return;
+            }
+
+            resultDiv.innerHTML = '🔄 Multi-LLM分析実行中...';
+
+            try {
+                const response = await fetch('/api/v1/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: query, task_type: level })
+                });
+
+                const data = await response.json();
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    ✅ Multi-LLM API成功<br>
+                    <strong>応答:</strong> ${data.response}<br>
+                    <strong>信頼度:</strong> ${Math.round(data.confidence * 100)}%<br>
+                    <strong>使用プロバイダー:</strong> ${data.providers_used?.join(', ')}<br>
+                    <strong>処理時間:</strong> ${data.processing_time_ms}ms<br>
+                    <strong>コスト:</strong> $${data.total_cost}
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ API接続失敗<br>エラー: ${error.message}`;
+            }
+        }
+
+        // 外部リソーステスト
+        function testExternalResources() {
+            const resultDiv = document.getElementById('resources-result');
+            resultDiv.innerHTML = '🔄 外部リソース確認中...';
+
+            const resources = [
+                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+                'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
+            ];
+
+            let results = [];
+
+            resources.forEach((url, index) => {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = url;
+
+                link.onload = () => {
+                    results.push(`✅ ${url.split('/').pop()}: 読み込み成功`);
+                    if (results.length === resources.length) {
+                        updateResourcesResult(results);
+                    }
+                };
+
+                link.onerror = () => {
+                    results.push(`❌ ${url.split('/').pop()}: 読み込み失敗`);
+                    if (results.length === resources.length) {
+                        updateResourcesResult(results);
+                    }
+                };
+
+                document.head.appendChild(link);
+            });
+
+            function updateResourcesResult(results) {
+                const success = results.every(r => r.includes('✅'));
+                resultDiv.className = success ? 'result success' : 'result error';
+                resultDiv.innerHTML = results.join('<br>');
+            }
+        }
+
+        // DOM要素確認
+        function testDomElements() {
+            const resultDiv = document.getElementById('dom-result');
+
+            const elements = [
+                { id: 'demo-query', name: 'デモクエリテキストエリア' },
+                { id: 'demo-level', name: 'デモレベル選択' },
+                { id: 'demo-btn', name: 'デモ実行ボタン' },
+                { id: 'demo-output', name: 'デモ結果表示' }
+            ];
+
+            let results = [];
+
+            elements.forEach(({ id, name }) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    const styles = window.getComputedStyle(element);
+                    const visible = styles.display !== 'none' &&
+                                  styles.visibility !== 'hidden' &&
+                                  styles.opacity !== '0';
+                    results.push(`${visible ? '✅' : '⚠️'} ${name}: 要素${visible ? '表示' : '非表示'}中`);
+                } else {
+                    results.push(`❌ ${name}: 要素が存在しません`);
+                }
+            });
+
+            const allVisible = results.every(r => r.includes('✅'));
+            resultDiv.className = allVisible ? 'result success' : 'result error';
+            resultDiv.innerHTML = results.join('<br>');
+        }
+
+        // ナビゲーション関数
+        function goToMain() { window.location.href = '/index.html'; }
+        function goToTop() { window.location.href = '/top.html'; }
+        function goToTest() { window.location.href = '/test.html'; }
+
+        // ページ読み込み時実行
+        document.addEventListener('DOMContentLoaded', function() {
+            displayAccessInfo();
+            console.log('🔍 TechSapo 外部アクセス検証ページ読み込み完了');
+        });
+    </script>
+</body>
+</html>
