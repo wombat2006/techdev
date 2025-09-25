@@ -326,39 +326,180 @@ export class WallBounceAnalyzer {
 
   // LLMプロバイダー実装（モック）
   private async invokeGemini(prompt: string): Promise<LLMResponse> {
-    // 実際の実装ではGemini APIを呼び出し
-    await this.simulateDelay(800, 1200);
-    return {
-      content: `[Gemini 2.5 Pro分析] ${prompt.substring(0, 50)}...に対する分析結果`,
-      confidence: 0.85 + Math.random() * 0.1,
-      reasoning: 'Gemini 2.5 Proによる多角的分析',
-      cost: 0.003,
-      tokens: { input: prompt.length / 4, output: 150 }
-    };
+    const startTime = Date.now();
+    
+    try {
+      const { GoogleGenerativeAI } = require('@google/generative-ai');
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+
+      const result = await model.generateContent([
+        {
+          role: 'user',
+          parts: [{
+            text: `システム: あなたは高度な技術解析AIです。多角的な視点で詳細な分析を行い、実践的な解決策を提案してください。
+
+ユーザークエリ: ${prompt}`
+          }]
+        }
+      ]);
+
+      const processingTime = Date.now() - startTime;
+      const content = result.response.text() || 'No response generated';
+      
+      // Gemini pricing estimation (rough approximation)
+      const estimatedInputTokens = prompt.length / 4;
+      const estimatedOutputTokens = content.length / 4;
+      const cost = (estimatedInputTokens * 0.00000125) + (estimatedOutputTokens * 0.00000375); // Gemini 2.0 Flash pricing
+
+      logger.info('✅ Gemini API call successful', {
+        processing_time_ms: processingTime,
+        estimated_input_tokens: estimatedInputTokens,
+        estimated_output_tokens: estimatedOutputTokens,
+        cost: cost
+      });
+
+      return {
+        content: `[Gemini 2.0 Flash分析] ${content}`,
+        confidence: 0.85 + Math.random() * 0.1,
+        reasoning: 'Gemini 2.0 Flashによる多角的分析と環境適応型ソリューション',
+        cost: cost,
+        tokens: { input: estimatedInputTokens, output: estimatedOutputTokens }
+      };
+    } catch (error) {
+      logger.error('❌ Gemini API call failed', { error });
+      
+      // Fallback to mock response if API fails
+      await this.simulateDelay(800, 1200);
+      return {
+        content: `[Gemini API Error] ${prompt.substring(0, 50)}...への分析中にエラーが発生しました`,
+        confidence: 0.3,
+        reasoning: 'Gemini API呼び出しに失敗しました',
+        cost: 0,
+        tokens: { input: prompt.length / 4, output: 50 }
+      };
+    }
   }
 
   private async invokeGPT5(prompt: string): Promise<LLMResponse> {
-    // 実際の実装ではOpenAI GPT-5 APIを呼び出し
-    await this.simulateDelay(600, 1000);
-    return {
-      content: `[GPT-5分析] ${prompt.substring(0, 50)}...に対する包括的な解析`,
-      confidence: 0.88 + Math.random() * 0.08,
-      reasoning: 'GPT-5による論理的推論',
-      cost: 0.005,
-      tokens: { input: prompt.length / 4, output: 180 }
-    };
+    const startTime = Date.now();
+    
+    try {
+      const OpenAI = require('openai');
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o', // Using GPT-4o as GPT-5 is not publicly available yet
+        messages: [
+          {
+            role: 'system',
+            content: 'あなたは技術的問題解決のエキスパートです。詳細で実用的な分析を提供してください。'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500
+      });
+
+      const processingTime = Date.now() - startTime;
+      const content = response.choices[0]?.message?.content || 'No response generated';
+      
+      // Calculate approximate cost (GPT-4o pricing: $2.50/1M input, $10/1M output tokens)
+      const inputTokens = response.usage?.prompt_tokens || 0;
+      const outputTokens = response.usage?.completion_tokens || 0;
+      const cost = (inputTokens * 0.0000025) + (outputTokens * 0.00001);
+
+      logger.info('✅ GPT-4o API call successful', {
+        processing_time_ms: processingTime,
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cost: cost
+      });
+
+      return {
+        content: `[GPT-4o分析] ${content}`,
+        confidence: 0.88 + Math.random() * 0.08,
+        reasoning: 'GPT-4oによる論理的推論と実用的解決策の提案',
+        cost: cost,
+        tokens: { input: inputTokens, output: outputTokens }
+      };
+    } catch (error) {
+      logger.error('❌ GPT-4o API call failed', { error });
+      
+      // Fallback to mock response if API fails
+      await this.simulateDelay(600, 1000);
+      return {
+        content: `[GPT-4o API Error] ${prompt.substring(0, 50)}...への分析中にエラーが発生しました`,
+        confidence: 0.3,
+        reasoning: 'API呼び出しに失敗しました',
+        cost: 0,
+        tokens: { input: prompt.length / 4, output: 50 }
+      };
+    }
   }
 
   private async invokeClaude(prompt: string): Promise<LLMResponse> {
-    // 実際の実装ではClaude APIを呼び出し
-    await this.simulateDelay(700, 1100);
-    return {
-      content: `[Claude Sonnet4分析] ${prompt.substring(0, 50)}...について詳細分析`,
-      confidence: 0.82 + Math.random() * 0.12,
-      reasoning: 'Claude Sonnet4による構造化分析',
-      cost: 0.008,
-      tokens: { input: prompt.length / 4, output: 200 }
-    };
+    const startTime = Date.now();
+    
+    try {
+      const Anthropic = require('@anthropic-ai/sdk');
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const response = await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1500,
+        temperature: 0.7,
+        system: 'あなたは構造化された分析と実装指向のソリューションを提供する技術エキスパートです。詳細で実行可能な解決策を提案してください。',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      });
+
+      const processingTime = Date.now() - startTime;
+      const content = response.content[0]?.text || 'No response generated';
+      
+      // Claude pricing calculation
+      const inputTokens = response.usage?.input_tokens || 0;
+      const outputTokens = response.usage?.output_tokens || 0;
+      const cost = (inputTokens * 0.000003) + (outputTokens * 0.000015); // Claude 3.5 Sonnet pricing
+
+      logger.info('✅ Claude API call successful', {
+        processing_time_ms: processingTime,
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cost: cost
+      });
+
+      return {
+        content: `[Claude 3.5 Sonnet分析] ${content}`,
+        confidence: 0.82 + Math.random() * 0.12,
+        reasoning: 'Claude 3.5 Sonnetによる構造化分析と実装指向ソリューション',
+        cost: cost,
+        tokens: { input: inputTokens, output: outputTokens }
+      };
+    } catch (error) {
+      logger.error('❌ Claude API call failed', { error });
+      
+      // Fallback to mock response if API fails
+      await this.simulateDelay(700, 1100);
+      return {
+        content: `[Claude API Error] ${prompt.substring(0, 50)}...への分析中にエラーが発生しました`,
+        confidence: 0.3,
+        reasoning: 'Claude API呼び出しに失敗しました',
+        cost: 0,
+        tokens: { input: prompt.length / 4, output: 50 }
+      };
+    }
   }
 
   private async invokeOpenRouter(prompt: string): Promise<LLMResponse> {
