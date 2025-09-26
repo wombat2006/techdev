@@ -80,9 +80,9 @@ function getRoutePattern(path: string): string {
     { pattern: /^\/health$/, route: '/health' },
     { pattern: /^\/metrics$/, route: '/metrics' },
     // 動的パラメータを含むパターン
-    { pattern: /^\/api\/v1\/sessions\/[^\/]+$/, route: '/api/v1/sessions/:id' },
-    { pattern: /^\/api\/v1\/users\/[^\/]+$/, route: '/api/v1/users/:id' },
-    { pattern: /^\/api\/v1\/projects\/[^\/]+\/analysis$/, route: '/api/v1/projects/:id/analysis' },
+    { pattern: /^\/api\/v1\/sessions\/[^/]+$/, route: '/api/v1/sessions/:id' },
+    { pattern: /^\/api\/v1\/users\/[^/]+$/, route: '/api/v1/users/:id' },
+    { pattern: /^\/api\/v1\/projects\/[^/]+\/analysis$/, route: '/api/v1/projects/:id/analysis' },
   ];
 
   for (const { pattern, route } of routePatterns) {

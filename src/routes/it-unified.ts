@@ -82,7 +82,7 @@ router.post('/', async (req: Request, res: Response) => {
       logger.info('🎯 Request type auto-detected', { detectedType: requestType });
     }
 
-    let response: ITUnifiedResponse = {
+    const response: ITUnifiedResponse = {
       success: true,
       request_type: requestType,
       metadata: {
