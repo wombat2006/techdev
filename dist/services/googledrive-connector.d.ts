@@ -50,6 +50,7 @@ export declare class GoogleDriveRAGConnector {
      * 📚 ドキュメントをVector Storeに追加
      */
     addDocumentToVectorStore(vectorStoreId: string, document: ProcessedDocument): Promise<string>;
+    removeDocumentFromVectorStore(vectorStoreId: string, vectorStoreFileId: string): Promise<void>;
     /**
      * 🔄 GoogleDriveフォルダ全体をRAG化
      */
@@ -58,6 +59,11 @@ export declare class GoogleDriveRAGConnector {
         processedCount: number;
         failedCount: number;
         processedDocuments: ProcessedDocument[];
+        failedDocuments: Array<{
+            id: string;
+            name: string;
+            error: string;
+        }>;
     }>;
     /**
      * 🔍 RAG検索実行

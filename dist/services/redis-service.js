@@ -193,12 +193,25 @@ class UpstashRedisService {
     // Session management methods
     async setSession(sessionId, data, expireInSeconds = 3600) {
         const key = `session:${sessionId}`;
-        await this.set(key, JSON.stringify(data), { ex: expireInSeconds });
+        const payload = typeof data === 'string' ? data : JSON.stringify(data);
+        await this.set(key, payload, { ex: expireInSeconds });
     }
     async getSession(sessionId) {
         const key = `session:${sessionId}`;
         const data = await this.get(key);
-        return data ? JSON.parse(data) : null;
+        if (!data) {
+            return null;
+        }
+        if (typeof data === 'string') {
+            try {
+                return JSON.parse(data);
+            }
+            catch (error) {
+                console.error(`Redis GET parse error for key ${key}:`, error);
+                return null;
+            }
+        }
+        return data;
     }
     async deleteSession(sessionId) {
         const key = `session:${sessionId}`;
@@ -207,12 +220,25 @@ class UpstashRedisService {
     // Cache management methods
     async setCache(key, data, expireInSeconds = 300) {
         const cacheKey = `cache:${key}`;
-        await this.set(cacheKey, JSON.stringify(data), { ex: expireInSeconds });
+        const payload = typeof data === 'string' ? data : JSON.stringify(data);
+        await this.set(cacheKey, payload, { ex: expireInSeconds });
     }
     async getCache(key) {
         const cacheKey = `cache:${key}`;
         const data = await this.get(cacheKey);
-        return data ? JSON.parse(data) : null;
+        if (!data) {
+            return null;
+        }
+        if (typeof data === 'string') {
+            try {
+                return JSON.parse(data);
+            }
+            catch (error) {
+                console.error(`Redis cache parse error for key ${cacheKey}:`, error);
+                return null;
+            }
+        }
+        return data;
     }
     async deleteCache(key) {
         const cacheKey = `cache:${key}`;

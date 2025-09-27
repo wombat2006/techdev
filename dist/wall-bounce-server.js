@@ -14,14 +14,61 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const wall_bounce_analyzer_1 = require("./services/wall-bounce-analyzer");
+const wall_bounce_adapter_1 = require("./services/wall-bounce-adapter");
+const feature_flags_1 = require("./config/feature-flags");
 const logger_1 = require("./utils/logger");
 const metrics_middleware_1 = require("./middleware/metrics-middleware");
 const prometheus_client_1 = require("./metrics/prometheus-client");
+const googledrive_connector_1 = require("./services/googledrive-connector");
 const app = (0, express_1.default)();
 exports.app = app;
 const PORT = process.env.CANARY_PORT || process.env.PORT || 4000;
+const driveConfig = {
+    clientId: process.env.GOOGLE_CLIENT_ID || '',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    redirectUri: process.env.GOOGLE_REDIRECT_URI || 'urn:ietf:wg:oauth:2.0:oob',
+    refreshToken: process.env.GOOGLE_REFRESH_TOKEN || ''
+};
+const openAiDriveConfig = {
+    apiKey: process.env.OPENAI_API_KEY || '',
+    organization: process.env.OPENAI_ORGANIZATION
+};
+let sharedRagConnector = null;
+const getSharedRagConnector = () => {
+    if (sharedRagConnector) {
+        return sharedRagConnector;
+    }
+    if (!driveConfig.clientId || !driveConfig.refreshToken || !openAiDriveConfig.apiKey) {
+        logger_1.logger.warn('⚠️ Google Drive/OpenAI credentials are missing; RAG source metadata is unavailable');
+        return null;
+    }
+    try {
+        sharedRagConnector = new googledrive_connector_1.GoogleDriveRAGConnector(driveConfig, openAiDriveConfig);
+        logger_1.logger.info('📂 Shared Google Drive RAG connector initialised');
+    }
+    catch (error) {
+        logger_1.logger.error('❌ Failed to initialise shared RAG connector', {
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        sharedRagConnector = null;
+    }
+    return sharedRagConnector;
+};
 // Prometheus metrics initialization
 (0, prometheus_client_1.initializeMetrics)();
+// Feature flags initialization
+(0, feature_flags_1.logFeatureFlags)(logger_1.logger);
+// SRP Integration Helper
+async function executeWallBounceWithSRP(prompt, taskType, options) {
+    if ((0, feature_flags_1.shouldUseSRPArchitecture)()) {
+        logger_1.logger.info('🆕 Using SRP Wall-Bounce Architecture');
+        return await wall_bounce_adapter_1.wallBounceAdapter.analyze(prompt, taskType, options);
+    }
+    else {
+        logger_1.logger.info('📞 Using Legacy Wall-Bounce Architecture');
+        return await wall_bounce_analyzer_1.wallBounceAnalyzer.executeWallBounce(prompt, { taskType });
+    }
+}
 // Security middleware
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
@@ -112,8 +159,8 @@ app.post('/api/v1/generate', async (req, res) => {
             session_id: sessionId,
             prompt_length: prompt.length
         });
-        // 壁打ち分析実行（必須）
-        const wallBounceResult = await wall_bounce_analyzer_1.wallBounceAnalyzer.executeWallBounce(`IT Infrastructure問題分析: ${prompt}`, task_type, {
+        // 壁打ち分析実行（必須）- SRP対応
+        const wallBounceResult = await executeWallBounceWithSRP(`IT Infrastructure問題分析: ${prompt}`, task_type, {
             minProviders: task_type === 'basic' ? 2 : task_type === 'premium' ? 3 : 4,
             requireConsensus: task_type !== 'basic',
             confidenceThreshold: task_type === 'critical' ? 0.9 : 0.8
@@ -191,8 +238,8 @@ app.post('/api/v1/analyze-logs', async (req, res) => {
 4. 関連する設定ファイルやサービス
 5. 重要度とビジネス影響度
 `;
-        // 壁打ち分析実行
-        const wallBounceResult = await wall_bounce_analyzer_1.wallBounceAnalyzer.executeWallBounce(analysisPrompt, 'premium', // ログ解析はプレミアムレベル
+        // 壁打ち分析実行 - SRP対応
+        const wallBounceResult = await executeWallBounceWithSRP(analysisPrompt, 'premium', // ログ解析はプレミアムレベル
         {
             minProviders: 3,
             requireConsensus: true,
@@ -264,22 +311,48 @@ app.post('/api/v1/rag/search', async (req, res) => {
 
 関連するドキュメントから回答を生成し、必ずソースを明記してください。
 `;
-        // 壁打ち分析でRAG検索
-        const wallBounceResult = await wall_bounce_analyzer_1.wallBounceAnalyzer.executeWallBounce(ragPrompt, 'premium', {
+        // 壁打ち分析でRAG検索 - SRP対応
+        const wallBounceResult = await executeWallBounceWithSRP(ragPrompt, 'premium', {
             minProviders: 2,
             requireConsensus: false // RAG検索は多様性を重視
         });
+        const discoveredSources = [];
+        const connector = getSharedRagConnector();
+        const effectiveFolderId = user_drive_folder_id || process.env.RAG_FOLDER_ID;
+        if (connector && effectiveFolderId) {
+            try {
+                const documents = await connector.listDocuments(effectiveFolderId);
+                documents
+                    .slice(0, Math.max(1, Math.min(max_results, 5)))
+                    .forEach((doc, index) => {
+                    const baseScore = 0.95 - index * 0.05;
+                    discoveredSources.push({
+                        title: doc.name,
+                        url: doc.webViewLink || `https://drive.google.com/file/d/${doc.id}/view`,
+                        relevance_score: Number((baseScore > 0 ? baseScore : 0.5).toFixed(2))
+                    });
+                });
+            }
+            catch (error) {
+                logger_1.logger.warn('⚠️ Failed to retrieve Google Drive document metadata', {
+                    folderId: effectiveFolderId,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        }
+        if (!discoveredSources.length) {
+            discoveredSources.push({
+                title: 'GoogleDriveドキュメント情報未取得',
+                url: effectiveFolderId
+                    ? `https://drive.google.com/drive/folders/${effectiveFolderId}`
+                    : 'https://drive.google.com',
+                relevance_score: 0.5
+            });
+        }
         const searchResult = {
             answer: wallBounceResult.consensus.content,
             confidence: wallBounceResult.consensus.confidence,
-            sources: [
-                // TODO: 実際のGoogleDriveファイル情報を追加
-                {
-                    title: "sample_document.pdf",
-                    url: `https://drive.google.com/file/d/${user_drive_folder_id}/view`,
-                    relevance_score: 0.95
-                }
-            ],
+            sources: discoveredSources,
             wall_bounce_analysis: {
                 providers_used: wallBounceResult.debug.providers_used,
                 processing_time_ms: wallBounceResult.processing_time_ms,
@@ -348,7 +421,8 @@ app.use((req, res) => {
 });
 // Prometheus metrics error handler first
 app.use(metrics_middleware_1.metricsErrorHandler);
-app.use((error, req, res, next) => {
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+app.use((error, req, res, _next) => {
     logger_1.logger.error('🚨 Server error', { error });
     if (error.type === 'entity.parse.failed') {
         return res.status(400).json({

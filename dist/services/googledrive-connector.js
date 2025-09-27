@@ -242,53 +242,6 @@ class GoogleDriveRAGConnector {
                         }
                     }
                 }
-                // 一時ファイル作成（GPT-5推奨パターンC）
-                const tmpDir = '/tmp/googledrive-rag';
-                await fs.mkdir(tmpDir, { recursive: true });
-                const fileExtension = metadata.mimeType === 'application/pdf' ? '.pdf' :
-                    metadata.mimeType.includes('image') ? '.img' : '.bin';
-                const tmpPath = path.join(tmpDir, `${documentId}${fileExtension}`);
-                try {
-                    // 公式Google Drive APIサンプル準拠ストリーミング処理
-                    const streamResponse = await this.drive.files.get({
-                        fileId: documentId,
-                        alt: 'media'
-                    }, {
-                        responseType: 'stream' // Blob問題完全回避
-                    });
-                    // Node.js pipeline使用（back-pressure対応）
-                    await new Promise((resolve, reject) => {
-                        const writeStream = (0, fs_1.createWriteStream)(tmpPath);
-                        streamResponse.data
-                            .on('error', reject)
-                            .pipe(writeStream)
-                            .on('error', reject)
-                            .on('finish', () => {
-                            logger_1.logger.info('🎯 ストリーミング完了', { documentId });
-                            resolve();
-                        });
-                    });
-                    // 一時ファイルからBufferに読み込み
-                    content = await fs.readFile(tmpPath);
-                    logger_1.logger.info('✅ 公式パターン処理完了', {
-                        documentId,
-                        bufferSize: content.length,
-                        tmpPath
-                    });
-                }
-                finally {
-                    // 一時ファイル削除（必ずクリーンアップ）
-                    try {
-                        await fs.unlink(tmpPath);
-                        logger_1.logger.info('🗑️ 一時ファイル削除完了', { tmpPath });
-                    }
-                    catch (cleanupError) {
-                        logger_1.logger.warn('⚠️ 一時ファイル削除失敗', {
-                            tmpPath,
-                            error: cleanupError instanceof Error ? cleanupError.message : 'Unknown error'
-                        });
-                    }
-                }
             }
             logger_1.logger.info('✅ ドキュメントダウンロード完了', {
                 name: metadata.name,
@@ -404,6 +357,43 @@ class GoogleDriveRAGConnector {
             throw error;
         }
     }
+    async removeDocumentFromVectorStore(vectorStoreId, vectorStoreFileId) {
+        try {
+            logger_1.logger.info('🗑️ Vector Storeファイル削除開始', {
+                vectorStoreId,
+                vectorStoreFileId
+            });
+            const filesApi = this.openai.vectorStores?.files;
+            if (filesApi?.del) {
+                await filesApi.del(vectorStoreId, vectorStoreFileId);
+            }
+            else if (filesApi?.delete) {
+                await filesApi.delete(vectorStoreId, vectorStoreFileId);
+            }
+            else {
+                throw new Error('Vector store file delete API is not available in current OpenAI SDK');
+            }
+            const rootFilesApi = this.openai.files;
+            if (rootFilesApi?.del) {
+                await rootFilesApi.del(vectorStoreFileId);
+            }
+            else if (rootFilesApi?.delete) {
+                await rootFilesApi.delete(vectorStoreFileId);
+            }
+            logger_1.logger.info('✅ Vector Storeファイル削除完了', {
+                vectorStoreId,
+                vectorStoreFileId
+            });
+        }
+        catch (error) {
+            logger_1.logger.error('❌ Vector Storeファイル削除エラー', {
+                vectorStoreId,
+                vectorStoreFileId,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+            throw error;
+        }
+    }
     /**
      * 🔄 GoogleDriveフォルダ全体をRAG化
      */
@@ -419,6 +409,7 @@ class GoogleDriveRAGConnector {
             // ドキュメント一覧取得
             const documents = await this.listDocuments(folderId);
             const processedDocuments = [];
+            const failedDocuments = [];
             let processedCount = 0;
             let failedCount = 0;
             // バッチ処理でドキュメント処理
@@ -445,10 +436,16 @@ class GoogleDriveRAGConnector {
                     }
                     catch (error) {
                         failedCount++;
+                        const failureMessage = error instanceof Error ? error.message : 'Unknown error';
+                        failedDocuments.push({
+                            id: docMeta.id,
+                            name: docMeta.name,
+                            error: failureMessage
+                        });
                         logger_1.logger.error('❌ ドキュメント処理失敗', {
                             id: docMeta.id,
                             name: docMeta.name,
-                            error: error instanceof Error ? error.message : 'Unknown error'
+                            error: failureMessage
                         });
                     }
                 }));
@@ -461,13 +458,15 @@ class GoogleDriveRAGConnector {
                 vectorStoreId,
                 processedCount,
                 failedCount,
-                totalDocuments: documents.length
+                totalDocuments: documents.length,
+                failedDocuments: failedDocuments.length
             });
             return {
                 vectorStoreId,
                 processedCount,
                 failedCount,
-                processedDocuments
+                processedDocuments,
+                failedDocuments
             };
         }
         catch (error) {

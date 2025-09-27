@@ -14,6 +14,34 @@ const session_manager_1 = require("./services/session-manager");
 const wall_bounce_analyzer_1 = require("./services/wall-bounce-analyzer");
 const log_analyzer_1 = require("./services/log-analyzer");
 const rag_endpoint_1 = __importDefault(require("./routes/rag-endpoint"));
+const codex_session_1 = __importDefault(require("./routes/codex-session"));
+const GEMINI_CLI_TTL_MS = 5 * 60 * 1000; // cache for 5 minutes
+let geminiCliHealth = null;
+const resolveGeminiCliHealth = async () => {
+    const now = Date.now();
+    if (geminiCliHealth && (now - geminiCliHealth.lastChecked) < GEMINI_CLI_TTL_MS) {
+        return geminiCliHealth;
+    }
+    try {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+        const { stdout } = await execAsync('gemini --version', { timeout: 5000 });
+        geminiCliHealth = {
+            status: 'ok',
+            version: stdout.trim(),
+            lastChecked: now
+        };
+    }
+    catch (error) {
+        geminiCliHealth = {
+            status: 'error',
+            version: 'unknown',
+            lastChecked: now
+        };
+    }
+    return geminiCliHealth;
+};
 function createServer() {
     const app = (0, express_1.default)();
     // Security middleware
@@ -34,6 +62,8 @@ function createServer() {
     }));
     // RAG API routes
     app.use('/api/v1/rag', rag_endpoint_1.default);
+    // Codex Session API routes
+    app.use('/api/codex', codex_session_1.default);
     // Real-time metrics endpoint (Server-Sent Events)
     app.get('/api/v1/metrics/stream', (req, res) => {
         // Set SSE headers
@@ -82,6 +112,7 @@ function createServer() {
         try {
             const redis = (0, redis_service_1.getRedisService)();
             const sessionManager = (0, session_manager_1.getSessionManager)();
+            const wallBounceAnalyzer = new wall_bounce_analyzer_1.WallBounceAnalyzer();
             // Test Redis connection
             let redisStatus = 'ok';
             try {
@@ -91,13 +122,40 @@ function createServer() {
             catch (error) {
                 redisStatus = 'error';
             }
+            const geminiHealth = await resolveGeminiCliHealth();
+            // Get current environment configuration
+            const environmentConfig = {
+                srpEnabled: process.env.USE_SRP_WALL_BOUNCE === 'true',
+                srpTrafficPercentage: parseInt(process.env.SRP_TRAFFIC_PERCENTAGE || '0'),
+                geminiStrategy: process.env.GEMINI_STRATEGY || 'api',
+                geminiCliPercentage: parseInt(process.env.GEMINI_CLI_PERCENTAGE || '0'),
+                deploymentVersion: process.env.DEPLOYMENT_VERSION || 'unknown'
+            };
             res.json({
                 status: 'ok',
                 services: {
                     redis: redisStatus,
-                    sessionManager: 'ok'
+                    sessionManager: 'ok',
+                    geminiCli: geminiHealth.status
+                },
+                gemini: {
+                    cliVersion: geminiHealth.version,
+                    strategy: environmentConfig.geminiStrategy,
+                    cliPercentage: environmentConfig.geminiCliPercentage
+                },
+                srp: {
+                    enabled: environmentConfig.srpEnabled,
+                    trafficPercentage: environmentConfig.srpTrafficPercentage
+                },
+                deployment: {
+                    version: environmentConfig.deploymentVersion,
+                    environment: process.env.NODE_ENV || 'development'
                 },
                 uptime: process.uptime(),
+                memory: {
+                    used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+                    total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+                },
                 timestamp: new Date().toISOString()
             });
         }
@@ -121,11 +179,8 @@ function createServer() {
             }
             // Real Multi-LLM Wall-Bounce Analysis
             const wallBounceAnalyzer = new wall_bounce_analyzer_1.WallBounceAnalyzer();
-            const wallBounceResult = await wallBounceAnalyzer.executeWallBounce(prompt, task_type || 'basic', {
-                minProviders: task_type === 'critical' ? 3 : 2,
-                maxProviders: task_type === 'critical' ? 4 : 3,
-                requireConsensus: true,
-                confidenceThreshold: task_type === 'critical' ? 0.9 : 0.8
+            const wallBounceResult = await wallBounceAnalyzer.executeWallBounce(prompt, {
+                taskType: task_type || 'basic'
             });
             const response = {
                 response: wallBounceResult.consensus.content,

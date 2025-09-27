@@ -15,7 +15,9 @@ export interface LLMResponse {
     tokens: {
         input: number;
         output: number;
+        total?: number;
     };
+    provider?: string;
 }
 export interface WallBounceResult {
     consensus: {
@@ -42,24 +44,18 @@ export declare class WallBounceAnalyzer {
     constructor();
     private initializeProviders;
     /**
+     * Google Gemini API経由での実行
+     */
+    private executeGeminiCLI;
+    /**
      * 壁打ち分析の実行 - 必須：最低2つのLLMで分析
      */
-    executeWallBounce(prompt: string, taskType?: 'basic' | 'premium' | 'critical', options?: {
-        minProviders?: number;
-        maxProviders?: number;
-        requireConsensus?: boolean;
-        confidenceThreshold?: number;
+    executeWallBounce(prompt: string, options?: {
+        taskType?: 'basic' | 'premium' | 'critical';
     }): Promise<WallBounceResult>;
-    private selectProvidersByTaskType;
-    private executeLLMCalls;
-    private calculateAgreementScores;
-    private calculateTextSimilarity;
-    private buildConsensus;
-    private checkTierEscalation;
     private invokeGemini;
     private invokeGPT5;
     private invokeClaude;
-    private invokeOpenRouter;
-    private simulateDelay;
+    private performClaudeInternalAnalysis;
 }
 export declare const wallBounceAnalyzer: WallBounceAnalyzer;

@@ -1,4 +1,5 @@
-export declare const getRedisService: import("jest-mock").Mock<import("jest-mock").UnknownFunction>;
+import { jest } from '@jest/globals';
+export declare const getRedisService: jest.Mock;
 export declare class UpstashRedisService {
     constructor(...args: any[]);
 }

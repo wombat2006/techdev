@@ -14,6 +14,7 @@ const crypto_1 = __importDefault(require("crypto"));
 const googledrive_connector_1 = require("./googledrive-connector");
 const logger_1 = require("../utils/logger");
 const prometheus_client_class_1 = require("../metrics/prometheus-client-class");
+const googledrive_vector_mapping_1 = require("./googledrive-vector-mapping");
 class GoogleDriveWebhookHandler {
     googleDriveConfig;
     openaiConfig;
@@ -55,7 +56,7 @@ class GoogleDriveWebhookHandler {
     /**
      * 🔔 Webhookメイン処理エンドポイント
      */
-    async handleWebhook(req, res) {
+    async handleWebhook(req) {
         try {
             logger_1.logger.info('📥 Google Drive Webhook受信', {
                 headers: {
@@ -69,8 +70,10 @@ class GoogleDriveWebhookHandler {
             // Webhook認証検証
             if (!this.verifyWebhookSignature(req)) {
                 logger_1.logger.warn('❌ Webhook署名検証失敗');
-                res.status(401).json({ error: 'Invalid webhook signature' });
-                return;
+                return {
+                    status: 401,
+                    body: { error: 'Invalid webhook signature' }
+                };
             }
             const notification = {
                 kind: req.headers['x-goog-channel-id'],
@@ -83,26 +86,30 @@ class GoogleDriveWebhookHandler {
             const resourceState = req.headers['x-goog-resource-state'];
             // 通知タイプ別処理
             await this.processNotification(notification, resourceState);
-            // 成功レスポンス
-            res.status(200).json({
-                status: 'success',
-                message: 'Webhook processed successfully',
-                timestamp: new Date().toISOString()
-            });
-            // メトリクス記録
             this.prometheusClient.recordWebhookNotification(resourceState, 'success');
+            // 成功レスポンス
+            return {
+                status: 200,
+                body: {
+                    status: 'success',
+                    message: 'Webhook processed successfully',
+                    timestamp: new Date().toISOString()
+                }
+            };
         }
         catch (error) {
             logger_1.logger.error('❌ Webhook処理エラー', {
                 error: error instanceof Error ? error.message : 'Unknown error',
                 stack: error instanceof Error ? error.stack : undefined
             });
-            res.status(500).json({
-                error: 'Webhook processing failed',
-                message: error instanceof Error ? error.message : 'Unknown error'
-            });
-            // メトリクス記録
             this.prometheusClient.recordWebhookNotification('error', 'failed');
+            return {
+                status: 500,
+                body: {
+                    error: 'Webhook processing failed',
+                    message: error instanceof Error ? error.message : 'Unknown error'
+                }
+            };
         }
     }
     /**
@@ -395,6 +402,7 @@ class GoogleDriveWebhookHandler {
             const vectorStoreId = await this.ragConnector.getOrCreateVectorStore(vectorStoreName);
             // ドキュメントをVector Storeに追加
             const vectorStoreFileId = await this.ragConnector.addDocumentToVectorStore(vectorStoreId, document);
+            await (0, googledrive_vector_mapping_1.rememberDriveVectorMapping)(file.id, vectorStoreId, vectorStoreFileId);
             logger_1.logger.info('✅ RAG同期完了', {
                 fileName: file.name,
                 vectorStoreFileId
@@ -413,11 +421,13 @@ class GoogleDriveWebhookHandler {
      */
     async removeFileFromRAG(fileId) {
         try {
-            // 実装予定: Vector StoreからファイルID基づく削除
-            // OpenAI Files APIからファイル削除
-            logger_1.logger.info('🗑️ RAGからファイル削除', { fileId });
-            // TODO: OpenAI Files APIの削除処理実装
-            // await this.openai.files.delete(vectorStoreFileId);
+            const mapping = await (0, googledrive_vector_mapping_1.resolveDriveVectorMapping)(fileId);
+            if (!mapping) {
+                logger_1.logger.warn('⚠️ RAG mapping not found for Drive file', { fileId });
+                return;
+            }
+            await this.ragConnector.removeDocumentFromVectorStore(mapping.vectorStoreId, mapping.vectorStoreFileId);
+            await (0, googledrive_vector_mapping_1.clearDriveVectorMapping)(fileId);
         }
         catch (error) {
             logger_1.logger.error('❌ RAGファイル削除エラー', {

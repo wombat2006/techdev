@@ -6,7 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { GoogleDriveWebhookHandler } from '../services/googledrive-webhook-handler';
 import { GoogleDriveRAGConnector, GoogleDriveConfig, OpenAIConfig } from '../services/googledrive-connector';
-import { rememberDriveVectorMappingsBulk } from '../services/googledrive-vector-mapping';
+import { runManualDriveSync } from '../services/googledrive-manual-sync';
 import { logger } from '../utils/logger';
 import { PrometheusClient } from '../metrics/prometheus-client-class';
 
@@ -258,26 +258,19 @@ router.post('/googledrive/test-webhook', async (req: Request, res: Response) => 
       body: { test: true }
     } as unknown as Request;
 
-    const mockRes = {
-      status: (code: number) => ({
-        json: (data: any) => {
-          logger.info('📤 テストレスポンス', { status: code, data });
-          return data;
-        }
-      })
-    } as Response;
-
     // テスト実行
-    await handler.handleWebhook(mockReq, mockRes);
+    const result = await handler.handleWebhook(mockReq);
+    logger.info('📤 テストレスポンス', { status: result.status, data: result.body });
 
-    res.json({
+    res.status(result.status).json({
       success: true,
       message: 'Webhook test completed successfully',
       test_data: {
         channel_id: mockReq.headers['x-goog-channel-id'],
         resource_state: mockReq.headers['x-goog-resource-state'],
         timestamp: new Date().toISOString()
-      }
+      },
+      handler_response: result.body
     });
 
     logger.info('✅ Webhookテスト完了');
@@ -332,37 +325,47 @@ router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
 
     // RAGコネクタによる同期実行
     const vectorStoreName = process.env.DEFAULT_VECTOR_STORE_NAME || 'techsapo-realtime-docs';
-    const syncResult = await connector.syncFolderToRAG(
-      targetFolderId,
+    const batchSize = typeof batch_size === 'number' && batch_size > 0 ? batch_size : 5;
+    const syncResult = await runManualDriveSync({
+      connector,
+      folderId: targetFolderId,
       vectorStoreName,
-      typeof batch_size === 'number' && batch_size > 0 ? batch_size : 5
-    );
+      batchSize
+    });
 
-    await rememberDriveVectorMappingsBulk(
-      syncResult.processedDocuments
-        .filter(doc => Boolean(doc.vectorStoreFileId))
-        .map(doc => ({
-          fileId: doc.id,
-          vectorStoreId: syncResult.vectorStoreId,
-          vectorStoreFileId: doc.vectorStoreFileId as string
-        }))
-    );
+    if (syncResult.failedCount > 0) {
+      logger.warn('⚠️ Manual Drive sync completed with failures', {
+        folderId: targetFolderId,
+        processed: syncResult.processedCount,
+        failed: syncResult.failedCount
+      });
+    } else {
+      logger.info('✅ Manual Drive sync completed without failures', {
+        folderId: targetFolderId,
+        processed: syncResult.processedCount
+      });
+    }
 
-    res.json({
+    const statusCode = syncResult.failedCount > 0 && syncResult.processedCount > 0 ? 207
+      : syncResult.failedCount > 0
+        ? 500
+        : 200;
+
+    res.status(statusCode).json({
       success: true,
       message: 'Manual sync triggered successfully',
       data: {
         folder_id: targetFolderId,
         vector_store_name: vectorStoreName,
         force_full_sync,
-        batch_size: syncResult.processedDocuments.length > 0 ? (typeof batch_size === 'number' && batch_size > 0 ? batch_size : 5) : undefined,
+        batch_size: syncResult.processedDocuments.length > 0 ? syncResult.batchSizeUsed : undefined,
         timestamp: new Date().toISOString(),
-        sync_result: {
-          vector_store_id: syncResult.vectorStoreId,
-          processed: syncResult.processedCount,
-          failed: syncResult.failedCount,
-          failed_documents: syncResult.failedDocuments
-        }
+         sync_result: {
+           vector_store_id: syncResult.vectorStoreId,
+           processed: syncResult.processedCount,
+           failed: syncResult.failedCount,
+           failed_documents: syncResult.failedDocuments
+         }
       }
     });
 

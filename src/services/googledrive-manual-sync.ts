@@ -1,5 +1,6 @@
 import { GoogleDriveRAGConnector } from './googledrive-connector';
 import { rememberDriveVectorMappingsBulk } from './googledrive-vector-mapping';
+import { logger } from '../utils/logger';
 
 export interface ManualSyncOptions {
   connector: GoogleDriveRAGConnector;
@@ -23,6 +24,12 @@ export const runManualDriveSync = async ({
   vectorStoreName,
   batchSize = 5
 }: ManualSyncOptions): Promise<ManualSyncOutcome> => {
+  logger.info('🔄 Manual Google Drive sync started', {
+    folderId,
+    vectorStoreName,
+    batchSize
+  });
+
   const syncResult = await connector.syncFolderToRAG(folderId, vectorStoreName, batchSize);
 
   await rememberDriveVectorMappingsBulk(

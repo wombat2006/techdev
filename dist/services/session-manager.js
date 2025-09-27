@@ -15,6 +15,9 @@ class SessionManager {
             conversationHistory: []
         };
         await this.redis.setSession(sessionId, sessionData, 86400); // 24 hours
+        if (userId) {
+            await this.trackUserSession(userId, sessionId);
+        }
         return sessionId;
     }
     async getSession(sessionId) {

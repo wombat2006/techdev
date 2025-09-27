@@ -2,7 +2,7 @@
  * Google Drive Webhook Handler for Real-time RAG Sync
  * GoogleDrive Push通知によるリアルタイムRAG同期処理
  */
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { GoogleDriveConfig, OpenAIConfig } from './googledrive-connector';
 export interface WebhookNotification {
     kind: string;
@@ -40,7 +40,10 @@ export declare class GoogleDriveWebhookHandler {
     /**
      * 🔔 Webhookメイン処理エンドポイント
      */
-    handleWebhook(req: Request, res: Response): Promise<void>;
+    handleWebhook(req: Request): Promise<{
+        status: number;
+        body: any;
+    }>;
     /**
      * 🔐 Webhook署名検証
      */

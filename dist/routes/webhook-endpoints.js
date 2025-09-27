@@ -6,6 +6,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const googledrive_webhook_handler_1 = require("../services/googledrive-webhook-handler");
+const googledrive_connector_1 = require("../services/googledrive-connector");
+const googledrive_manual_sync_1 = require("../services/googledrive-manual-sync");
 const logger_1 = require("../utils/logger");
 const prometheus_client_class_1 = require("../metrics/prometheus-client-class");
 const router = (0, express_1.Router)();
@@ -20,10 +22,15 @@ const openaiConfig = {
     apiKey: process.env.OPENAI_API_KEY || '',
     organization: process.env.OPENAI_ORGANIZATION
 };
-const webhookSecret = process.env.GOOGLEDRIVE_WEBHOOK_SECRET || 'default-webhook-secret-change-in-production';
+const webhookSecret = process.env.GOOGLEDRIVE_WEBHOOK_SECRET;
 // Webhook ハンドラー初期化
 let webhookHandler = null;
+let ragConnector = null;
 const initializeWebhookHandler = () => {
+    if (!webhookSecret) {
+        logger_1.logger.error('❌ Google Drive webhook secret is not configured');
+        return null;
+    }
     if (!webhookHandler && googleDriveConfig.clientId && openaiConfig.apiKey) {
         webhookHandler = new googledrive_webhook_handler_1.GoogleDriveWebhookHandler(googleDriveConfig, openaiConfig, webhookSecret);
         // デフォルト監視フォルダ設定
@@ -35,6 +42,26 @@ const initializeWebhookHandler = () => {
         logger_1.logger.info('🤖 Drive Webhookハンドラー初期化完了');
     }
     return webhookHandler;
+};
+const getRagConnector = () => {
+    if (ragConnector) {
+        return ragConnector;
+    }
+    if (!googleDriveConfig.clientId || !googleDriveConfig.refreshToken || !openaiConfig.apiKey) {
+        logger_1.logger.error('❌ Google Drive/OpenAI credentials are not fully configured for manual sync');
+        return null;
+    }
+    try {
+        ragConnector = new googledrive_connector_1.GoogleDriveRAGConnector(googleDriveConfig, openaiConfig);
+        logger_1.logger.info('📂 Google Drive RAG connector initialised for manual sync');
+    }
+    catch (error) {
+        logger_1.logger.error('❌ Failed to initialise Google Drive RAG connector', {
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        ragConnector = null;
+    }
+    return ragConnector;
 };
 /**
  * 🔔 Google Drive Push通知受信エンドポイント
@@ -57,14 +84,16 @@ router.post('/googledrive/notifications', async (req, res) => {
                 message: 'Check Google Drive and OpenAI configuration'
             });
         }
-        // Webhook処理実行
-        await handler.handleWebhook(req, res);
-        // 成功メトリクス記録
+        // Webhook処理実行 (HTTPレスポンス生成はルート側で担当)
+        const result = await handler.handleWebhook(req);
         const duration = Date.now() - startTime;
-        prometheusClient.recordWebhookProcessingDuration(duration);
-        logger_1.logger.info('✅ Google Drive Webhook処理完了', {
-            duration: `${duration}ms`
-        });
+        if (result.status < 500) {
+            prometheusClient.recordWebhookProcessingDuration(duration);
+            logger_1.logger.info('✅ Google Drive Webhook処理完了', {
+                duration: `${duration}ms`
+            });
+        }
+        res.status(result.status).json(result.body);
     }
     catch (error) {
         logger_1.logger.error('❌ Webhook処理エラー', {
@@ -77,8 +106,6 @@ router.post('/googledrive/notifications', async (req, res) => {
                 message: error instanceof Error ? error.message : 'Unknown error'
             });
         }
-        // エラーメトリクス記録
-        const duration = Date.now() - startTime;
         prometheusClient.recordWebhookError('processing_error');
     }
 });
@@ -194,24 +221,18 @@ router.post('/googledrive/test-webhook', async (req, res) => {
             },
             body: { test: true }
         };
-        const mockRes = {
-            status: (code) => ({
-                json: (data) => {
-                    logger_1.logger.info('📤 テストレスポンス', { status: code, data });
-                    return data;
-                }
-            })
-        };
         // テスト実行
-        await handler.handleWebhook(mockReq, mockRes);
-        res.json({
+        const result = await handler.handleWebhook(mockReq);
+        logger_1.logger.info('📤 テストレスポンス', { status: result.status, data: result.body });
+        res.status(result.status).json({
             success: true,
             message: 'Webhook test completed successfully',
             test_data: {
                 channel_id: mockReq.headers['x-goog-channel-id'],
                 resource_state: mockReq.headers['x-goog-resource-state'],
                 timestamp: new Date().toISOString()
-            }
+            },
+            handler_response: result.body
         });
         logger_1.logger.info('✅ Webhookテスト完了');
     }
@@ -230,15 +251,23 @@ router.post('/googledrive/test-webhook', async (req, res) => {
  */
 router.post('/googledrive/manual-sync', async (req, res) => {
     try {
-        const { folder_id, force_full_sync = false } = req.body;
+        const { folder_id, force_full_sync = false, batch_size } = req.body;
         logger_1.logger.info('🔄 手動同期トリガー実行', {
             folder_id: folder_id || 'default',
-            force_full_sync
+            force_full_sync,
+            batch_size
         });
         const handler = initializeWebhookHandler();
         if (!handler) {
             return res.status(500).json({
                 error: 'Webhook handler not initialized'
+            });
+        }
+        const connector = getRagConnector();
+        if (!connector) {
+            return res.status(500).json({
+                error: 'RAG connector not initialized',
+                message: 'Check Google Drive and OpenAI credentials'
             });
         }
         // 使用するフォルダID決定
@@ -250,17 +279,45 @@ router.post('/googledrive/manual-sync', async (req, res) => {
         }
         // RAGコネクタによる同期実行
         const vectorStoreName = process.env.DEFAULT_VECTOR_STORE_NAME || 'techsapo-realtime-docs';
-        // TODO: ragConnectorへのアクセス方法を検討
-        // const syncResult = await ragConnector.syncFolderToRAG(targetFolderId, vectorStoreName, 5);
-        res.json({
+        const batchSize = typeof batch_size === 'number' && batch_size > 0 ? batch_size : 5;
+        const syncResult = await (0, googledrive_manual_sync_1.runManualDriveSync)({
+            connector,
+            folderId: targetFolderId,
+            vectorStoreName,
+            batchSize
+        });
+        if (syncResult.failedCount > 0) {
+            logger_1.logger.warn('⚠️ Manual Drive sync completed with failures', {
+                folderId: targetFolderId,
+                processed: syncResult.processedCount,
+                failed: syncResult.failedCount
+            });
+        }
+        else {
+            logger_1.logger.info('✅ Manual Drive sync completed without failures', {
+                folderId: targetFolderId,
+                processed: syncResult.processedCount
+            });
+        }
+        const statusCode = syncResult.failedCount > 0 && syncResult.processedCount > 0 ? 207
+            : syncResult.failedCount > 0
+                ? 500
+                : 200;
+        res.status(statusCode).json({
             success: true,
             message: 'Manual sync triggered successfully',
             data: {
                 folder_id: targetFolderId,
                 vector_store_name: vectorStoreName,
                 force_full_sync,
-                timestamp: new Date().toISOString()
-                // sync_result: syncResult
+                batch_size: syncResult.processedDocuments.length > 0 ? syncResult.batchSizeUsed : undefined,
+                timestamp: new Date().toISOString(),
+                sync_result: {
+                    vector_store_id: syncResult.vectorStoreId,
+                    processed: syncResult.processedCount,
+                    failed: syncResult.failedCount,
+                    failed_documents: syncResult.failedDocuments
+                }
             }
         });
         logger_1.logger.info('✅ 手動同期トリガー完了', { folder_id: targetFolderId });

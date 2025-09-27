@@ -45,7 +45,7 @@ router.post('/', async (req, res) => {
             requestType = detectRequestType(requestData);
             logger.info('🎯 Request type auto-detected', { detectedType: requestType });
         }
-        let response = {
+        const response = {
             success: true,
             request_type: requestType,
             metadata: {
