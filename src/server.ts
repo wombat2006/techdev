@@ -10,6 +10,44 @@ import { LogAnalyzer } from './services/log-analyzer';
 import ragEndpoints from './routes/rag-endpoint';
 import codexSessionRoutes from './routes/codex-session';
 
+interface GeminiCliHealth {
+  status: 'ok' | 'error' | 'unknown';
+  version: string;
+  lastChecked: number;
+}
+
+const GEMINI_CLI_TTL_MS = 5 * 60 * 1000; // cache for 5 minutes
+let geminiCliHealth: GeminiCliHealth | null = null;
+
+const resolveGeminiCliHealth = async (): Promise<GeminiCliHealth> => {
+  const now = Date.now();
+
+  if (geminiCliHealth && (now - geminiCliHealth.lastChecked) < GEMINI_CLI_TTL_MS) {
+    return geminiCliHealth;
+  }
+
+  try {
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    const { stdout } = await execAsync('gemini --version', { timeout: 5000 });
+    geminiCliHealth = {
+      status: 'ok',
+      version: stdout.trim(),
+      lastChecked: now
+    };
+  } catch (error) {
+    geminiCliHealth = {
+      status: 'error',
+      version: 'unknown',
+      lastChecked: now
+    };
+  }
+
+  return geminiCliHealth;
+};
+
 export function createServer() {
   const app = express();
 
@@ -101,19 +139,7 @@ export function createServer() {
         redisStatus = 'error';
       }
 
-      // Test Gemini CLI availability
-      let geminiCliStatus = 'ok';
-      let geminiCliVersion = 'unknown';
-      try {
-        const { exec } = require('child_process');
-        const { promisify } = require('util');
-        const execAsync = promisify(exec);
-        
-        const { stdout } = await execAsync('gemini --version', { timeout: 5000 });
-        geminiCliVersion = stdout.trim();
-      } catch (error) {
-        geminiCliStatus = 'error';
-      }
+      const geminiHealth = await resolveGeminiCliHealth();
 
       // Get current environment configuration
       const environmentConfig = {
@@ -129,10 +155,10 @@ export function createServer() {
         services: {
           redis: redisStatus,
           sessionManager: 'ok',
-          geminiCli: geminiCliStatus
+          geminiCli: geminiHealth.status
         },
         gemini: {
-          cliVersion: geminiCliVersion,
+          cliVersion: geminiHealth.version,
           strategy: environmentConfig.geminiStrategy,
           cliPercentage: environmentConfig.geminiCliPercentage
         },

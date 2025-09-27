@@ -264,59 +264,6 @@ export class GoogleDriveRAGConnector {
             }
           }
         }
-        
-        // 一時ファイル作成（GPT-5推奨パターンC）
-        const tmpDir = '/tmp/googledrive-rag';
-        await fs.mkdir(tmpDir, { recursive: true });
-        
-        const fileExtension = metadata.mimeType === 'application/pdf' ? '.pdf' : 
-                              metadata.mimeType.includes('image') ? '.img' : '.bin';
-        const tmpPath = path.join(tmpDir, `${documentId}${fileExtension}`);
-        
-        try {
-          // 公式Google Drive APIサンプル準拠ストリーミング処理
-          const streamResponse = await this.drive.files.get({
-            fileId: documentId,
-            alt: 'media'
-          }, {
-            responseType: 'stream'  // Blob問題完全回避
-          });
-          
-          // Node.js pipeline使用（back-pressure対応）
-          await new Promise<void>((resolve, reject) => {
-            const writeStream = createWriteStream(tmpPath);
-            
-            streamResponse.data
-              .on('error', reject)
-              .pipe(writeStream)
-              .on('error', reject)
-              .on('finish', () => {
-                logger.info('🎯 ストリーミング完了', { documentId });
-                resolve();
-              });
-          });
-          
-          // 一時ファイルからBufferに読み込み
-          content = await fs.readFile(tmpPath);
-          
-          logger.info('✅ 公式パターン処理完了', { 
-            documentId, 
-            bufferSize: content.length,
-            tmpPath
-          });
-          
-        } finally {
-          // 一時ファイル削除（必ずクリーンアップ）
-          try {
-            await fs.unlink(tmpPath);
-            logger.info('🗑️ 一時ファイル削除完了', { tmpPath });
-          } catch (cleanupError) {
-            logger.warn('⚠️ 一時ファイル削除失敗', { 
-              tmpPath, 
-              error: cleanupError instanceof Error ? cleanupError.message : 'Unknown error'
-            });
-          }
-        }
       }
 
       logger.info('✅ ドキュメントダウンロード完了', { 

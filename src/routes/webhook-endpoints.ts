@@ -24,12 +24,17 @@ const openaiConfig: OpenAIConfig = {
   organization: process.env.OPENAI_ORGANIZATION
 };
 
-const webhookSecret = process.env.GOOGLEDRIVE_WEBHOOK_SECRET || 'default-webhook-secret-change-in-production';
+const webhookSecret = process.env.GOOGLEDRIVE_WEBHOOK_SECRET;
 
 // Webhook ハンドラー初期化
 let webhookHandler: GoogleDriveWebhookHandler | null = null;
 
 const initializeWebhookHandler = () => {
+  if (!webhookSecret) {
+    logger.error('❌ Google Drive webhook secret is not configured');
+    return null;
+  }
+
   if (!webhookHandler && googleDriveConfig.clientId && openaiConfig.apiKey) {
     webhookHandler = new GoogleDriveWebhookHandler(
       googleDriveConfig,
