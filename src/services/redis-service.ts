@@ -213,13 +213,27 @@ class UpstashRedisService implements RedisService {
   // Session management methods
   async setSession(sessionId: string, data: any, expireInSeconds = 3600): Promise<void> {
     const key = `session:${sessionId}`;
-    await this.set(key, JSON.stringify(data), { ex: expireInSeconds });
+    const payload = typeof data === 'string' ? data : JSON.stringify(data);
+    await this.set(key, payload, { ex: expireInSeconds });
   }
 
   async getSession<T = any>(sessionId: string): Promise<T | null> {
     const key = `session:${sessionId}`;
     const data = await this.get(key);
-    return data ? JSON.parse(data) : null;
+    if (!data) {
+      return null;
+    }
+
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data) as T;
+      } catch (error) {
+        console.error(`Redis GET parse error for key ${key}:`, error);
+        return null;
+      }
+    }
+
+    return data as T;
   }
 
   async deleteSession(sessionId: string): Promise<void> {
@@ -230,13 +244,27 @@ class UpstashRedisService implements RedisService {
   // Cache management methods
   async setCache(key: string, data: any, expireInSeconds = 300): Promise<void> {
     const cacheKey = `cache:${key}`;
-    await this.set(cacheKey, JSON.stringify(data), { ex: expireInSeconds });
+    const payload = typeof data === 'string' ? data : JSON.stringify(data);
+    await this.set(cacheKey, payload, { ex: expireInSeconds });
   }
 
   async getCache<T = any>(key: string): Promise<T | null> {
     const cacheKey = `cache:${key}`;
     const data = await this.get(cacheKey);
-    return data ? JSON.parse(data) : null;
+    if (!data) {
+      return null;
+    }
+
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data) as T;
+      } catch (error) {
+        console.error(`Redis cache parse error for key ${cacheKey}:`, error);
+        return null;
+      }
+    }
+
+    return data as T;
   }
 
   async deleteCache(key: string): Promise<void> {
