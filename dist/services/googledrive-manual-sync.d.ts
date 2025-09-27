@@ -4,9 +4,10 @@ export interface ManualSyncOptions {
     folderId: string;
     vectorStoreName: string;
     batchSize?: number;
+    dryRun?: boolean;
 }
 export interface ManualSyncOutcome {
-    vectorStoreId: string;
+    vectorStoreId: string | null;
     processedCount: number;
     failedCount: number;
     processedDocuments: Array<{
@@ -20,5 +21,6 @@ export interface ManualSyncOutcome {
         error: string;
     }>;
     batchSizeUsed: number;
+    dryRun: boolean;
 }
-export declare const runManualDriveSync: ({ connector, folderId, vectorStoreName, batchSize }: ManualSyncOptions) => Promise<ManualSyncOutcome>;
+export declare const runManualDriveSync: ({ connector, folderId, vectorStoreName, batchSize, dryRun }: ManualSyncOptions) => Promise<ManualSyncOutcome>;

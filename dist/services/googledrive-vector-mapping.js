@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clearDriveVectorMapping = exports.resolveDriveVectorMapping = exports.rememberDriveVectorMappingsBulk = exports.rememberDriveVectorMapping = void 0;
+exports.clearDriveVectorMapping = exports.resolveDriveVectorMapping = exports.rememberDriveVectorMappingsBulk = exports.rememberDriveVectorMapping = exports.warmDriveVectorMappings = void 0;
 const redis_service_1 = require("./redis-service");
 const logger_1 = require("../utils/logger");
 const inMemoryMappings = new Map();
@@ -21,6 +21,41 @@ const ensureRedis = () => {
     }
     return redisService;
 };
+const warmDriveVectorMappings = async () => {
+    const redis = ensureRedis();
+    if (!redis) {
+        return inMemoryMappings.size;
+    }
+    try {
+        const existing = await redis.hgetall(VECTOR_MAPPING_KEY);
+        if (!existing) {
+            return inMemoryMappings.size;
+        }
+        Object.entries(existing).forEach(([fileId, raw]) => {
+            try {
+                const parsed = JSON.parse(raw);
+                if (parsed?.vectorStoreId && parsed?.vectorStoreFileId) {
+                    inMemoryMappings.set(fileId, parsed);
+                }
+            }
+            catch (error) {
+                logger_1.logger.warn('Drive mapping store: failed to parse mapping during warmup', {
+                    fileId,
+                    raw,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        });
+        return inMemoryMappings.size;
+    }
+    catch (error) {
+        logger_1.logger.warn('Drive mapping store: failed to warm cache from Redis', {
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        return inMemoryMappings.size;
+    }
+};
+exports.warmDriveVectorMappings = warmDriveVectorMappings;
 const rememberDriveVectorMapping = async (fileId, vectorStoreId, vectorStoreFileId) => {
     const payload = { vectorStoreId, vectorStoreFileId };
     inMemoryMappings.set(fileId, payload);

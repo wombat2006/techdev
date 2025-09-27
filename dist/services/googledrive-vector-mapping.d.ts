@@ -2,6 +2,7 @@ interface VectorMapping {
     vectorStoreId: string;
     vectorStoreFileId: string;
 }
+export declare const warmDriveVectorMappings: () => Promise<number>;
 export declare const rememberDriveVectorMapping: (fileId: string, vectorStoreId: string, vectorStoreFileId: string) => Promise<void>;
 export declare const rememberDriveVectorMappingsBulk: (mappings: Array<{
     fileId: string;

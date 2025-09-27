@@ -3,12 +3,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.runManualDriveSync = void 0;
 const googledrive_vector_mapping_1 = require("./googledrive-vector-mapping");
 const logger_1 = require("../utils/logger");
-const runManualDriveSync = async ({ connector, folderId, vectorStoreName, batchSize = 5 }) => {
+const runManualDriveSync = async ({ connector, folderId, vectorStoreName, batchSize = 5, dryRun = false }) => {
     logger_1.logger.info('🔄 Manual Google Drive sync started', {
         folderId,
         vectorStoreName,
-        batchSize
+        batchSize,
+        dryRun
     });
+    if (dryRun) {
+        const documents = await connector.listDocuments(folderId);
+        return {
+            vectorStoreId: null,
+            processedCount: 0,
+            failedCount: 0,
+            processedDocuments: documents.map(doc => ({ id: doc.id, name: doc.name })),
+            failedDocuments: [],
+            batchSizeUsed: batchSize,
+            dryRun: true
+        };
+    }
     const syncResult = await connector.syncFolderToRAG(folderId, vectorStoreName, batchSize);
     await (0, googledrive_vector_mapping_1.rememberDriveVectorMappingsBulk)(syncResult.processedDocuments
         .filter(doc => Boolean(doc.vectorStoreFileId))
@@ -27,7 +40,8 @@ const runManualDriveSync = async ({ connector, folderId, vectorStoreName, batchS
             vectorStoreFileId: doc.vectorStoreFileId
         })),
         failedDocuments: syncResult.failedDocuments,
-        batchSizeUsed: batchSize
+        batchSizeUsed: batchSize,
+        dryRun: false
     };
 };
 exports.runManualDriveSync = runManualDriveSync;
