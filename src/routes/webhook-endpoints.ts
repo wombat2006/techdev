@@ -6,6 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { GoogleDriveWebhookHandler } from '../services/googledrive-webhook-handler';
 import { GoogleDriveRAGConnector, GoogleDriveConfig, OpenAIConfig } from '../services/googledrive-connector';
+import { rememberDriveVectorMappingsBulk } from '../services/googledrive-vector-mapping';
 import { logger } from '../utils/logger';
 import { PrometheusClient } from '../metrics/prometheus-client-class';
 
@@ -334,6 +335,16 @@ router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
       targetFolderId,
       vectorStoreName,
       typeof batch_size === 'number' && batch_size > 0 ? batch_size : 5
+    );
+
+    await rememberDriveVectorMappingsBulk(
+      syncResult.processedDocuments
+        .filter(doc => Boolean(doc.vectorStoreFileId))
+        .map(doc => ({
+          fileId: doc.id,
+          vectorStoreId: syncResult.vectorStoreId,
+          vectorStoreFileId: doc.vectorStoreFileId as string
+        }))
     );
 
     res.json({
