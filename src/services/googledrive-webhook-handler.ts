@@ -3,7 +3,7 @@
  * GoogleDrive Push通知によるリアルタイムRAG同期処理
  */
 
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
@@ -93,7 +93,7 @@ export class GoogleDriveWebhookHandler {
   /**
    * 🔔 Webhookメイン処理エンドポイント
    */
-  async handleWebhook(req: Request, res: Response): Promise<void> {
+  async handleWebhook(req: Request): Promise<{ status: number; body: any }> {
     try {
       logger.info('📥 Google Drive Webhook受信', {
         headers: {
@@ -108,8 +108,10 @@ export class GoogleDriveWebhookHandler {
       // Webhook認証検証
       if (!this.verifyWebhookSignature(req)) {
         logger.warn('❌ Webhook署名検証失敗');
-        res.status(401).json({ error: 'Invalid webhook signature' });
-        return;
+        return {
+          status: 401,
+          body: { error: 'Invalid webhook signature' }
+        };
       }
 
       const notification: WebhookNotification = {
@@ -126,15 +128,17 @@ export class GoogleDriveWebhookHandler {
       // 通知タイプ別処理
       await this.processNotification(notification, resourceState);
 
-      // 成功レスポンス
-      res.status(200).json({ 
-        status: 'success',
-        message: 'Webhook processed successfully',
-        timestamp: new Date().toISOString()
-      });
-
-      // メトリクス記録
       this.prometheusClient.recordWebhookNotification(resourceState, 'success');
+
+      // 成功レスポンス
+      return {
+        status: 200,
+        body: {
+          status: 'success',
+          message: 'Webhook processed successfully',
+          timestamp: new Date().toISOString()
+        }
+      };
 
     } catch (error) {
       logger.error('❌ Webhook処理エラー', {
@@ -142,13 +146,15 @@ export class GoogleDriveWebhookHandler {
         stack: error instanceof Error ? error.stack : undefined
       });
 
-      res.status(500).json({
-        error: 'Webhook processing failed',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
-
-      // メトリクス記録
       this.prometheusClient.recordWebhookNotification('error', 'failed');
+
+      return {
+        status: 500,
+        body: {
+          error: 'Webhook processing failed',
+          message: error instanceof Error ? error.message : 'Unknown error'
+        }
+      };
     }
   }
 

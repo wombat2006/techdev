@@ -103,16 +103,18 @@ router.post('/googledrive/notifications', async (req: Request, res: Response) =>
       });
     }
 
-    // Webhook処理実行
-    await handler.handleWebhook(req, res);
+    // Webhook処理実行 (HTTPレスポンス生成はルート側で担当)
+    const result = await handler.handleWebhook(req);
 
-    // 成功メトリクス記録
     const duration = Date.now() - startTime;
-    prometheusClient.recordWebhookProcessingDuration(duration);
+    if (result.status < 500) {
+      prometheusClient.recordWebhookProcessingDuration(duration);
+      logger.info('✅ Google Drive Webhook処理完了', {
+        duration: `${duration}ms`
+      });
+    }
 
-    logger.info('✅ Google Drive Webhook処理完了', {
-      duration: `${duration}ms`
-    });
+    res.status(result.status).json(result.body);
 
   } catch (error) {
     logger.error('❌ Webhook処理エラー', {
@@ -127,7 +129,6 @@ router.post('/googledrive/notifications', async (req: Request, res: Response) =>
       });
     }
 
-    // エラーメトリクス記録
     prometheusClient.recordWebhookError('processing_error');
   }
 });
