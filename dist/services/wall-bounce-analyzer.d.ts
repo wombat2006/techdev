@@ -37,10 +37,17 @@ export interface WallBounceResult {
         wall_bounce_verified: boolean;
         providers_used: string[];
         tier_escalated: boolean;
+        provider_errors?: string[];
     };
+}
+interface ExecuteOptions {
+    taskType?: 'basic' | 'premium' | 'critical';
+    minProviders?: number;
+    maxProviders?: number;
 }
 export declare class WallBounceAnalyzer {
     private providers;
+    private providerOrder;
     constructor();
     private initializeProviders;
     /**
@@ -50,12 +57,12 @@ export declare class WallBounceAnalyzer {
     /**
      * 壁打ち分析の実行 - 必須：最低2つのLLMで分析
      */
-    executeWallBounce(prompt: string, options?: {
-        taskType?: 'basic' | 'premium' | 'critical';
-    }): Promise<WallBounceResult>;
+    executeWallBounce(prompt: string, options?: ExecuteOptions): Promise<WallBounceResult>;
+    private getProviderOrder;
     private invokeGemini;
     private invokeGPT5;
     private invokeClaude;
     private performClaudeInternalAnalysis;
 }
 export declare const wallBounceAnalyzer: WallBounceAnalyzer;
+export {};

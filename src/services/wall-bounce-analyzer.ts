@@ -48,11 +48,19 @@ export interface WallBounceResult {
     wall_bounce_verified: boolean;
     providers_used: string[];
     tier_escalated: boolean;
+    provider_errors?: string[];
   };
+}
+
+interface ExecuteOptions {
+  taskType?: 'basic' | 'premium' | 'critical';
+  minProviders?: number;
+  maxProviders?: number;
 }
 
 export class WallBounceAnalyzer {
   private providers: Map<string, LLMProvider> = new Map();
+  private providerOrder: string[] = [];
   
   constructor() {
     this.initializeProviders();
@@ -68,6 +76,7 @@ export class WallBounceAnalyzer {
       model: 'gemini-2.5-pro', 
       invoke: this.invokeGemini.bind(this) // CLI経由のみ
     });
+    this.providerOrder.push('gemini-2.5-pro');
 
     // Tier 1b: Gemini 2.5 Flash (CLI必須)
     this.providers.set('gemini-2.5-flash', {
@@ -75,6 +84,7 @@ export class WallBounceAnalyzer {
       model: 'gemini-2.5-flash', 
       invoke: this.invokeGemini.bind(this) // CLI経由のみ
     });
+    this.providerOrder.push('gemini-2.5-flash');
 
     // Tier 2: GPT-5 Codex via CLI (コーディング特化 - CLI必須)
     this.providers.set('gpt-5-codex', {
@@ -82,6 +92,7 @@ export class WallBounceAnalyzer {
       model: 'gpt-5-codex',
       invoke: this.invokeGPT5.bind(this) // CLI経由のみ
     });
+    this.providerOrder.push('gpt-5-codex');
 
     // Tier 2b: GPT-5 General via CLI (汎用タスク - CLI必須) 
     this.providers.set('gpt-5-general', {
@@ -89,6 +100,7 @@ export class WallBounceAnalyzer {
       model: 'gpt-5',
       invoke: this.invokeGPT5.bind(this) // CLI経由のみ
     });
+    this.providerOrder.push('gpt-5-general');
 
     // Tier 3: Anthropic Opus 4.1 (内部呼び出しのみ)
     this.providers.set('opus-4.1', {
@@ -96,6 +108,7 @@ export class WallBounceAnalyzer {
       model: 'claude-opus-4.1',
       invoke: this.invokeClaude.bind(this) // 内部呼び出しのみ、API禁止
     });
+    this.providerOrder.push('opus-4.1');
 
     // Tier 3b: Anthropic Sonnet 4 (内部呼び出しのみ)
     this.providers.set('sonnet-4', {
@@ -103,6 +116,7 @@ export class WallBounceAnalyzer {
       model: 'claude-sonnet-4',
       invoke: this.invokeClaude.bind(this) // 内部呼び出しのみ、API禁止
     });
+    this.providerOrder.push('sonnet-4');
 
     logger.info('🚀 Wall-Bounce Providers初期化完了（要求仕様準拠）', {
       total_providers: this.providers.size,
@@ -211,81 +225,103 @@ export class WallBounceAnalyzer {
   /**
    * 壁打ち分析の実行 - 必須：最低2つのLLMで分析
    */
-  async executeWallBounce(prompt: string, options: { taskType?: 'basic' | 'premium' | 'critical' } = {}): Promise<WallBounceResult> {
+  async executeWallBounce(prompt: string, options: ExecuteOptions = {}): Promise<WallBounceResult> {
     const startTime = Date.now();
     logger.info('🚀 Wall-Bounce分析開始', { 
       prompt: prompt.substring(0, 100) + '...',
       taskType: options.taskType || 'basic'
     });
 
-    // 真の6プロバイダーWall-Bounce分析実装
-    const allProviders = [
-      'gemini-2.5-pro', 'gemini-2.5-flash', 
-      'gpt-5-codex', 'gpt-5-general',
-      'opus-4.1', 'sonnet-4'
-    ];
-    
-    // タスクタイプに応じてプロバイダー数を決定
-    const providerCount = options.taskType === 'basic' ? 2 : 
-                         options.taskType === 'premium' ? 4 : 6;
-    const providers = allProviders.slice(0, providerCount);
-    const responses: LLMResponse[] = [];
-    const errors: string[] = [];
+    const taskType = options.taskType || 'basic';
+    const providerOrder = this.getProviderOrder(taskType);
+    const taskBasedCount = taskType === 'basic' ? 2 : taskType === 'premium' ? 4 : providerOrder.length;
+    const minProviders = Math.max(options.minProviders ?? 2, 1);
+    const maxProviders = Math.min(options.maxProviders ?? providerOrder.length, providerOrder.length);
+    let targetCount = Math.min(Math.max(taskBasedCount, minProviders), maxProviders);
+
+    if (targetCount > providerOrder.length) {
+      targetCount = providerOrder.length;
+    }
+
+    const selectedProviderNames = providerOrder.slice(0, targetCount);
+    const selectedProviders = selectedProviderNames
+      .map(name => {
+        const provider = this.providers.get(name);
+        if (!provider) {
+          logger.warn('⚠️ 指定されたプロバイダーがレジストリに存在しません', { name });
+        }
+        return provider ? { name, handler: provider } : null;
+      })
+      .filter((provider): provider is { name: string; handler: LLMProvider } => provider !== null);
+
+    if (selectedProviders.length === 0) {
+      throw new Error('No available providers for wall-bounce analysis');
+    }
 
     // 各プロバイダーで並列実行（パフォーマンス改善: 34秒→10秒以下）
-    const providerPromises = providers.map(async (provider) => {
+    const providerPromises = selectedProviders.map(async ({ name, handler }) => {
       try {
         let response: LLMResponse;
         
-        if (provider === 'gemini-2.5-pro') {
+        if (name === 'gemini-2.5-pro') {
           response = await this.invokeGemini(prompt, '2.5-pro');
-        } else if (provider === 'gemini-2.5-flash') {
+        } else if (name === 'gemini-2.5-flash') {
           response = await this.invokeGemini(prompt, '2.5-flash');
-        } else if (provider === 'gpt-5-codex') {
+        } else if (name === 'gpt-5-codex') {
           response = await this.invokeGPT5(prompt, { model: 'gpt-5-codex', specialization: 'coding' });
-        } else if (provider === 'gpt-5-general') {
+        } else if (name === 'gpt-5-general') {
           response = await this.invokeGPT5(prompt, { model: 'gpt-5', specialization: 'general' });
-        } else if (provider === 'opus-4.1') {
+        } else if (name === 'opus-4.1') {
           response = await this.invokeClaude(prompt, 'opus-4.1');
-        } else if (provider === 'sonnet-4') {
+        } else if (name === 'sonnet-4') {
           response = await this.invokeClaude(prompt, 'sonnet-4');
         } else {
-          throw new Error(`Unknown provider: ${provider}`);
+          response = await handler.invoke(prompt);
         }
         
-        return { ...response, provider };
+        return { ...response, provider: name };
       } catch (error) {
-        const errorMsg = `${provider}: ${error instanceof Error ? error.message : String(error)}`;
-        logger.error(`❌ ${provider} 分析失敗`, { error: errorMsg });
+        const errorMsg = `${name}: ${error instanceof Error ? error.message : String(error)}`;
+        logger.error(`❌ ${name} 分析失敗`, { error: errorMsg });
         return null;
       }
     });
 
     // 並列実行して結果を収集
     const results = await Promise.allSettled(providerPromises);
-    const finalResponses: LLMResponse[] = [];
+    const finalResponses: Array<LLMResponse & { provider: string }> = [];
     const finalErrors: string[] = [];
 
     results.forEach((result, index) => {
       if (result.status === 'fulfilled' && result.value) {
         finalResponses.push(result.value);
-        logger.info(`✅ ${providers[index]} 分析完了`, { confidence: result.value.confidence });
+        logger.info(`✅ ${selectedProviderNames[index]} 分析完了`, { confidence: result.value.confidence });
       } else {
-        const errorMsg = result.status === 'rejected' ? result.reason : `${providers[index]}: 実行失敗`;
+        const providerName = selectedProviderNames[index];
+        const errorMsg = result.status === 'rejected'
+          ? `${providerName}: ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`
+          : `${providerName}: 実行失敗`;
         finalErrors.push(errorMsg);
       }
     });
 
     // 最低2つのプロバイダーでの応答が必要
-    if (finalResponses.length < 2) {
-      throw new Error(`Wall-bounce failed: Need at least 2 providers, got ${finalResponses.length}`);
+    if (finalResponses.length < minProviders) {
+      const errorDetail = finalErrors.length ? `Failures: ${finalErrors.join('; ')}` : 'No successful providers';
+      throw new Error(`Wall-bounce failed: Need at least ${minProviders} providers, got ${finalResponses.length}. ${errorDetail}`);
+    }
+
+    if (finalErrors.length > 0) {
+      logger.warn('Wall-bounce completed with provider errors', {
+        errors: finalErrors
+      });
     }
 
     // 簡単なコンセンサス
     const avgConfidence = finalResponses.reduce((sum, r) => sum + r.confidence, 0) / finalResponses.length;
-    const bestResponse = finalResponses.reduce((best, current) =>
+    const bestResponse = finalResponses.reduce<LLMResponse & { provider: string }>((best, current) =>
       current.confidence > best.confidence ? current : best
-    );
+    , finalResponses[0]);
 
     const result: WallBounceResult = {
       consensus: {
@@ -304,11 +340,25 @@ export class WallBounceAnalyzer {
       debug: {
         wall_bounce_verified: true,
         providers_used: finalResponses.map(r => r.provider || 'unknown'),
-        tier_escalated: false
+        tier_escalated: false,
+        provider_errors: finalErrors
       }
     };
 
     return result;
+  }
+
+  private getProviderOrder(taskType: 'basic' | 'premium' | 'critical'): string[] {
+    const baseOrder = [...this.providerOrder];
+    switch (taskType) {
+      case 'premium':
+        return baseOrder;
+      case 'critical':
+        return baseOrder;
+      case 'basic':
+      default:
+        return baseOrder;
+    }
   }
 
   private async invokeGemini(prompt: string, version: '2.5-pro' | '2.5-flash'): Promise<LLMResponse> {

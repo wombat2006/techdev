@@ -43,7 +43,7 @@ class CodexGPT5Provider {
             const mockResponse = this.generateMockResponse(prompt);
             return {
                 content: `[Codex MCP Error] ${error instanceof Error ? error.message : '不明なエラー'}`,
-                confidence: 0.1,
+                confidence: 0,
                 reasoning: 'Codex MCP実行時にエラーが発生',
                 cost: 0.001,
                 tokens: { input: 0, output: 0 }
@@ -99,7 +99,7 @@ class CodexGPT5Provider {
             const mockResponse = this.generateMockResponse(prompt);
             return {
                 response: mockResponse,
-                success: true, // フォールバックも成功扱い
+                success: false,
                 tokens: this.estimateTokens(prompt, mockResponse)
             };
         }

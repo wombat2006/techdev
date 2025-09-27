@@ -27,11 +27,11 @@ const warmDriveVectorMappings = async () => {
         return inMemoryMappings.size;
     }
     try {
-        const existing = await redis.hgetall(VECTOR_MAPPING_KEY);
-        if (!existing) {
+        const entries = await redis.hgetall(VECTOR_MAPPING_KEY);
+        if (!entries) {
             return inMemoryMappings.size;
         }
-        Object.entries(existing).forEach(([fileId, raw]) => {
+        Object.entries(entries).forEach(([fileId, raw]) => {
             try {
                 const parsed = JSON.parse(raw);
                 if (parsed?.vectorStoreId && parsed?.vectorStoreFileId) {

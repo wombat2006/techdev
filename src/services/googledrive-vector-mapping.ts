@@ -64,42 +64,6 @@ export const warmDriveVectorMappings = async (): Promise<number> => {
   }
 };
 
-export const warmDriveVectorMappings = async (): Promise<number> => {
-  const redis = ensureRedis();
-  if (!redis) {
-    return inMemoryMappings.size;
-  }
-
-  try {
-    const existing = await redis.hgetall<Record<string, string>>(VECTOR_MAPPING_KEY);
-    if (!existing) {
-      return inMemoryMappings.size;
-    }
-
-    Object.entries(existing).forEach(([fileId, raw]) => {
-      try {
-        const parsed = JSON.parse(raw) as VectorMapping;
-        if (parsed?.vectorStoreId && parsed?.vectorStoreFileId) {
-          inMemoryMappings.set(fileId, parsed);
-        }
-      } catch (error) {
-        logger.warn('Drive mapping store: failed to parse mapping during warmup', {
-          fileId,
-          raw,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
-    });
-
-    return inMemoryMappings.size;
-  } catch (error) {
-    logger.warn('Drive mapping store: failed to warm cache from Redis', {
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-    return inMemoryMappings.size;
-  }
-};
-
 export const rememberDriveVectorMapping = async (
   fileId: string,
   vectorStoreId: string,

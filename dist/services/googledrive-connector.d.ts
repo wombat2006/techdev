@@ -66,6 +66,21 @@ export declare class GoogleDriveRAGConnector {
         }>;
     }>;
     /**
+     * 📄 特定ドキュメントを再同期
+     */
+    syncDocumentsById(documentIds: string[], vectorStoreName: string): Promise<{
+        vectorStoreId: string;
+        processed: Array<{
+            id: string;
+            name: string;
+            vectorStoreFileId: string;
+        }>;
+        failed: Array<{
+            id: string;
+            error: string;
+        }>;
+    }>;
+    /**
      * 🔍 RAG検索実行
      */
     searchRAG(query: string, vectorStoreId?: string, maxResults?: number): Promise<{

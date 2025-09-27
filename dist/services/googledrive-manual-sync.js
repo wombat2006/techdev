@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.runManualDriveSync = void 0;
+exports.resyncDriveDocuments = exports.runManualDriveSync = void 0;
 const googledrive_vector_mapping_1 = require("./googledrive-vector-mapping");
 const logger_1 = require("../utils/logger");
 const runManualDriveSync = async ({ connector, folderId, vectorStoreName, batchSize = 5, dryRun = false }) => {
@@ -45,4 +45,34 @@ const runManualDriveSync = async ({ connector, folderId, vectorStoreName, batchS
     };
 };
 exports.runManualDriveSync = runManualDriveSync;
+const resyncDriveDocuments = async (connector, vectorStoreName, documentIds) => {
+    logger_1.logger.info('🔁 Drive document re-sync started', {
+        count: documentIds.length,
+        vectorStoreName
+    });
+    const result = await connector.syncDocumentsById(documentIds, vectorStoreName);
+    await (0, googledrive_vector_mapping_1.rememberDriveVectorMappingsBulk)(result.processed.map(doc => ({
+        fileId: doc.id,
+        vectorStoreId: result.vectorStoreId,
+        vectorStoreFileId: doc.vectorStoreFileId
+    })));
+    return {
+        vectorStoreId: result.vectorStoreId,
+        processedCount: result.processed.length,
+        failedCount: result.failed.length,
+        processedDocuments: result.processed.map(doc => ({
+            id: doc.id,
+            name: doc.name,
+            vectorStoreFileId: doc.vectorStoreFileId
+        })),
+        failedDocuments: result.failed.map(doc => ({
+            id: doc.id,
+            name: doc.id,
+            error: doc.error
+        })),
+        batchSizeUsed: documentIds.length,
+        dryRun: false
+    };
+};
+exports.resyncDriveDocuments = resyncDriveDocuments;
 //# sourceMappingURL=googledrive-manual-sync.js.map

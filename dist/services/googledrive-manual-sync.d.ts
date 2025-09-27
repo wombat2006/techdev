@@ -24,3 +24,4 @@ export interface ManualSyncOutcome {
     dryRun: boolean;
 }
 export declare const runManualDriveSync: ({ connector, folderId, vectorStoreName, batchSize, dryRun }: ManualSyncOptions) => Promise<ManualSyncOutcome>;
+export declare const resyncDriveDocuments: (connector: GoogleDriveRAGConnector, vectorStoreName: string, documentIds: string[]) => Promise<ManualSyncOutcome>;
