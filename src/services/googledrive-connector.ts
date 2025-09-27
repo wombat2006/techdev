@@ -400,6 +400,47 @@ export class GoogleDriveRAGConnector {
     }
   }
 
+  async removeDocumentFromVectorStore(
+    vectorStoreId: string,
+    vectorStoreFileId: string
+  ): Promise<void> {
+    try {
+      logger.info('🗑️ Vector Storeファイル削除開始', {
+        vectorStoreId,
+        vectorStoreFileId
+      });
+
+      const filesApi: any = this.openai.vectorStores?.files;
+      if (filesApi?.del) {
+        await filesApi.del(vectorStoreId, vectorStoreFileId);
+      } else if (filesApi?.delete) {
+        await filesApi.delete(vectorStoreId, vectorStoreFileId);
+      } else {
+        throw new Error('Vector store file delete API is not available in current OpenAI SDK');
+      }
+
+      const rootFilesApi: any = this.openai.files;
+      if (rootFilesApi?.del) {
+        await rootFilesApi.del(vectorStoreFileId);
+      } else if (rootFilesApi?.delete) {
+        await rootFilesApi.delete(vectorStoreFileId);
+      }
+
+      logger.info('✅ Vector Storeファイル削除完了', {
+        vectorStoreId,
+        vectorStoreFileId
+      });
+
+    } catch (error) {
+      logger.error('❌ Vector Storeファイル削除エラー', {
+        vectorStoreId,
+        vectorStoreFileId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw error;
+    }
+  }
+
   /**
    * 🔄 GoogleDriveフォルダ全体をRAG化
    */

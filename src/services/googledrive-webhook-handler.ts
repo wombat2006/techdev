@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import { GoogleDriveRAGConnector, GoogleDriveConfig, OpenAIConfig } from './googledrive-connector';
 import { logger } from '../utils/logger';
 import { PrometheusClient } from '../metrics/prometheus-client-class';
+import { getRedisService, RedisService } from './redis-service';
 
 export interface WebhookNotification {
   kind: string;
@@ -42,6 +43,9 @@ export class GoogleDriveWebhookHandler {
   private prometheusClient: PrometheusClient;
   private webhookSecret: string;
   private monitoredFolders: Set<string>;
+  private redis: RedisService | null;
+  private vectorStoreMappings: Map<string, { vectorStoreId: string; vectorStoreFileId: string }>;
+  private readonly vectorStoreMappingKey = 'rag:drive-vector-mapping';
 
   // RAG同期設定
   private readonly SUPPORTED_MIME_TYPES = [
@@ -80,6 +84,8 @@ export class GoogleDriveWebhookHandler {
     
     // Prometheusクライアント初期化
     this.prometheusClient = PrometheusClient.getInstance();
+    this.redis = this.initializeRedis();
+    this.vectorStoreMappings = new Map();
 
     logger.info('🔔 Google Drive Webhookハンドラー初期化完了', {
       supportedMimeTypes: this.SUPPORTED_MIME_TYPES.length
@@ -492,6 +498,8 @@ export class GoogleDriveWebhookHandler {
         document
       );
 
+      await this.rememberVectorStoreMapping(file.id, vectorStoreId, vectorStoreFileId);
+
       logger.info('✅ RAG同期完了', {
         fileName: file.name,
         vectorStoreFileId
@@ -511,12 +519,19 @@ export class GoogleDriveWebhookHandler {
    */
   private async removeFileFromRAG(fileId: string): Promise<void> {
     try {
-      // 実装予定: Vector StoreからファイルID基づく削除
-      // OpenAI Files APIからファイル削除
-      logger.info('🗑️ RAGからファイル削除', { fileId });
+      const mapping = await this.resolveVectorStoreMapping(fileId);
 
-      // TODO: OpenAI Files APIの削除処理実装
-      // await this.openai.files.delete(vectorStoreFileId);
+      if (!mapping) {
+        logger.warn('⚠️ RAG mapping not found for Drive file', { fileId });
+        return;
+      }
+
+      await this.ragConnector.removeDocumentFromVectorStore(
+        mapping.vectorStoreId,
+        mapping.vectorStoreFileId
+      );
+
+      await this.clearVectorStoreMapping(fileId);
 
     } catch (error) {
       logger.error('❌ RAGファイル削除エラー', {
@@ -524,6 +539,83 @@ export class GoogleDriveWebhookHandler {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
       throw error;
+    }
+  }
+
+  private initializeRedis(): RedisService | null {
+    try {
+      return getRedisService();
+    } catch (error) {
+      logger.warn('⚠️ Redis unavailable for Drive vector mapping persistence', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      return null;
+    }
+  }
+
+  private async rememberVectorStoreMapping(
+    fileId: string,
+    vectorStoreId: string,
+    vectorStoreFileId: string
+  ): Promise<void> {
+    const payload = { vectorStoreId, vectorStoreFileId };
+    this.vectorStoreMappings.set(fileId, payload);
+
+    if (this.redis) {
+      try {
+        await this.redis.hset(this.vectorStoreMappingKey, fileId, JSON.stringify(payload));
+      } catch (error) {
+        logger.warn('⚠️ Failed to persist Drive vector mapping to Redis', {
+          fileId,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    }
+  }
+
+  private async resolveVectorStoreMapping(
+    fileId: string
+  ): Promise<{ vectorStoreId: string; vectorStoreFileId: string } | null> {
+    const inMemory = this.vectorStoreMappings.get(fileId);
+    if (inMemory) {
+      return inMemory;
+    }
+
+    if (!this.redis) {
+      return null;
+    }
+
+    try {
+      const raw = await this.redis.hget<string>(this.vectorStoreMappingKey, fileId);
+      if (!raw) {
+        return null;
+      }
+
+      const payload = JSON.parse(raw) as { vectorStoreId: string; vectorStoreFileId: string };
+      this.vectorStoreMappings.set(fileId, payload);
+      return payload;
+
+    } catch (error) {
+      logger.warn('⚠️ Failed to load Drive vector mapping from Redis', {
+        fileId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      return null;
+    }
+  }
+
+  private async clearVectorStoreMapping(fileId: string): Promise<void> {
+    this.vectorStoreMappings.delete(fileId);
+
+    if (this.redis) {
+      try {
+        await this.redis.hdel(this.vectorStoreMappingKey, fileId);
+      } catch (error) {
+        logger.warn('⚠️ Failed to delete Drive vector mapping from Redis', {
+          fileId,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
     }
   }
 

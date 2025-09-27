@@ -88,4 +88,4 @@ See detailed documentation in:
 - TODO の方向性確認:
   - `src/wall-bounce-server.ts:337` の「GoogleDriveファイル情報を追加」は正しい次ステップです。→ **実装済み**：Drive メタデータを取得し、検索結果の `sources` に反映しました。
   - `src/routes/webhook-endpoints.ts:296` の `ragConnector` 連携未実装は、同期機能が空振りになるため早めの実装が必要です。→ **実装済み**：手動同期エンドポイントで RAG コネクタを初期化し、実際に `syncFolderToRAG` を実行します。
-  - `src/services/googledrive-webhook-handler.ts:520` の OpenAI Files API での削除処理も、重複データ防止のため実装予定通り進めてください。
+  - `src/services/googledrive-webhook-handler.ts:520` の OpenAI Files API での削除処理も、重複データ防止のため実装予定通り進めてください。→ **実装済み**：Drive ファイルIDと Vector Store ファイルID を Redis/In-memory で管理し、削除通知時に OpenAI Vector Store からファイルを削除します。
