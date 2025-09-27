@@ -7,28 +7,45 @@ export interface ManualSyncOptions {
   folderId: string;
   vectorStoreName: string;
   batchSize?: number;
+  dryRun?: boolean;
 }
 
 export interface ManualSyncOutcome {
-  vectorStoreId: string;
+  vectorStoreId: string | null;
   processedCount: number;
   failedCount: number;
   processedDocuments: Array<{ id: string; name: string; vectorStoreFileId?: string }>;
   failedDocuments: Array<{ id: string; name: string; error: string }>;
   batchSizeUsed: number;
+  dryRun: boolean;
 }
 
 export const runManualDriveSync = async ({
   connector,
   folderId,
   vectorStoreName,
-  batchSize = 5
+  batchSize = 5,
+  dryRun = false
 }: ManualSyncOptions): Promise<ManualSyncOutcome> => {
   logger.info('🔄 Manual Google Drive sync started', {
     folderId,
     vectorStoreName,
-    batchSize
+    batchSize,
+    dryRun
   });
+
+  if (dryRun) {
+    const documents = await connector.listDocuments(folderId);
+    return {
+      vectorStoreId: null,
+      processedCount: 0,
+      failedCount: 0,
+      processedDocuments: documents.map(doc => ({ id: doc.id, name: doc.name })),
+      failedDocuments: [],
+      batchSizeUsed: batchSize,
+      dryRun: true
+    };
+  }
 
   const syncResult = await connector.syncFolderToRAG(folderId, vectorStoreName, batchSize);
 
@@ -52,6 +69,7 @@ export const runManualDriveSync = async ({
       vectorStoreFileId: doc.vectorStoreFileId
     })),
     failedDocuments: syncResult.failedDocuments,
-    batchSizeUsed: batchSize
+    batchSizeUsed: batchSize,
+    dryRun: false
   };
 };

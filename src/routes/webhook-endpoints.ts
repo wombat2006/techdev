@@ -7,6 +7,7 @@ import { Router, Request, Response } from 'express';
 import { GoogleDriveWebhookHandler } from '../services/googledrive-webhook-handler';
 import { GoogleDriveRAGConnector, GoogleDriveConfig, OpenAIConfig } from '../services/googledrive-connector';
 import { runManualDriveSync } from '../services/googledrive-manual-sync';
+import { warmDriveVectorMappings } from '../services/googledrive-vector-mapping';
 import { logger } from '../utils/logger';
 import { PrometheusClient } from '../metrics/prometheus-client-class';
 
@@ -30,6 +31,7 @@ const webhookSecret = process.env.GOOGLEDRIVE_WEBHOOK_SECRET;
 // Webhook ハンドラー初期化
 let webhookHandler: GoogleDriveWebhookHandler | null = null;
 let ragConnector: GoogleDriveRAGConnector | null = null;
+let mappingWarmPromise: Promise<number> | null = null;
 
 const initializeWebhookHandler = () => {
   if (!webhookSecret) {
@@ -43,15 +45,29 @@ const initializeWebhookHandler = () => {
       openaiConfig,
       webhookSecret
     );
-    
+
     // デフォルト監視フォルダ設定
     const defaultFolderId = process.env.RAG_FOLDER_ID;
     if (defaultFolderId) {
       webhookHandler.addMonitoredFolder(defaultFolderId);
       logger.info('🔔 デフォルトRAGフォルダを監視対象に追加', { folderId: defaultFolderId });
     }
-    
+
     logger.info('🤖 Drive Webhookハンドラー初期化完了');
+
+    if (!mappingWarmPromise) {
+      mappingWarmPromise = warmDriveVectorMappings()
+        .then(count => {
+          logger.info('🔥 Drive vector mapping cache warmed', { entries: count });
+          return count;
+        })
+        .catch(error => {
+          logger.warn('⚠️ Failed to warm Drive vector mapping cache', {
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
+          return 0;
+        });
+    }
   }
   return webhookHandler;
 };
@@ -292,7 +308,7 @@ router.post('/googledrive/test-webhook', async (req: Request, res: Response) => 
  */
 router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
   try {
-    const { folder_id, force_full_sync = false, batch_size } = req.body;
+    const { folder_id, force_full_sync = false, batch_size, dry_run = false } = req.body;
 
     logger.info('🔄 手動同期トリガー実行', { 
       folder_id: folder_id || 'default',
@@ -330,10 +346,11 @@ router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
       connector,
       folderId: targetFolderId,
       vectorStoreName,
-      batchSize
+      batchSize,
+      dryRun: Boolean(dry_run)
     });
 
-    if (syncResult.failedCount > 0) {
+    if (!syncResult.dryRun && syncResult.failedCount > 0) {
       logger.warn('⚠️ Manual Drive sync completed with failures', {
         folderId: targetFolderId,
         processed: syncResult.processedCount,
@@ -346,10 +363,13 @@ router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
       });
     }
 
-    const statusCode = syncResult.failedCount > 0 && syncResult.processedCount > 0 ? 207
-      : syncResult.failedCount > 0
-        ? 500
-        : 200;
+    const statusCode = syncResult.dryRun
+      ? 200
+      : syncResult.failedCount > 0 && syncResult.processedCount > 0
+        ? 207
+        : syncResult.failedCount > 0
+          ? 500
+          : 200;
 
     res.status(statusCode).json({
       success: true,
@@ -358,14 +378,16 @@ router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
         folder_id: targetFolderId,
         vector_store_name: vectorStoreName,
         force_full_sync,
+        dry_run: syncResult.dryRun,
         batch_size: syncResult.processedDocuments.length > 0 ? syncResult.batchSizeUsed : undefined,
         timestamp: new Date().toISOString(),
-         sync_result: {
-           vector_store_id: syncResult.vectorStoreId,
-           processed: syncResult.processedCount,
-           failed: syncResult.failedCount,
-           failed_documents: syncResult.failedDocuments
-         }
+        sync_result: {
+          vector_store_id: syncResult.vectorStoreId,
+          processed: syncResult.processedCount,
+          failed: syncResult.failedCount,
+          failed_documents: syncResult.failedDocuments,
+          processed_documents: syncResult.dryRun ? syncResult.processedDocuments : undefined
+        }
       }
     });
 

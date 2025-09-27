@@ -90,4 +90,4 @@ See detailed documentation in:
   - `src/routes/webhook-endpoints.ts:296` の `ragConnector` 連携未実装は、同期機能が空振りになるため早めの実装が必要です。→ **実装済み**：手動同期エンドポイントで RAG コネクタを初期化し、実際に `syncFolderToRAG` を実行します。
 - `src/services/googledrive-webhook-handler.ts:520` の OpenAI Files API での削除処理も、重複データ防止のため実装予定通り進めてください。→ **実装済み**：共有マッピングストア（`src/services/googledrive-vector-mapping.ts`）に Drive ファイルIDと Vector Store ファイルID を保存し、削除通知および手動同期後も Vector Store 側までクリーンアップされるようになりました。
 - SRP 強化: `GoogleDriveWebhookHandler.handleWebhook` が HTTP レスポンス組み立てまで担っていたため、処理ロジックとプレゼンテーション層を分離しました。ルート側でレスポンス生成を行い、ハンドラーは結果オブジェクトのみ返します。
-- 監視性強化: `syncFolderToRAG` は失敗したドキュメントのID/名称/エラー理由を返し、`runManualDriveSync` を介して `/googledrive/manual-sync` レスポンスで確認可能になりました。失敗が発生した場合は HTTP 207/500 で通知されます。
+- 監視性強化: `syncFolderToRAG` は失敗したドキュメントのID/名称/エラー理由を返し、`runManualDriveSync` を介して `/googledrive/manual-sync` レスポンスで確認可能になりました。失敗が発生した場合は HTTP 207/500 で通知されます。`dry_run=true` を渡すと実際の同期を行わずプレビューを取得できます。
