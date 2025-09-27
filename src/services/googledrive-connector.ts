@@ -554,6 +554,43 @@ export class GoogleDriveRAGConnector {
   }
 
   /**
+   * 📄 特定ドキュメントを再同期
+   */
+  async syncDocumentsById(
+    documentIds: string[],
+    vectorStoreName: string
+  ): Promise<{
+    vectorStoreId: string;
+    processed: Array<{ id: string; name: string; vectorStoreFileId: string }>;
+    failed: Array<{ id: string; error: string }>;
+  }> {
+    const vectorStoreId = await this.getOrCreateVectorStore(vectorStoreName);
+    const processed: Array<{ id: string; name: string; vectorStoreFileId: string }> = [];
+    const failed: Array<{ id: string; error: string }> = [];
+
+    for (const documentId of documentIds) {
+      try {
+        const document = await this.downloadDocument(documentId);
+        const vectorStoreFileId = await this.addDocumentToVectorStore(vectorStoreId, document);
+        processed.push({ id: documentId, name: document.name, vectorStoreFileId });
+        logger.info('✅ ドキュメント再同期完了', {
+          documentId,
+          vectorStoreFileId
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        failed.push({ id: documentId, error: message });
+        logger.error('❌ ドキュメント再同期失敗', {
+          documentId,
+          error: message
+        });
+      }
+    }
+
+    return { vectorStoreId, processed, failed };
+  }
+
+  /**
    * 🔍 RAG検索実行
    */
   async searchRAG(

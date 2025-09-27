@@ -73,3 +73,42 @@ export const runManualDriveSync = async ({
     dryRun: false
   };
 };
+
+export const resyncDriveDocuments = async (
+  connector: GoogleDriveRAGConnector,
+  vectorStoreName: string,
+  documentIds: string[]
+): Promise<ManualSyncOutcome> => {
+  logger.info('🔁 Drive document re-sync started', {
+    count: documentIds.length,
+    vectorStoreName
+  });
+
+  const result = await connector.syncDocumentsById(documentIds, vectorStoreName);
+
+  await rememberDriveVectorMappingsBulk(
+    result.processed.map(doc => ({
+      fileId: doc.id,
+      vectorStoreId: result.vectorStoreId,
+      vectorStoreFileId: doc.vectorStoreFileId
+    }))
+  );
+
+  return {
+    vectorStoreId: result.vectorStoreId,
+    processedCount: result.processed.length,
+    failedCount: result.failed.length,
+    processedDocuments: result.processed.map(doc => ({
+      id: doc.id,
+      name: doc.name,
+      vectorStoreFileId: doc.vectorStoreFileId
+    })),
+    failedDocuments: result.failed.map(doc => ({
+      id: doc.id,
+      name: doc.id,
+      error: doc.error
+    })),
+    batchSizeUsed: documentIds.length,
+    dryRun: false
+  };
+};

@@ -91,3 +91,4 @@ See detailed documentation in:
 - `src/services/googledrive-webhook-handler.ts:520` の OpenAI Files API での削除処理も、重複データ防止のため実装予定通り進めてください。→ **実装済み**：共有マッピングストア（`src/services/googledrive-vector-mapping.ts`）に Drive ファイルIDと Vector Store ファイルID を保存し、削除通知および手動同期後も Vector Store 側までクリーンアップされるようになりました。
 - SRP 強化: `GoogleDriveWebhookHandler.handleWebhook` が HTTP レスポンス組み立てまで担っていたため、処理ロジックとプレゼンテーション層を分離しました。ルート側でレスポンス生成を行い、ハンドラーは結果オブジェクトのみ返します。
 - 監視性強化: `syncFolderToRAG` は失敗したドキュメントのID/名称/エラー理由を返し、`runManualDriveSync` を介して `/googledrive/manual-sync` レスポンスで確認可能になりました。失敗が発生した場合は HTTP 207/500 で通知されます。`dry_run=true` を渡すと実際の同期を行わずプレビューを取得できます。
+- CLI 補助: `scripts/resync-drive-docs.ts --input manual-sync.json` で失敗したドキュメントのみ再同期できます。`--dry-run` で対象IDの確認、`--document docA,docB` で任意指定が可能です。
