@@ -80,3 +80,12 @@ See detailed documentation in:
 - TypeScript: ES2022, strict mode, CommonJS
 - Testing: Jest, 30s timeout, Node environment
 - Redis required for caching and sessions
+
+## 🚨 Review Feedback (Codex)
+
+- `src/services/redis-service.ts:216` でセッション/キャッシュの `set` に素のオブジェクトを渡すように変更されていますが、Upstash SDK は `string | number | boolean` しか扱えず、Redis には `"[object Object]"` が保存されてしまいます。元の `JSON.stringify`/`JSON.parse` を維持してください。
+- `src/services/wall-bounce-analyzer.ts:207` で `executeGeminiCLI` の引数が常に `gemini-2.5-pro` になっており、`gemini-2.5-flash` パスでも Pro モデルが呼ばれてしまいます。`version` を使って CLI の `--model` を切り替える必要があります。
+- TODO の方向性確認:
+  - `src/wall-bounce-server.ts:337` の「GoogleDriveファイル情報を追加」は正しい次ステップです。Drive から実ファイルメタデータを組み込む実装を検討してください。
+  - `src/routes/webhook-endpoints.ts:296` の `ragConnector` 連携未実装は、同期機能が空振りになるため早めの実装が必要です。
+  - `src/services/googledrive-webhook-handler.ts:520` の OpenAI Files API での削除処理も、重複データ防止のため実装予定通り進めてください。
