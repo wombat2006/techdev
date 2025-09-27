@@ -453,6 +453,7 @@ export class GoogleDriveRAGConnector {
     processedCount: number;
     failedCount: number;
     processedDocuments: ProcessedDocument[];
+    failedDocuments: Array<{ id: string; name: string; error: string }>;
   }> {
     try {
       logger.info('🔄 GoogleDriveフォルダRAG同期開始', { 
@@ -468,6 +469,7 @@ export class GoogleDriveRAGConnector {
       const documents = await this.listDocuments(folderId);
       
       const processedDocuments: ProcessedDocument[] = [];
+      const failedDocuments: Array<{ id: string; name: string; error: string }> = [];
       let processedCount = 0;
       let failedCount = 0;
 
@@ -504,10 +506,16 @@ export class GoogleDriveRAGConnector {
 
             } catch (error) {
               failedCount++;
+              const failureMessage = error instanceof Error ? error.message : 'Unknown error';
+              failedDocuments.push({
+                id: docMeta.id,
+                name: docMeta.name,
+                error: failureMessage
+              });
               logger.error('❌ ドキュメント処理失敗', { 
                 id: docMeta.id,
                 name: docMeta.name,
-                error: error instanceof Error ? error.message : 'Unknown error' 
+                error: failureMessage 
               });
             }
           })
@@ -523,14 +531,16 @@ export class GoogleDriveRAGConnector {
         vectorStoreId,
         processedCount,
         failedCount,
-        totalDocuments: documents.length 
+        totalDocuments: documents.length,
+        failedDocuments: failedDocuments.length 
       });
 
       return {
         vectorStoreId,
         processedCount,
         failedCount,
-        processedDocuments
+        processedDocuments,
+        failedDocuments
       };
 
     } catch (error) {

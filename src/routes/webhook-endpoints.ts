@@ -360,7 +360,8 @@ router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
         sync_result: {
           vector_store_id: syncResult.vectorStoreId,
           processed: syncResult.processedCount,
-          failed: syncResult.failedCount
+          failed: syncResult.failedCount,
+          failed_documents: syncResult.failedDocuments
         }
       }
     });
