@@ -10,7 +10,7 @@ export const config = {
   huggingface: {
     apiKey: process.env.HUGGINGFACE_API_KEY || '',
     baseUrl: process.env.HUGGINGFACE_BASE_URL || 'https://api-inference.huggingface.co',
-    timeout: 30000,
+    timeout: 300000, // 5 minutes for complete testing
     retryAttempts: 3,
   },
   redis: {
