@@ -5,7 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { GoogleDriveWebhookHandler } from '../services/googledrive-webhook-handler';
-import { GoogleDriveConfig, OpenAIConfig } from '../services/googledrive-connector';
+import { GoogleDriveRAGConnector, GoogleDriveConfig, OpenAIConfig } from '../services/googledrive-connector';
 import { logger } from '../utils/logger';
 import { PrometheusClient } from '../metrics/prometheus-client-class';
 
@@ -28,6 +28,7 @@ const webhookSecret = process.env.GOOGLEDRIVE_WEBHOOK_SECRET;
 
 // Webhook ハンドラー初期化
 let webhookHandler: GoogleDriveWebhookHandler | null = null;
+let ragConnector: GoogleDriveRAGConnector | null = null;
 
 const initializeWebhookHandler = () => {
   if (!webhookSecret) {
@@ -52,6 +53,29 @@ const initializeWebhookHandler = () => {
     logger.info('🤖 Drive Webhookハンドラー初期化完了');
   }
   return webhookHandler;
+};
+
+const getRagConnector = (): GoogleDriveRAGConnector | null => {
+  if (ragConnector) {
+    return ragConnector;
+  }
+
+  if (!googleDriveConfig.clientId || !googleDriveConfig.refreshToken || !openaiConfig.apiKey) {
+    logger.error('❌ Google Drive/OpenAI credentials are not fully configured for manual sync');
+    return null;
+  }
+
+  try {
+    ragConnector = new GoogleDriveRAGConnector(googleDriveConfig, openaiConfig);
+    logger.info('📂 Google Drive RAG connector initialised for manual sync');
+  } catch (error) {
+    logger.error('❌ Failed to initialise Google Drive RAG connector', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    ragConnector = null;
+  }
+
+  return ragConnector;
 };
 
 /**
@@ -103,7 +127,6 @@ router.post('/googledrive/notifications', async (req: Request, res: Response) =>
     }
 
     // エラーメトリクス記録
-    const duration = Date.now() - startTime;
     prometheusClient.recordWebhookError('processing_error');
   }
 });
@@ -274,17 +297,26 @@ router.post('/googledrive/test-webhook', async (req: Request, res: Response) => 
  */
 router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
   try {
-    const { folder_id, force_full_sync = false } = req.body;
+    const { folder_id, force_full_sync = false, batch_size } = req.body;
 
     logger.info('🔄 手動同期トリガー実行', { 
       folder_id: folder_id || 'default',
-      force_full_sync 
+      force_full_sync,
+      batch_size
     });
 
     const handler = initializeWebhookHandler();
     if (!handler) {
       return res.status(500).json({
         error: 'Webhook handler not initialized'
+      });
+    }
+
+    const connector = getRagConnector();
+    if (!connector) {
+      return res.status(500).json({
+        error: 'RAG connector not initialized',
+        message: 'Check Google Drive and OpenAI credentials'
       });
     }
 
@@ -298,9 +330,11 @@ router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
 
     // RAGコネクタによる同期実行
     const vectorStoreName = process.env.DEFAULT_VECTOR_STORE_NAME || 'techsapo-realtime-docs';
-    
-    // TODO: ragConnectorへのアクセス方法を検討
-    // const syncResult = await ragConnector.syncFolderToRAG(targetFolderId, vectorStoreName, 5);
+    const syncResult = await connector.syncFolderToRAG(
+      targetFolderId,
+      vectorStoreName,
+      typeof batch_size === 'number' && batch_size > 0 ? batch_size : 5
+    );
 
     res.json({
       success: true,
@@ -309,8 +343,13 @@ router.post('/googledrive/manual-sync', async (req: Request, res: Response) => {
         folder_id: targetFolderId,
         vector_store_name: vectorStoreName,
         force_full_sync,
-        timestamp: new Date().toISOString()
-        // sync_result: syncResult
+        batch_size: syncResult.processedDocuments.length > 0 ? (typeof batch_size === 'number' && batch_size > 0 ? batch_size : 5) : undefined,
+        timestamp: new Date().toISOString(),
+        sync_result: {
+          vector_store_id: syncResult.vectorStoreId,
+          processed: syncResult.processedCount,
+          failed: syncResult.failedCount
+        }
       }
     });
 

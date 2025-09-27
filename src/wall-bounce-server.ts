@@ -11,7 +11,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { wallBounceAnalyzer, WallBounceResult } from './services/wall-bounce-analyzer';
 import { wallBounceAdapter } from './services/wall-bounce-adapter';
-import { featureFlags, shouldUseSRPArchitecture, logFeatureFlags } from './config/feature-flags';
+import { shouldUseSRPArchitecture, logFeatureFlags } from './config/feature-flags';
 import { logger } from './utils/logger';
 import { 
   metricsMiddleware, 
@@ -22,9 +22,47 @@ import {
   register, 
   initializeMetrics 
 } from './metrics/prometheus-client';
+import { GoogleDriveRAGConnector, GoogleDriveConfig, OpenAIConfig } from './services/googledrive-connector';
 
 const app = express();
 const PORT = process.env.CANARY_PORT || process.env.PORT || 4000;
+
+const driveConfig: GoogleDriveConfig = {
+  clientId: process.env.GOOGLE_CLIENT_ID || '',
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+  redirectUri: process.env.GOOGLE_REDIRECT_URI || 'urn:ietf:wg:oauth:2.0:oob',
+  refreshToken: process.env.GOOGLE_REFRESH_TOKEN || ''
+};
+
+const openAiDriveConfig: OpenAIConfig = {
+  apiKey: process.env.OPENAI_API_KEY || '',
+  organization: process.env.OPENAI_ORGANIZATION
+};
+
+let sharedRagConnector: GoogleDriveRAGConnector | null = null;
+
+const getSharedRagConnector = (): GoogleDriveRAGConnector | null => {
+  if (sharedRagConnector) {
+    return sharedRagConnector;
+  }
+
+  if (!driveConfig.clientId || !driveConfig.refreshToken || !openAiDriveConfig.apiKey) {
+    logger.warn('⚠️ Google Drive/OpenAI credentials are missing; RAG source metadata is unavailable');
+    return null;
+  }
+
+  try {
+    sharedRagConnector = new GoogleDriveRAGConnector(driveConfig, openAiDriveConfig);
+    logger.info('📂 Shared Google Drive RAG connector initialised');
+  } catch (error) {
+    logger.error('❌ Failed to initialise shared RAG connector', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    sharedRagConnector = null;
+  }
+
+  return sharedRagConnector;
+};
 
 // Prometheus metrics initialization
 initializeMetrics();
@@ -330,17 +368,45 @@ app.post('/api/v1/rag/search', async (req, res) => {
       }
     );
 
+    const discoveredSources: Array<{ title: string; url: string; relevance_score: number }> = [];
+    const connector = getSharedRagConnector();
+    const effectiveFolderId = user_drive_folder_id || process.env.RAG_FOLDER_ID;
+
+    if (connector && effectiveFolderId) {
+      try {
+        const documents = await connector.listDocuments(effectiveFolderId);
+        documents
+          .slice(0, Math.max(1, Math.min(max_results, 5)))
+          .forEach((doc, index) => {
+            const baseScore = 0.95 - index * 0.05;
+            discoveredSources.push({
+              title: doc.name,
+              url: doc.webViewLink || `https://drive.google.com/file/d/${doc.id}/view`,
+              relevance_score: Number((baseScore > 0 ? baseScore : 0.5).toFixed(2))
+            });
+          });
+      } catch (error) {
+        logger.warn('⚠️ Failed to retrieve Google Drive document metadata', {
+          folderId: effectiveFolderId,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    }
+
+    if (!discoveredSources.length) {
+      discoveredSources.push({
+        title: 'GoogleDriveドキュメント情報未取得',
+        url: effectiveFolderId
+          ? `https://drive.google.com/drive/folders/${effectiveFolderId}`
+          : 'https://drive.google.com',
+        relevance_score: 0.5
+      });
+    }
+
     const searchResult = {
       answer: wallBounceResult.consensus.content,
       confidence: wallBounceResult.consensus.confidence,
-      sources: [
-        // TODO: 実際のGoogleDriveファイル情報を追加
-        {
-          title: "sample_document.pdf",
-          url: `https://drive.google.com/file/d/${user_drive_folder_id}/view`,
-          relevance_score: 0.95
-        }
-      ],
+      sources: discoveredSources,
       wall_bounce_analysis: {
         providers_used: wallBounceResult.debug.providers_used,
         processing_time_ms: wallBounceResult.processing_time_ms,
@@ -414,7 +480,8 @@ app.use((req, res) => {
 // Prometheus metrics error handler first
 app.use(metricsErrorHandler);
 
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+app.use((error: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('🚨 Server error', { error });
   
   if (error.type === 'entity.parse.failed') {
