@@ -8,6 +8,7 @@ import { getSessionManager } from './services/session-manager';
 import { WallBounceAnalyzer } from './services/wall-bounce-analyzer';
 import { LogAnalyzer } from './services/log-analyzer';
 import ragEndpoints from './routes/rag-endpoint';
+import codexSessionRoutes from './routes/codex-session';
 
 export function createServer() {
   const app = express();
@@ -33,6 +34,9 @@ export function createServer() {
 
   // RAG API routes
   app.use('/api/v1/rag', ragEndpoints);
+  
+  // Codex Session API routes
+  app.use('/api/codex', codexSessionRoutes);
 
   // Real-time metrics endpoint (Server-Sent Events)
   app.get('/api/v1/metrics/stream', (req, res) => {
@@ -86,6 +90,7 @@ export function createServer() {
     try {
       const redis = getRedisService();
       const sessionManager = getSessionManager();
+      const wallBounceAnalyzer = new WallBounceAnalyzer();
 
       // Test Redis connection
       let redisStatus = 'ok';
@@ -96,13 +101,54 @@ export function createServer() {
         redisStatus = 'error';
       }
 
+      // Test Gemini CLI availability
+      let geminiCliStatus = 'ok';
+      let geminiCliVersion = 'unknown';
+      try {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+        
+        const { stdout } = await execAsync('gemini --version', { timeout: 5000 });
+        geminiCliVersion = stdout.trim();
+      } catch (error) {
+        geminiCliStatus = 'error';
+      }
+
+      // Get current environment configuration
+      const environmentConfig = {
+        srpEnabled: process.env.USE_SRP_WALL_BOUNCE === 'true',
+        srpTrafficPercentage: parseInt(process.env.SRP_TRAFFIC_PERCENTAGE || '0'),
+        geminiStrategy: process.env.GEMINI_STRATEGY || 'api',
+        geminiCliPercentage: parseInt(process.env.GEMINI_CLI_PERCENTAGE || '0'),
+        deploymentVersion: process.env.DEPLOYMENT_VERSION || 'unknown'
+      };
+
       res.json({
         status: 'ok',
         services: {
           redis: redisStatus,
-          sessionManager: 'ok'
+          sessionManager: 'ok',
+          geminiCli: geminiCliStatus
+        },
+        gemini: {
+          cliVersion: geminiCliVersion,
+          strategy: environmentConfig.geminiStrategy,
+          cliPercentage: environmentConfig.geminiCliPercentage
+        },
+        srp: {
+          enabled: environmentConfig.srpEnabled,
+          trafficPercentage: environmentConfig.srpTrafficPercentage
+        },
+        deployment: {
+          version: environmentConfig.deploymentVersion,
+          environment: process.env.NODE_ENV || 'development'
         },
         uptime: process.uptime(),
+        memory: {
+          used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+        },
         timestamp: new Date().toISOString()
       });
     } catch (error) {
@@ -131,12 +177,8 @@ export function createServer() {
       const wallBounceAnalyzer = new WallBounceAnalyzer();
       const wallBounceResult = await wallBounceAnalyzer.executeWallBounce(
         prompt,
-        task_type as 'basic' | 'premium' | 'critical' || 'basic',
-        {
-          minProviders: task_type === 'critical' ? 3 : 2,
-          maxProviders: task_type === 'critical' ? 4 : 3,
-          requireConsensus: true,
-          confidenceThreshold: task_type === 'critical' ? 0.9 : 0.8
+        { 
+          taskType: (task_type as 'basic' | 'premium' | 'critical') || 'basic'
         }
       );
 

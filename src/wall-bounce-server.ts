@@ -10,6 +10,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { wallBounceAnalyzer, WallBounceResult } from './services/wall-bounce-analyzer';
+import { wallBounceAdapter } from './services/wall-bounce-adapter';
+import { featureFlags, shouldUseSRPArchitecture, logFeatureFlags } from './config/feature-flags';
 import { logger } from './utils/logger';
 import { 
   metricsMiddleware, 
@@ -26,6 +28,24 @@ const PORT = process.env.CANARY_PORT || process.env.PORT || 4000;
 
 // Prometheus metrics initialization
 initializeMetrics();
+
+// Feature flags initialization
+logFeatureFlags(logger);
+
+// SRP Integration Helper
+async function executeWallBounceWithSRP(
+  prompt: string,
+  taskType: 'basic' | 'premium' | 'critical',
+  options: any
+): Promise<WallBounceResult> {
+  if (shouldUseSRPArchitecture()) {
+    logger.info('🆕 Using SRP Wall-Bounce Architecture');
+    return await wallBounceAdapter.analyze(prompt, taskType, options);
+  } else {
+    logger.info('📞 Using Legacy Wall-Bounce Architecture');
+    return await wallBounceAnalyzer.executeWallBounce(prompt, { taskType });
+  }
+}
 
 // Security middleware
 app.use(helmet());
@@ -126,8 +146,8 @@ app.post('/api/v1/generate', async (req, res) => {
       prompt_length: prompt.length
     });
 
-    // 壁打ち分析実行（必須）
-    const wallBounceResult: WallBounceResult = await wallBounceAnalyzer.executeWallBounce(
+    // 壁打ち分析実行（必須）- SRP対応
+    const wallBounceResult: WallBounceResult = await executeWallBounceWithSRP(
       `IT Infrastructure問題分析: ${prompt}`,
       task_type as 'basic' | 'premium' | 'critical',
       {
@@ -217,8 +237,8 @@ app.post('/api/v1/analyze-logs', async (req, res) => {
 5. 重要度とビジネス影響度
 `;
 
-    // 壁打ち分析実行
-    const wallBounceResult = await wallBounceAnalyzer.executeWallBounce(
+    // 壁打ち分析実行 - SRP対応
+    const wallBounceResult = await executeWallBounceWithSRP(
       analysisPrompt,
       'premium', // ログ解析はプレミアムレベル
       {
@@ -300,8 +320,8 @@ app.post('/api/v1/rag/search', async (req, res) => {
 関連するドキュメントから回答を生成し、必ずソースを明記してください。
 `;
 
-    // 壁打ち分析でRAG検索
-    const wallBounceResult = await wallBounceAnalyzer.executeWallBounce(
+    // 壁打ち分析でRAG検索 - SRP対応
+    const wallBounceResult = await executeWallBounceWithSRP(
       ragPrompt,
       'premium',
       {
