@@ -2,10 +2,10 @@ import { HuggingFaceClient } from './huggingface-client';
 import { 
   InferenceRequest, 
   InferenceResponse, 
-  TaskType,
-  HuggingFaceError 
+  TaskType
 } from '../types/huggingface';
 import { logger } from '../utils/logger';
+import { config as environmentConfig } from '../config/environment';
 
 export interface InferenceServiceConfig {
   defaultModel: string;
@@ -83,7 +83,7 @@ export class InferenceService {
         'cl-tohoku/bert-base-japanese-v3'
       ],
       maxRetries: 3,
-      timeoutMs: 60000,
+      timeoutMs: environmentConfig.wallBounce.enableTimeout ? (environmentConfig.wallBounce.timeoutMs || 60000) : Number.MAX_SAFE_INTEGER,
       rateLimitPerMinute: 60,
       ...config
     };
@@ -370,6 +370,13 @@ export class InferenceService {
     const techTermCount = technicalTerms.filter(term => text.includes(term)).length;
     confidence += (techTermCount / technicalTerms.length) * 0.1;
 
+    // Task type weighting
+    if (request.taskType === TaskType.CRITICAL) {
+      confidence += 0.05;
+    } else if (request.taskType === TaskType.PREMIUM) {
+      confidence += 0.025;
+    }
+
     return Math.min(confidence, 1.0);
   }
 
@@ -524,7 +531,8 @@ export class InferenceService {
     const baseCostPerToken = 0.00001; // $0.00001 per token
     const inputCost = response.usage.inputTokens * baseCostPerToken;
     const outputCost = response.usage.outputTokens * baseCostPerToken * 2; // Output typically costs more
-    const totalCost = inputCost + outputCost;
+    const modelAdjustment = model.includes('critical') ? 1.75 : model.includes('premium') ? 1.3 : 1;
+    const totalCost = (inputCost + outputCost) * modelAdjustment;
 
     return {
       inputCost,

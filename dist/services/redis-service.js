@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpstashRedisService = exports.getRedisService = void 0;
 const redis_1 = require("@upstash/redis");
 const environment_1 = require("../config/environment");
+/* eslint-enable @typescript-eslint/no-unused-vars, no-unused-vars */
 class UpstashRedisService {
     redis;
     constructor() {

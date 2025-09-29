@@ -44,6 +44,7 @@ interface ExecuteOptions {
     taskType?: 'basic' | 'premium' | 'critical';
     minProviders?: number;
     maxProviders?: number;
+    mode?: 'parallel' | 'sequential';
 }
 export declare class WallBounceAnalyzer {
     private providers;
@@ -55,9 +56,17 @@ export declare class WallBounceAnalyzer {
      */
     private executeGeminiCLI;
     /**
-     * 壁打ち分析の実行 - 必須：最低2つのLLMで分析
+     * 壁打ち分析の実行 - モードによって並列/逐次を切り替え
      */
     executeWallBounce(prompt: string, options?: ExecuteOptions): Promise<WallBounceResult>;
+    private executeParallelMode;
+    private executeSequentialMode;
+    private buildProviderPrompt;
+    private buildAggregatorPrompt;
+    private updateSequentialSummary;
+    private buildWallBounceResult;
+    private invokeProvider;
+    private truncate;
     private getProviderOrder;
     private invokeGemini;
     private invokeGPT5;

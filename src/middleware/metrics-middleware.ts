@@ -12,7 +12,6 @@ import { logger } from '../utils/logger';
  */
 export function metricsMiddleware(req: Request, res: Response, next: NextFunction): void {
   const startTime = Date.now();
-  const startHrTime = process.hrtime();
   
   // リクエストサイズ計算
   const requestSize = req.get('content-length') ? parseInt(req.get('content-length')!, 10) : 0;
@@ -198,7 +197,7 @@ export function updateHealthMetrics(): void {
   const used = process.memoryUsage();
   
   // Node.js プロセスメトリクス
-  import('../metrics/prometheus-client').then(({ memoryUsage, activeConnections }) => {
+  import('../metrics/prometheus-client').then(({ memoryUsage }) => {
     memoryUsage.set({ component: 'heap_used' }, used.heapUsed);
     memoryUsage.set({ component: 'heap_total' }, used.heapTotal);
     memoryUsage.set({ component: 'external' }, used.external);

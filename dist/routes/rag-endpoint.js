@@ -198,7 +198,7 @@ RAG回答: ${ragResult.results[0]?.content || 'N/A'}
                 }).then(result => ({ model: 'gemini', result })).catch(err => ({ model: 'gemini', error: err.message })));
             }
             const wallBounceResponses = await Promise.allSettled(wallBouncePromises);
-            wallBounceResults = wallBounceResponses.reduce((acc, response, index) => {
+            wallBounceResults = wallBounceResponses.reduce((acc, response) => {
                 if (response.status === 'fulfilled') {
                     const modelResult = response.value;
                     acc[modelResult.model] = modelResult.result || modelResult.error;

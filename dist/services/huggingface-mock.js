@@ -106,6 +106,10 @@ class HuggingFaceMockClient {
         return true;
     }
     async retryWithBackoff(operation, maxRetries = 3, initialDelay = 1000) {
+        logger_1.logger.debug('Mock retryWithBackoff invoked', {
+            maxRetries,
+            initialDelay
+        });
         // Mock implementation - just execute once
         return await operation();
     }

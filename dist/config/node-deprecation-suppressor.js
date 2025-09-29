@@ -6,8 +6,7 @@
  * 特にpunycode廃止警告の対処
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.suppressPunycodeDeprecationWarnings = suppressPunycodeDeprecationWarnings;
-exports.setupDeprecationWarningControl = setupDeprecationWarningControl;
+exports.setupDeprecationWarningControl = exports.suppressPunycodeDeprecationWarnings = void 0;
 /**
  * Punycode廃止警告を抑制
  * Node.js v21.0.0以降のランタイム廃止警告への対処
@@ -21,6 +20,7 @@ function suppressPunycodeDeprecationWarnings() {
         process.env.NODE_NO_WARNINGS += ',deprecation';
     }
 }
+exports.suppressPunycodeDeprecationWarnings = suppressPunycodeDeprecationWarnings;
 /**
  * 全般的な廃止警告制御
  * 環境変数に基づく柔軟な制御
@@ -35,6 +35,7 @@ function setupDeprecationWarningControl() {
         suppressPunycodeDeprecationWarnings();
     }
 }
+exports.setupDeprecationWarningControl = setupDeprecationWarningControl;
 /**
  * プロセス起動時の自動初期化
  * このモジュールがインポートされた時点で実行

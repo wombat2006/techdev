@@ -1,9 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DataSanitizer = void 0;
-exports.sanitizeInput = sanitizeInput;
-exports.sanitizeLogData = sanitizeLogData;
-exports.sanitizeUserInput = sanitizeUserInput;
+exports.DataSanitizer = exports.sanitizeUserInput = exports.sanitizeLogData = exports.sanitizeInput = void 0;
 function sanitizeInput(input, options = {}) {
     const { maxLength = 10000, allowedFields, stripHtml = true } = options;
     if (typeof input === 'string') {
@@ -34,6 +31,7 @@ function sanitizeInput(input, options = {}) {
     }
     return input;
 }
+exports.sanitizeInput = sanitizeInput;
 function sanitizeLogData(logData) {
     return sanitizeInput(logData, {
         maxLength: 50000,
@@ -41,12 +39,14 @@ function sanitizeLogData(logData) {
         stripHtml: true
     });
 }
+exports.sanitizeLogData = sanitizeLogData;
 function sanitizeUserInput(userInput) {
     return sanitizeInput(userInput, {
         maxLength: 5000,
         stripHtml: true
     });
 }
+exports.sanitizeUserInput = sanitizeUserInput;
 class DataSanitizer {
     static sanitizeInput(input) {
         const issues = [];

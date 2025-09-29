@@ -4,9 +4,7 @@
  * 🔄 Multi-LLM collaborative analysis integration
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mcp__gpt_5__deep_analysis = mcp__gpt_5__deep_analysis;
-exports.mcp__gemini_cli__ask_gemini = mcp__gemini_cli__ask_gemini;
-exports.testMCPAvailability = testMCPAvailability;
+exports.testMCPAvailability = exports.mcp__gemini_cli__ask_gemini = exports.mcp__gpt_5__deep_analysis = void 0;
 /**
  * 🎯 GPT-5 MCP Client Integration
  */
@@ -52,6 +50,7 @@ async function mcp__gpt_5__deep_analysis(params) {
         throw new Error(`GPT-5 MCP client failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
+exports.mcp__gpt_5__deep_analysis = mcp__gpt_5__deep_analysis;
 /**
  * 🌐 Gemini MCP Client Integration
  */
@@ -94,6 +93,7 @@ async function mcp__gemini_cli__ask_gemini(params) {
         throw new Error(`Gemini MCP client failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
+exports.mcp__gemini_cli__ask_gemini = mcp__gemini_cli__ask_gemini;
 /**
  * Test MCP client availability
  */
@@ -116,4 +116,5 @@ async function testMCPAvailability() {
         };
     }
 }
+exports.testMCPAvailability = testMCPAvailability;
 //# sourceMappingURL=mcp-clients.js.map

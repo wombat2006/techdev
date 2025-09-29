@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createServer = createServer;
+exports.createServer = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -318,5 +318,6 @@ function createServer() {
     };
     return { app, server: mockServer };
 }
+exports.createServer = createServer;
 exports.default = TechSapoServer;
 //# sourceMappingURL=index.js.map

@@ -8,6 +8,7 @@
  * - 緊急時自動ロールバック
  * - アラート通知
  */
+/// <reference types="node" />
 import { EventEmitter } from 'events';
 export interface SafetyThresholds {
     warningErrorRate: number;

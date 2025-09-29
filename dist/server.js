@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createServer = createServer;
+exports.createServer = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -15,6 +15,7 @@ const wall_bounce_analyzer_1 = require("./services/wall-bounce-analyzer");
 const log_analyzer_1 = require("./services/log-analyzer");
 const rag_endpoint_1 = __importDefault(require("./routes/rag-endpoint"));
 const codex_session_1 = __importDefault(require("./routes/codex-session"));
+const pdf_routes_1 = __importDefault(require("./routes/pdf-routes"));
 const GEMINI_CLI_TTL_MS = 5 * 60 * 1000; // cache for 5 minutes
 let geminiCliHealth = null;
 const resolveGeminiCliHealth = async () => {
@@ -64,6 +65,8 @@ function createServer() {
     app.use('/api/v1/rag', rag_endpoint_1.default);
     // Codex Session API routes
     app.use('/api/codex', codex_session_1.default);
+    // PDF API routes
+    app.use('/api/v1/pdf', pdf_routes_1.default);
     // Real-time metrics endpoint (Server-Sent Events)
     app.get('/api/v1/metrics/stream', (req, res) => {
         // Set SSE headers
@@ -268,6 +271,7 @@ function createServer() {
     });
     return { app, server };
 }
+exports.createServer = createServer;
 /**
  * Generate real-time system metrics
  */

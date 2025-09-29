@@ -403,9 +403,11 @@ export function recordLLMResponse(
   responseTime: number,
   inputTokens: number,
   outputTokens: number,
-  cost: number,
-  status: 'success' | 'error' | 'timeout'
+  _cost: number,
+  _status: 'success' | 'error' | 'timeout'
 ): void {
+  void _cost;
+  void _status;
   llmResponseTime.observe({ provider, model }, responseTime / 1000);
   llmTokenUsage.inc({ provider, type: 'input', model }, inputTokens);
   llmTokenUsage.inc({ provider, type: 'output', model }, outputTokens);

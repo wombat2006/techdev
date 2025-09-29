@@ -338,15 +338,16 @@ export class EmbeddingService {
   }
 
   private generateRecommendation(bestModel: any, averageSimilarity: number, texts: string[]): string {
-    const textLength = texts.join(' ').length;
     const modelInfo = this.getModelInfo(bestModel.model);
-    
+    const textLength = texts.join(' ').length;
+    const lengthDescriptor = textLength > 500 ? '長文' : '短文';
+
     if (averageSimilarity > 0.8) {
-      return `高い一貫性（${(averageSimilarity * 100).toFixed(1)}%）。${modelInfo.name} を推奨します。`;
+      return `高い一貫性（${(averageSimilarity * 100).toFixed(1)}%）。${modelInfo.name} を推奨します。（テキスト長: ${lengthDescriptor}）`;
     } else if (averageSimilarity > 0.6) {
-      return `中程度の一貫性（${(averageSimilarity * 100).toFixed(1)}%）。用途に応じてモデルを選択してください。`;
+      return `中程度の一貫性（${(averageSimilarity * 100).toFixed(1)}%）。用途に応じてモデルを選択してください。（テキスト長: ${lengthDescriptor}）`;
     } else {
-      return `低い一貫性（${(averageSimilarity * 100).toFixed(1)}%）。テキストの性質を考慮したモデル選択が重要です。`;
+      return `低い一貫性（${(averageSimilarity * 100).toFixed(1)}%）。テキストの性質を考慮したモデル選択が重要です。（テキスト長: ${lengthDescriptor}）`;
     }
   }
 

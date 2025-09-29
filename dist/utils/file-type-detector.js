@@ -4,9 +4,7 @@
  * マジックナンバーを使用した正確なファイル形式判別
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.detectFileType = detectFileType;
-exports.isSupportedFileType = isSupportedFileType;
-exports.debugMagicNumber = debugMagicNumber;
+exports.debugMagicNumber = exports.isSupportedFileType = exports.detectFileType = void 0;
 const security_1 = require("./security");
 // マジックナンバーパターン定義
 const MAGIC_PATTERNS = [
@@ -519,6 +517,7 @@ function detectFileType(buffer) {
         isSupported: false
     };
 }
+exports.detectFileType = detectFileType;
 /**
  * ZIP形式ベースのOffice文書かチェック
  */
@@ -834,6 +833,7 @@ function isTextFile(buffer) {
 function isSupportedFileType(fileType) {
     return fileType.isSupported;
 }
+exports.isSupportedFileType = isSupportedFileType;
 /**
  * デバッグ用：バッファの最初の32バイトを16進数で表示
  */
@@ -848,4 +848,5 @@ function debugMagicNumber(buffer) {
     const sanitizedAscii = (0, security_1.redactSensitiveContent)(ascii);
     return `HEX: ${hex}\nASCII: ${sanitizedAscii}`;
 }
+exports.debugMagicNumber = debugMagicNumber;
 //# sourceMappingURL=file-type-detector.js.map

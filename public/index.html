@@ -3,413 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechSapo - IT技術サポートシステム</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>TechSapo - 次世代IT技術サポートプラットフォーム</title>
+    <meta name="description" content="Wall-Bounce分析と高品質なIT技術サポートを提供する次世代プラットフォーム">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <style>
-        /* Fallback styles to ensure interactive elements are visible */
-        .tab-content { display: none !important; }
-        .tab-content.active { display: block !important; }
-        .nav-link { cursor: pointer; padding: 10px; margin: 5px; background: #ddd; }
-        .nav-link.active { background: #007bff; color: white; }
-        .btn { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px; }
-        .btn:hover { background: #0056b3; }
-        textarea, input, select { width: 100%; max-width: 500px; padding: 8px; margin: 5px 0; border: 1px solid #ccc; }
-        .result-content { border: 1px solid #ccc; padding: 15px; margin: 10px 0; background: #f9f9f9; }
-    </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Header -->
-        <header class="header">
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
             <div class="container">
-                <div class="header-content">
-                    <div class="logo">
-                        <i class="fas fa-tools"></i>
-                        <span>TechSapo</span>
-                    </div>
-                    <nav class="nav">
-                        <a href="#home" class="nav-link active" data-tab="home">
-                            <i class="fas fa-home"></i> ホーム
-                        </a>
-                        <a href="#support" class="nav-link" data-tab="support">
-                            <i class="fas fa-life-ring"></i> IT支援
-                        </a>
-                        <a href="#rag" class="nav-link" data-tab="rag">
-                            <i class="fas fa-search"></i> RAG検索
-                        </a>
-                        <a href="#logs" class="nav-link" data-tab="logs">
-                            <i class="fas fa-file-alt"></i> ログ解析
-                        </a>
-                        <a href="#monitoring" class="nav-link" data-tab="monitoring">
-                            <i class="fas fa-chart-line"></i> 監視
-                        </a>
-                    </nav>
+                <div class="nav-brand">
+                    <img src="logo.svg" alt="TechSapo" class="logo">
+                    <span class="brand-text">TechSapo</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#features">機能</a></li>
+                    <li><a href="#architecture">技術</a></li>
+                    <li><a href="#docs">ドキュメント</a></li>
+                    <li><a href="#contact">お問い合わせ</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
             </div>
-        </header>
+        </nav>
+    </header>
 
-        <!-- Main Content -->
-        <main class="main">
-            <div class="container">
-                <!-- Home Tab -->
-                <section id="home" class="tab-content active">
-                    <div class="hero">
-                        <h1>TechSapo IT技術サポートシステム</h1>
-                        <p>Multi-LLM Wall-Bounce分析による高度なIT技術支援</p>
-                        <div class="system-status">
-                            <div class="status-card">
-                                <i class="fas fa-server"></i>
-                                <div class="status-info">
-                                    <h3>システム状態</h3>
-                                    <p id="system-status">チェック中...</p>
-                                </div>
-                            </div>
-                            <div class="status-card">
-                                <i class="fas fa-database"></i>
-                                <div class="status-info">
-                                    <h3>Redis接続</h3>
-                                    <p id="redis-status">チェック中...</p>
-                                </div>
-                            </div>
-                            <div class="status-card">
-                                <i class="fas fa-clock"></i>
-                                <div class="status-info">
-                                    <h3>稼働時間</h3>
-                                    <p id="uptime">計算中...</p>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    次世代IT技術サポート<br>
+                    <span class="gradient-text">TechSapo</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Wall-Bounce分析技術による複数LLMオーケストレーションで、<br>
+                    高品質で信頼性の高いIT技術サポートを提供
+                </p>
+                <div class="hero-buttons">
+                    <a href="#docs" class="btn btn-primary">
+                        <i class="fas fa-book"></i>
+                        ドキュメントを見る
+                    </a>
+                    <a href="#contact" class="btn btn-secondary">
+                        <i class="fas fa-comments"></i>
+                        お問い合わせ
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">99.9%</span>
+                        <span class="stat-label">信頼度</span>
                     </div>
-
-                    <div class="features-grid">
-                        <div class="feature-card" onclick="switchTab('support')">
-                            <i class="fas fa-cogs"></i>
-                            <h3>IT技術支援</h3>
-                            <p>Multi-LLM Wall-Bounceによる高精度な技術問題解決</p>
-                        </div>
-                        <div class="feature-card" onclick="switchTab('rag')">
-                            <i class="fas fa-book-open"></i>
-                            <h3>RAG文書検索</h3>
-                            <p>Google Drive連携による智能文書検索システム</p>
-                        </div>
-                        <div class="feature-card" onclick="switchTab('logs')">
-                            <i class="fas fa-bug"></i>
-                            <h3>ログ解析</h3>
-                            <p>システムログの自動分析と問題特定</p>
-                        </div>
-                        <div class="feature-card" onclick="switchTab('monitoring')">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <h3>パフォーマンス監視</h3>
-                            <p>リアルタイムシステム監視とアラート</p>
-                        </div>
+                    <div class="stat">
+                        <span class="stat-number">3+</span>
+                        <span class="stat-label">LLM統合</span>
                     </div>
-                </section>
-
-                <!-- IT Support Tab -->
-                <section id="support" class="tab-content">
-                    <h2><i class="fas fa-life-ring"></i> IT技術支援</h2>
-                    <div class="support-container">
-                        <div class="support-form">
-                            <div class="input-group">
-                                <label for="support-level">支援レベル</label>
-                                <select id="support-level" class="form-select">
-                                    <option value="basic">基本</option>
-                                    <option value="premium">プレミアム</option>
-                                    <option value="critical">クリティカル</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label for="tech-query">技術的な問題を詳しく記述してください</label>
-                                <textarea
-                                    id="tech-query"
-                                    rows="6"
-                                    placeholder="例: Dockerコンテナが起動しない、nginxの設定エラー、データベース接続問題など..."
-                                    class="form-textarea"
-                                ></textarea>
-                            </div>
-                            <button onclick="analyzeTechProblem()" class="btn btn-primary">
-                                <i class="fas fa-cog fa-spin" id="support-loading" style="display: none;"></i>
-                                <i class="fas fa-search" id="support-icon"></i>
-                                Multi-LLM Wall-Bounce分析
-                            </button>
-                        </div>
-                        <div class="support-result">
-                            <div id="support-output" class="result-content"></div>
-                        </div>
+                    <div class="stat">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">サポート</span>
                     </div>
-                </section>
-
-                <!-- RAG Search Tab -->
-                <section id="rag" class="tab-content">
-                    <h2><i class="fas fa-search"></i> RAG文書検索</h2>
-                    <div class="rag-container">
-                        <div class="rag-form">
-                            <div class="input-group">
-                                <label for="rag-query">検索クエリ</label>
-                                <input
-                                    type="text"
-                                    id="rag-query"
-                                    placeholder="技術文書から情報を検索..."
-                                    class="form-input"
-                                />
-                            </div>
-                            <div class="input-group">
-                                <label for="vector-store-id">Vector Store ID</label>
-                                <input
-                                    type="text"
-                                    id="vector-store-id"
-                                    placeholder="vs_xxxxxxxxxxxxxxxx"
-                                    class="form-input"
-                                />
-                            </div>
-                            <div class="search-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="enable-wall-bounce" checked>
-                                    <span class="checkbox-custom"></span>
-                                    Wall-Bounce分析を有効化
-                                </label>
-                                <div class="max-results">
-                                    <label for="max-results">最大結果数:</label>
-                                    <input type="number" id="max-results" value="5" min="1" max="20" class="form-input-small">
-                                </div>
-                            </div>
-                            <button onclick="performRagSearch()" class="btn btn-primary">
-                                <i class="fas fa-cog fa-spin" id="rag-loading" style="display: none;"></i>
-                                <i class="fas fa-search" id="rag-icon"></i>
-                                検索実行
-                            </button>
-                        </div>
-                        <div class="rag-result">
-                            <div id="rag-output" class="result-content"></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Log Analysis Tab -->
-                <section id="logs" class="tab-content">
-                    <h2><i class="fas fa-file-alt"></i> ログ解析</h2>
-                    <div class="logs-container">
-                        <div class="logs-form">
-                            <div class="input-group">
-                                <label for="user-command">実行コマンド</label>
-                                <input
-                                    type="text"
-                                    id="user-command"
-                                    placeholder="例: sudo systemctl start nginx"
-                                    class="form-input"
-                                />
-                            </div>
-                            <div class="input-group">
-                                <label for="error-output">エラー出力</label>
-                                <textarea
-                                    id="error-output"
-                                    rows="6"
-                                    placeholder="コマンド実行時のエラーメッセージやログを貼り付けてください..."
-                                    class="form-textarea"
-                                ></textarea>
-                            </div>
-                            <div class="input-group">
-                                <label for="system-context">システム情報（オプション）</label>
-                                <textarea
-                                    id="system-context"
-                                    rows="3"
-                                    placeholder="OS、バージョン、環境情報など..."
-                                    class="form-textarea"
-                                ></textarea>
-                            </div>
-                            <button onclick="analyzeLog()" class="btn btn-primary">
-                                <i class="fas fa-cog fa-spin" id="logs-loading" style="display: none;"></i>
-                                <i class="fas fa-bug" id="logs-icon"></i>
-                                ログ解析実行
-                            </button>
-                        </div>
-                        <div class="logs-result">
-                            <div id="logs-output" class="result-content"></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Monitoring Tab -->
-                <section id="monitoring" class="tab-content">
-                    <h2><i class="fas fa-chart-line"></i> システム監視</h2>
-                    <div class="monitoring-container">
-                        <div class="metrics-grid">
-                            <div class="metric-card">
-                                <h3><i class="fas fa-microchip"></i> CPU使用率</h3>
-                                <div class="metric-value" id="cpu-usage">--</div>
-                            </div>
-                            <div class="metric-card">
-                                <h3><i class="fas fa-memory"></i> メモリ使用率</h3>
-                                <div class="metric-value" id="memory-usage">--</div>
-                            </div>
-                            <div class="metric-card">
-                                <h3><i class="fas fa-network-wired"></i> 接続数</h3>
-                                <div class="metric-value" id="active-connections">--</div>
-                            </div>
-                            <div class="metric-card">
-                                <h3><i class="fas fa-clock"></i> 応答時間</h3>
-                                <div class="metric-value" id="response-time">--</div>
-                            </div>
-                        </div>
-                        <div class="monitoring-controls">
-                            <button onclick="refreshMetrics()" class="btn btn-secondary">
-                                <i class="fas fa-sync-alt"></i> 更新
-                            </button>
-                            <button onclick="toggleAutoRefresh()" class="btn btn-secondary" id="auto-refresh-btn">
-                                <i class="fas fa-play"></i> 自動更新開始
-                            </button>
-                        </div>
-                    </div>
-                </section>
+                </div>
             </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container">
-                <p>&copy; 2025 TechSapo - Multi-LLM Wall-Bounce Analysis System</p>
-                <p>🤖 Powered by GPT-5, Gemini-2.5Pro, Claude Opus 4.1</p>
-            </div>
-        </footer>
-    </div>
-
-    <script src="app.js"></script>
-    <script>
-        // Fallback initialization if app.js fails
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if main app initialized
-            setTimeout(function() {
-                if (!window.initializeApp || typeof switchTab !== 'function') {
-                    console.log('🔧 Main app failed, loading fallback...');
-                    loadFallbackApp();
-                }
-            }, 1000);
-        });
-
-        function loadFallbackApp() {
-            console.log('🚨 Loading fallback interactive functionality');
-
-            // Simple tab switching
-            window.switchTab = function(tabName) {
-                // Hide all tabs
-                document.querySelectorAll('.tab-content, section[id]').forEach(tab => {
-                    tab.style.display = 'none';
-                    tab.classList.remove('active');
-                });
-
-                // Show target tab
-                const targetTab = document.getElementById(tabName);
-                if (targetTab) {
-                    targetTab.style.display = 'block';
-                    targetTab.classList.add('active');
-                }
-
-                // Update nav
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                });
-
-                const targetLink = document.querySelector(`[data-tab="${tabName}"]`);
-                if (targetLink) {
-                    targetLink.classList.add('active');
-                }
-            };
-
-            // Initialize home tab
-            switchTab('home');
-
-            // Set up nav clicks
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const tab = this.getAttribute('data-tab');
-                    if (tab) switchTab(tab);
-                });
-            });
-
-            // Basic functionality for buttons
-            window.analyzeTechProblem = async function() {
-                const query = document.getElementById('tech-query').value;
-                const level = document.getElementById('support-level').value;
-                const output = document.getElementById('support-output');
-
-                if (!query.trim()) {
-                    output.innerHTML = '<p style="color: red;">❌ Please enter a question</p>';
-                    return;
-                }
-
-                output.innerHTML = '<p>⏳ Multi-LLM Wall-Bounce analysis in progress...</p>';
-
-                try {
-                    const response = await fetch('/api/v1/generate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: query, task_type: level })
-                    });
-                    const result = await response.json();
-                    output.innerHTML = `
-                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0;">
-                            <h3 style="color: green;">✅ Analysis Complete</h3>
-                            <p><strong>Response:</strong> ${result.response}</p>
-                            <p><strong>Confidence:</strong> ${Math.round(result.confidence * 100)}%</p>
-                            <p><strong>Providers:</strong> ${result.providers_used?.join(', ')}</p>
-                            <p><strong>Cost:</strong> $${result.total_cost}</p>
-                            <p><strong>Time:</strong> ${result.processing_time_ms}ms</p>
+            <div class="hero-image">
+                <div class="dashboard-preview">
+                    <div class="window-header">
+                        <div class="window-controls">
+                            <span class="control close"></span>
+                            <span class="control minimize"></span>
+                            <span class="control maximize"></span>
                         </div>
-                    `;
-                } catch (error) {
-                    output.innerHTML = `<p style="color: red;">❌ Analysis failed: ${error.message}</p>`;
-                }
-            };
-
-            window.analyzeLog = async function() {
-                const command = document.getElementById('user-command').value;
-                const errorOutput = document.getElementById('error-output').value;
-                const systemContext = document.getElementById('system-context').value;
-                const output = document.getElementById('logs-output');
-
-                if (!command.trim() || !errorOutput.trim()) {
-                    output.innerHTML = '<p style="color: red;">❌ Please enter command and error output</p>';
-                    return;
-                }
-
-                output.innerHTML = '<p>⏳ Log analysis in progress...</p>';
-
-                try {
-                    const response = await fetch('/api/v1/analyze-logs', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            user_command: command,
-                            error_output: errorOutput,
-                            system_context: systemContext
-                        })
-                    });
-                    const result = await response.json();
-                    if (result.error) {
-                        output.innerHTML = `<p style="color: red;">❌ Analysis failed: ${result.error}</p>`;
-                    } else {
-                        const analysis = result.analysis_result;
-                        output.innerHTML = `
-                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0;">
-                                <h3 style="color: green;">✅ Log Analysis Complete</h3>
-                                <p><strong>Problem:</strong> ${analysis.problem_category}</p>
-                                <p><strong>Root Cause:</strong> ${analysis.root_cause}</p>
-                                <p><strong>Confidence:</strong> ${Math.round(analysis.confidence_score * 100)}%</p>
-                                <h4>Solution Steps:</h4>
-                                <ul>${analysis.solution_steps?.map(step => `<li>${step}</li>`).join('')}</ul>
+                        <span class="window-title">TechSapo Dashboard</span>
+                    </div>
+                    <div class="dashboard-content">
+                        <div class="wall-bounce-demo">
+                            <div class="provider-card gemini">
+                                <i class="fab fa-google"></i>
+                                <span>Gemini 2.5</span>
+                                <div class="status active"></div>
                             </div>
-                        `;
-                    }
-                } catch (error) {
-                    output.innerHTML = `<p style="color: red;">❌ Analysis failed: ${error.message}</p>`;
-                }
-            };
+                            <div class="provider-card openai">
+                                <i class="fas fa-robot"></i>
+                                <span>GPT-5</span>
+                                <div class="status active"></div>
+                            </div>
+                            <div class="provider-card anthropic">
+                                <i class="fas fa-brain"></i>
+                                <span>Claude</span>
+                                <div class="status active"></div>
+                            </div>
+                            <div class="consensus-meter">
+                                <div class="meter-label">Consensus: 94%</div>
+                                <div class="meter-bar">
+                                    <div class="meter-fill" style="width: 94%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            console.log('✅ Fallback app loaded successfully');
-        }
-    </script>
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">主要機能</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h3>Wall-Bounce分析</h3>
+                    <p>複数のLLMプロバイダーによる相互検証で、高品質で信頼性の高い回答を提供</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>RAG知識ベース</h3>
+                    <p>Google Drive統合によるセマンティック検索で、関連ドキュメントを自動取得</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>ログ分析</h3>
+                    <p>AI駆動による自動問題診断と段階的解決手順の提示</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>高セキュリティ</h3>
+                    <p>API Key管理、レート制限、暗号化通信による企業レベルのセキュリティ</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>リアルタイム監視</h3>
+                    <p>Prometheus/Grafana統合による包括的システム監視</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h3>コスト最適化</h3>
+                    <p>予算管理とリアルタイムコスト追跡で効率的な運用</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="architecture">
+        <div class="container">
+            <h2 class="section-title">技術アーキテクチャ</h2>
+            <div class="arch-content">
+                <div class="arch-diagram">
+                    <div class="layer frontend">
+                        <h4>Frontend Layer</h4>
+                        <div class="tech-stack">
+                            <span class="tech">HTML5</span>
+                            <span class="tech">CSS3</span>
+                            <span class="tech">JavaScript</span>
+                        </div>
+                    </div>
+                    <div class="layer api">
+                        <h4>API Gateway</h4>
+                        <div class="tech-stack">
+                            <span class="tech">Express.js</span>
+                            <span class="tech">Node.js</span>
+                            <span class="tech">TypeScript</span>
+                        </div>
+                    </div>
+                    <div class="layer services">
+                        <h4>Core Services</h4>
+                        <div class="tech-stack">
+                            <span class="tech">Wall-Bounce</span>
+                            <span class="tech">RAG</span>
+                            <span class="tech">Session Mgmt</span>
+                        </div>
+                    </div>
+                    <div class="layer data">
+                        <h4>Data Layer</h4>
+                        <div class="tech-stack">
+                            <span class="tech">Redis</span>
+                            <span class="tech">Vector Store</span>
+                            <span class="tech">Config Store</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="arch-features">
+                    <h3>技術的特徴</h3>
+                    <ul>
+                        <li><strong>マルチLLM統合</strong>: Gemini, OpenAI, Anthropic</li>
+                        <li><strong>高性能キャッシュ</strong>: Redis クラスター対応</li>
+                        <li><strong>スケーラブル設計</strong>: マイクロサービス指向</li>
+                        <li><strong>監視・運用</strong>: Prometheus, Grafana統合</li>
+                        <li><strong>セキュリティ</strong>: JWT認証, レート制限</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="docs" class="documentation">
+        <div class="container">
+            <h2 class="section-title">ドキュメント</h2>
+            <div class="docs-grid">
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>スタートガイド</h3>
+                    <p>TechSapoの導入から基本的な使用方法まで</p>
+                    <a href="/docs/getting-started" class="doc-link">
+                        読む <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>API リファレンス</h3>
+                    <p>REST API の詳細仕様とサンプルコード</p>
+                    <a href="/docs/api-reference" class="doc-link">
+                        読む <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3>システム設計</h3>
+                    <p>アーキテクチャとWall-Bounce技術の詳細</p>
+                    <a href="/docs/architecture" class="doc-link">
+                        読む <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3>デプロイメント</h3>
+                    <p>本番環境への展開とスケーリング</p>
+                    <a href="/docs/deployment" class="doc-link">
+                        読む <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">お問い合わせ</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>メール</h4>
+                            <p>support@techsapo.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-github"></i>
+                        <div>
+                            <h4>GitHub</h4>
+                            <p>github.com/techsapo/platform</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-comments"></i>
+                        <div>
+                            <h4>Discord</h4>
+                            <p>discord.gg/techsapo</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <input type="text" name="name" placeholder="お名前" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" name="email" placeholder="メールアドレス" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea name="message" placeholder="メッセージ" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            送信
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="logo.svg" alt="TechSapo" class="logo">
+                    <span class="brand-text">TechSapo</span>
+                    <p>次世代IT技術サポートプラットフォーム</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>プロダクト</h4>
+                        <ul>
+                            <li><a href="#features">機能</a></li>
+                            <li><a href="#architecture">アーキテクチャ</a></li>
+                            <li><a href="/pricing">価格</a></li>
+                            <li><a href="/enterprise">エンタープライズ</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>開発者</h4>
+                        <ul>
+                            <li><a href="/docs">ドキュメント</a></li>
+                            <li><a href="/api">API</a></li>
+                            <li><a href="/github">GitHub</a></li>
+                            <li><a href="/community">コミュニティ</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>会社</h4>
+                        <ul>
+                            <li><a href="/about">会社概要</a></li>
+                            <li><a href="/blog">ブログ</a></li>
+                            <li><a href="/careers">採用</a></li>
+                            <li><a href="/contact">お問い合わせ</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 TechSapo. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>

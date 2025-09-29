@@ -53,6 +53,7 @@ exports.JAPANESE_EMBEDDING_MODELS = [
         useCase: 'general'
     }
 ];
+/* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
 var TaskType;
 (function (TaskType) {
     TaskType["BASIC"] = "basic";

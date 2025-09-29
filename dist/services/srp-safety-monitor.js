@@ -206,6 +206,9 @@ class SRPSafetyMonitor extends events_1.EventEmitter {
         this.emit(level, alert);
     }
     getActionRequiredForAlert(level, category) {
+        if (category === 'system' && level !== 'info') {
+            return 'Initiate infrastructure diagnostic runbook';
+        }
         switch (level) {
             case 'emergency':
                 return 'IMMEDIATE AUTO-ROLLBACK';

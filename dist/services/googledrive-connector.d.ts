@@ -2,6 +2,8 @@
  * GoogleDrive Connector for RAG System
  * セキュアなドキュメント取得とOpenAI Vector Store統合
  */
+/// <reference types="node" />
+/// <reference types="node" />
 export interface GoogleDriveConfig {
     clientId: string;
     clientSecret: string;

@@ -146,11 +146,13 @@ export const JAPANESE_EMBEDDING_MODELS: JapaneseEmbeddingModel[] = [
   }
 ];
 
+/* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
 export enum TaskType {
   BASIC = 'basic',
   PREMIUM = 'premium', 
   CRITICAL = 'critical'
 }
+/* eslint-enable @typescript-eslint/no-unused-vars, no-unused-vars */
 
 export interface HuggingFaceError extends Error {
   error: string;

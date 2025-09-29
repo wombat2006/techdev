@@ -16,6 +16,9 @@ process.env.GOOGLE_RAG_FOLDER_ID = process.env.GOOGLE_RAG_FOLDER_ID || 'folder_m
 // Set test timeout
 jest.setTimeout(30000);
 
+// Increase EventEmitter max listeners to prevent memory leak warnings
+require('events').EventEmitter.defaultMaxListeners = 20;
+
 // Mock winston logger to avoid console spam
 jest.mock('winston', () => ({
   createLogger: jest.fn(() => ({

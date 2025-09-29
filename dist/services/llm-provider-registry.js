@@ -102,15 +102,15 @@ class LLMProviderRegistry {
     // === プロバイダー実装メソッド（絶対的命令に従う） ===
     async invokeGemini(prompt) {
         // Gemini API実装 (既存コードから移植)
-        throw new Error('Gemini provider implementation needed');
+        throw new Error(`Gemini provider implementation needed (prompt length: ${prompt.length})`);
     }
     async invokeGPT5(prompt) {
         // 絶対的命令: codex経由でのみ呼び出し
-        throw new Error('GPT-5 Codex provider implementation needed');
+        throw new Error(`GPT-5 Codex provider implementation needed (prompt length: ${prompt.length})`);
     }
     async invokeClaude(prompt) {
         // 絶対的命令: Claude Code直接呼び出しのみ
-        throw new Error('Claude Code direct provider implementation needed');
+        throw new Error(`Claude Code direct provider implementation needed (prompt length: ${prompt.length})`);
     }
 }
 exports.LLMProviderRegistry = LLMProviderRegistry;

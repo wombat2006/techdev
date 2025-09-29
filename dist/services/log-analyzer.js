@@ -19,23 +19,13 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -471,7 +461,11 @@ Provide environment-specific adjustments.`;
      */
     static calculateWallBounceConfidence(gpt5Analysis, geminiAnalysis) {
         // 複数LLMの合意に基づく高信頼度
-        return 0.95; // Wall-bounce分析により非常に高い信頼度
+        const hasTechnicalResolution = Array.isArray(gpt5Analysis?.resolution) && gpt5Analysis.resolution.length > 0;
+        const hasEnvironmentGuidance = Array.isArray(geminiAnalysis?.adjustedResolution) && geminiAnalysis.adjustedResolution.length > 0;
+        const baseConfidence = 0.9;
+        const confidenceBoost = (hasTechnicalResolution ? 0.03 : 0) + (hasEnvironmentGuidance ? 0.02 : 0);
+        return Math.min(0.97, baseConfidence + confidenceBoost);
     }
     /**
      * 関連サービス抽出
@@ -498,7 +492,15 @@ Provide environment-specific adjustments.`;
      */
     static determineSeverityFromWallBounce(gpt5Analysis, geminiAnalysis) {
         // 複雑なインフラ障害は基本的に高深刻度
-        return 'high';
+        const hasCriticalIndicators = gpt5Analysis?.riskLevel === 'high' || geminiAnalysis?.criticalSignals;
+        const hasMediumIndicators = gpt5Analysis?.riskLevel === 'medium';
+        if (hasCriticalIndicators) {
+            return 'critical';
+        }
+        if (hasMediumIndicators) {
+            return 'high';
+        }
+        return 'medium';
     }
     /**
      * Get systemd troubleshooting knowledge from Context7
@@ -526,6 +528,10 @@ Provide environment-specific adjustments.`;
         const errorOutput = systemInfo.originalError;
         const userCommand = systemInfo.userCommand;
         const systemContext = systemInfo.context;
+        logger.debug('Applying systemd troubleshooting knowledge', {
+            errorType,
+            knowledge: systemdKnowledge
+        });
         // Comprehensive error analysis using native AI reasoning
         return this.performComprehensiveAnalysis(errorOutput, serviceName, userCommand, systemContext, exitCode, executable);
     }
@@ -538,6 +544,11 @@ Provide environment-specific adjustments.`;
         const service = serviceName || 'unknown service';
         const cmd = userCommand || 'system command';
         const context = systemContext || 'system operation';
+        logger.debug('Comprehensive analysis context snapshot', {
+            service,
+            command: cmd,
+            context
+        });
         // Port binding conflicts
         if (errorOutput.toLowerCase().includes('address already in use') ||
             errorOutput.toLowerCase().includes('bind()') ||
@@ -701,6 +712,11 @@ Provide environment-specific adjustments.`;
     static analyzePermissionError(serviceName, executable, systemInfo) {
         const service = serviceName || 'unknown service';
         const exec = executable || 'service executable';
+        logger.debug('Analyzing permission error', {
+            service,
+            executable: exec,
+            context: systemInfo?.context
+        });
         return {
             problemCategory: `${service.charAt(0).toUpperCase() + service.slice(1)} Permission Denied - Dynamic Analysis`,
             rootCause: `${service} cannot execute ${exec} due to insufficient permissions, missing file, or security policy restrictions`,
@@ -730,6 +746,11 @@ Provide environment-specific adjustments.`;
     static analyzeCoreError(serviceName, exitCode, systemInfo) {
         const service = serviceName || 'unknown service';
         const code = exitCode?.status || 'unknown';
+        logger.debug('Analyzing core dump error', {
+            service,
+            exitCode: code,
+            context: systemInfo?.context
+        });
         return {
             problemCategory: `${service.charAt(0).toUpperCase() + service.slice(1)} Process Crash - Dynamic Analysis`,
             rootCause: `${service} process terminated abnormally (exit code ${code}), likely due to SECCOMP violation, segmentation fault, or security policy`,
@@ -758,6 +779,10 @@ Provide environment-specific adjustments.`;
      */
     static analyzeConnectionError(serviceName, systemInfo) {
         const service = serviceName || 'unknown service';
+        logger.debug('Analyzing connection error', {
+            service,
+            context: systemInfo?.context
+        });
         return {
             problemCategory: `${service.charAt(0).toUpperCase() + service.slice(1)} Connection Failure - Dynamic Analysis`,
             rootCause: `${service} cannot establish required connections due to network issues, port conflicts, or service dependencies`,
@@ -786,6 +811,10 @@ Provide environment-specific adjustments.`;
      */
     static analyzeStartupError(serviceName, systemInfo) {
         const service = serviceName || 'unknown service';
+        logger.debug('Analyzing startup error', {
+            service,
+            context: systemInfo?.context
+        });
         return {
             problemCategory: `${service.charAt(0).toUpperCase() + service.slice(1)} Startup Failure - Dynamic Analysis`,
             rootCause: `${service} failed to start due to configuration errors, missing dependencies, or resource constraints`,
@@ -814,6 +843,10 @@ Provide environment-specific adjustments.`;
      */
     static analyzeGeneralError(serviceName, systemInfo) {
         const service = serviceName || 'system service';
+        logger.debug('Analyzing general error', {
+            service,
+            context: systemInfo?.context
+        });
         return {
             problemCategory: `${service.charAt(0).toUpperCase() + service.slice(1)} General Issue - Dynamic Analysis`,
             rootCause: `${service} experiencing issues requiring detailed investigation of logs, configuration, and system state`,
@@ -841,7 +874,10 @@ Provide environment-specific adjustments.`;
      * Analyze systemd service logs with dynamic Context7 knowledge integration
      */
     static async analyzeSystemdLogs(errorOutput, userCommand, systemContext) {
-        const content = errorOutput.toLowerCase();
+        logger.debug('Analyzing systemd logs with context', {
+            userCommand,
+            systemContext
+        });
         // 🔍 Dynamic Analysis: Extract key information from error
         const errorAnalysis = this.extractErrorContext(errorOutput, userCommand, systemContext);
         // 🧠 AI-Powered Analysis: Get dynamic solution from Context7 systemd knowledge
@@ -857,6 +893,10 @@ Provide environment-specific adjustments.`;
      */
     static analyzeNginxLogs(errorOutput, userCommand, systemContext) {
         const content = errorOutput.toLowerCase();
+        logger.debug('Analyzing nginx logs with context', {
+            userCommand,
+            systemContext
+        });
         if (content.includes('403 forbidden')) {
             return {
                 issue_identified: true,
@@ -928,6 +968,10 @@ Provide environment-specific adjustments.`;
      */
     static analyzeMysqlLogs(errorOutput, userCommand, systemContext) {
         const content = errorOutput.toLowerCase();
+        logger.debug('Analyzing MySQL logs with context', {
+            userCommand,
+            systemContext
+        });
         if (content.includes('connection refused') && content.includes('3306')) {
             return {
                 issue_identified: true,
@@ -1000,6 +1044,10 @@ Provide environment-specific adjustments.`;
      */
     static analyzeKernelLogs(errorOutput, userCommand, systemContext) {
         const content = errorOutput.toLowerCase();
+        logger.debug('Analyzing kernel logs with context', {
+            userCommand,
+            systemContext
+        });
         if (content.includes('segmentation fault') || content.includes('segfault')) {
             return {
                 issue_identified: true,
@@ -1048,6 +1096,11 @@ Provide environment-specific adjustments.`;
      * Analyze application logs
      */
     static analyzeApplicationLogs(errorOutput, userCommand, systemContext) {
+        logger.debug('Analyzing application logs with context', {
+            sampleLength: errorOutput.length,
+            userCommand,
+            systemContext
+        });
         return {
             issue_identified: true,
             problem_category: 'Application Error',
@@ -1073,6 +1126,11 @@ Provide environment-specific adjustments.`;
      * Analyze general logs
      */
     static analyzeGeneralLogs(errorOutput, userCommand, systemContext) {
+        logger.debug('Analyzing general system logs with context', {
+            sampleLength: errorOutput.length,
+            userCommand,
+            systemContext
+        });
         return {
             issue_identified: true,
             problem_category: 'General System Error',

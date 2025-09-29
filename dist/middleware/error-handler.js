@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.notFoundHandler = exports.asyncHandler = exports.errorHandler = exports.ServiceUnavailableError = exports.RateLimitError = exports.ValidationError = void 0;
 const logger_1 = require("../utils/logger");
 class ValidationError extends Error {
-    details;
     statusCode = 400;
     code = 'VALIDATION_ERROR';
+    details;
     constructor(message, details) {
         super(message);
-        this.details = details;
         this.name = 'ValidationError';
+        this.details = details;
     }
 }
 exports.ValidationError = ValidationError;
@@ -23,17 +23,19 @@ class RateLimitError extends Error {
 }
 exports.RateLimitError = RateLimitError;
 class ServiceUnavailableError extends Error {
-    service;
     statusCode = 503;
     code = 'SERVICE_UNAVAILABLE';
+    service;
     constructor(message, service) {
         super(message);
-        this.service = service;
         this.name = 'ServiceUnavailableError';
+        this.service = service;
     }
 }
 exports.ServiceUnavailableError = ServiceUnavailableError;
-const errorHandler = (error, req, res, next) => {
+const errorHandler = (error, req, res, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+next) => {
     logger_1.logger.error('API Error occurred', {
         error: error.message,
         stack: error.stack,

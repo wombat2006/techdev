@@ -50,7 +50,7 @@ export declare class CodexMCPWrapper {
     /**
      * Get conversation history
      */
-    getConversationHistory(identifier: string): Promise<import("./codex-session-manager").CodexMessage[]>;
+    getConversationHistory(identifier: string): Promise<any>;
     /**
      * Execute Codex MCP request
      */
@@ -62,16 +62,10 @@ export declare class CodexMCPWrapper {
     /**
      * Get session statistics
      */
-    getSessionStats(): Promise<{
-        totalActiveSessions: number;
-        totalConversations: number;
-        oldestSession: string | null;
-    }>;
+    getSessionStats(): Promise<any>;
     /**
      * Cleanup expired sessions
      */
-    cleanupSessions(): Promise<{
-        cleaned: number;
-    }>;
+    cleanupSessions(): Promise<any>;
 }
 export declare const getCodexMCPWrapper: () => CodexMCPWrapper;

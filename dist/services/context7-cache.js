@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getContext7CacheManager = exports.Context7CacheManager = void 0;
-exports.getCachedOrFetchLibraryId = getCachedOrFetchLibraryId;
+exports.getCachedOrFetchLibraryId = exports.getContext7CacheManager = exports.Context7CacheManager = void 0;
 const redis_service_1 = require("./redis-service");
 class Context7CacheManager {
     redis = (0, redis_service_1.getRedisService)();
@@ -157,4 +156,5 @@ async function getCachedOrFetchLibraryId(libraryName, fetchFunction) {
         throw error;
     }
 }
+exports.getCachedOrFetchLibraryId = getCachedOrFetchLibraryId;
 //# sourceMappingURL=context7-cache.js.map

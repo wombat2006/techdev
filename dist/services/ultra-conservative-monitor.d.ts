@@ -8,6 +8,7 @@
  * - 自動降格機能（5% → 2% → 1%）
  * - 複数の承認ゲート
  */
+/// <reference types="node" />
 import { EventEmitter } from 'events';
 export type PhaseLevel = '1percent' | '2percent' | '5percent';
 export interface PhaseConfiguration {

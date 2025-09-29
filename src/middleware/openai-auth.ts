@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 export interface OpenAIAuthRequest extends Request {
+  headers: any;
   openaiAuth?: {
     apiKey: string;
     model: string;

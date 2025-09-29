@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InferenceService = void 0;
 const huggingface_1 = require("../types/huggingface");
 const logger_1 = require("../utils/logger");
+const environment_1 = require("../config/environment");
 class InferenceService {
     huggingFaceClient;
     config;
@@ -19,7 +20,7 @@ class InferenceService {
                 'cl-tohoku/bert-base-japanese-v3'
             ],
             maxRetries: 3,
-            timeoutMs: 60000,
+            timeoutMs: environment_1.config.wallBounce.enableTimeout ? (environment_1.config.wallBounce.timeoutMs || 60000) : Number.MAX_SAFE_INTEGER,
             rateLimitPerMinute: 60,
             ...config
         };
@@ -245,6 +246,13 @@ class InferenceService {
         const technicalTerms = ['システム', 'サーバ', 'エラー', '設定', '解決', '対処'];
         const techTermCount = technicalTerms.filter(term => text.includes(term)).length;
         confidence += (techTermCount / technicalTerms.length) * 0.1;
+        // Task type weighting
+        if (request.taskType === huggingface_1.TaskType.CRITICAL) {
+            confidence += 0.05;
+        }
+        else if (request.taskType === huggingface_1.TaskType.PREMIUM) {
+            confidence += 0.025;
+        }
         return Math.min(confidence, 1.0);
     }
     calculateRelevance(response, input) {
@@ -359,7 +367,8 @@ class InferenceService {
         const baseCostPerToken = 0.00001; // $0.00001 per token
         const inputCost = response.usage.inputTokens * baseCostPerToken;
         const outputCost = response.usage.outputTokens * baseCostPerToken * 2; // Output typically costs more
-        const totalCost = inputCost + outputCost;
+        const modelAdjustment = model.includes('critical') ? 1.75 : model.includes('premium') ? 1.3 : 1;
+        const totalCost = (inputCost + outputCost) * modelAdjustment;
         return {
             inputCost,
             outputCost,

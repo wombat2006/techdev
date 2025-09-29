@@ -41,7 +41,7 @@ export interface ApprovalPolicy {
   required_approvers: number;
   approver_roles: string[];
   auto_approve_conditions?: Array<{
-    condition: (request: ApprovalRequest) => boolean;
+    condition: (request: ApprovalRequest) => boolean; // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
     description: string;
   }>;
   escalation_timeout_ms: number;

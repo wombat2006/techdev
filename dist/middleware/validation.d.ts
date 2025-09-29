@@ -1,3 +1,4 @@
+/// <reference types="qs" />
 import { Request, Response, NextFunction } from 'express';
 export interface ValidationRule {
     field: string;
@@ -19,12 +20,12 @@ export declare const multiModelValidation: (req: Request, res: Response, next: N
 export declare const sanitizeInput: (req: Request, res: Response, next: NextFunction) => void;
 export declare const rateLimiter: (requestsPerMinute?: number) => (req: Request, res: Response, next: NextFunction) => void;
 declare const _default: {
-    validateRequest: (rules: ValidationRule[]) => (req: Request, res: Response, next: NextFunction) => void;
-    sanitizeInput: (req: Request, res: Response, next: NextFunction) => void;
-    rateLimiter: (requestsPerMinute?: number) => (req: Request, res: Response, next: NextFunction) => void;
-    embeddingValidation: (req: Request, res: Response, next: NextFunction) => void;
-    inferenceValidation: (req: Request, res: Response, next: NextFunction) => void;
-    conversationValidation: (req: Request, res: Response, next: NextFunction) => void;
-    multiModelValidation: (req: Request, res: Response, next: NextFunction) => void;
+    validateRequest: (rules: ValidationRule[]) => (req: Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction) => void;
+    sanitizeInput: (req: Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction) => void;
+    rateLimiter: (requestsPerMinute?: number) => (req: Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction) => void;
+    embeddingValidation: (req: Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction) => void;
+    inferenceValidation: (req: Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction) => void;
+    conversationValidation: (req: Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction) => void;
+    multiModelValidation: (req: Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>, next: NextFunction) => void;
 };
 export default _default;

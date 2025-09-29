@@ -210,7 +210,6 @@ const rateLimiter = (requestsPerMinute = 60) => {
     return (req, res, next) => {
         const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
         const now = Date.now();
-        const windowStart = now - 60000; // 1 minute window
         let clientData = rateLimitStore.get(clientIP);
         if (!clientData || clientData.resetTime <= now) {
             clientData = { count: 1, resetTime: now + 60000 };

@@ -4,8 +4,8 @@
  * フロー: User -> Claude Code -> Wall-Bounce -> GPT-5 -> Gemini-2.5-Pro -> Claude Sonnet4 -> Claude Code -> User
  */
 
-import { WallBounceAnalyzer, WallBounceResult } from './wall-bounce-analyzer';
-import { CodexMCPWrapper, CodexExecutionResult } from './codex-mcp-wrapper';
+import { WallBounceAnalyzer } from './wall-bounce-analyzer';
+import { CodexMCPWrapper } from './codex-mcp-wrapper';
 import { getCodexSessionManager, CodexSessionData } from './codex-session-manager';
 import { logger } from '../utils/logger';
 
@@ -154,6 +154,10 @@ export class MultiLLMSessionHandler {
 
     // Wall-Bounce設定をターン数に応じて調整
     const config = this.getWallBounceConfig(turnNumber);
+    logger.debug('Wall-bounce configuration applied', {
+      turnNumber,
+      config
+    });
 
     // Wall-Bounce分析実行
     const wallBounceResult = await this.wallBounceAnalyzer.executeWallBounce(

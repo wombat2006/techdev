@@ -12,7 +12,7 @@ export interface ValidationRule {
   max?: number;
   pattern?: RegExp;
   enum?: any[];
-  custom?: (value: any) => boolean | string;
+  custom?: (value: any) => boolean | string; // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
 }
 
 export const validateRequest = (rules: ValidationRule[]) => {
@@ -240,8 +240,6 @@ export const rateLimiter = (requestsPerMinute: number = 60) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
     const now = Date.now();
-    const windowStart = now - 60000; // 1 minute window
-
     let clientData = rateLimitStore.get(clientIP);
     
     if (!clientData || clientData.resetTime <= now) {

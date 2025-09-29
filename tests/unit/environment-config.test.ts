@@ -1,20 +1,55 @@
-import { config } from '../../src/config/environment';
+jest.mock('dotenv', () => ({ config: jest.fn() }));
 
-// Store original env vars
-const originalEnv = process.env;
+const originalEnvRef = process.env;
+const originalEnvSnapshot = { ...process.env };
+
+const appEnvKeys = [
+  'UPSTASH_REDIS_URL',
+  'UPSTASH_REDIS_TOKEN',
+  'HUGGINGFACE_API_KEY',
+  'HUGGINGFACE_BASE_URL',
+  'MYSQL_HOST',
+  'MYSQL_PORT',
+  'MYSQL_USER',
+  'MYSQL_PASSWORD',
+  'MYSQL_DATABASE',
+  'PORT',
+  'NODE_ENV',
+  'OPENAI_API_KEY',
+  'MONTHLY_BUDGET_LIMIT',
+  'COST_ALERT_THRESHOLD',
+  'EMBEDDING_MODEL_1',
+  'EMBEDDING_MODEL_2',
+  'EMBEDDING_MODEL_3',
+  'EMBEDDING_MODEL_4',
+  'EMBEDDING_MODEL_5',
+];
+
+type AppConfig = typeof import('../../src/config/environment').config;
+
+const loadConfig = (): AppConfig => {
+  jest.resetModules();
+  // eslint-disable-next-line @typescript-eslint/no-var-requires -- dynamic import for test isolation
+  const moduleExports = require('../../src/config/environment');
+  return moduleExports.config as AppConfig;
+};
 
 describe('Environment Configuration', () => {
   beforeEach(() => {
-    jest.resetModules();
-    process.env = { ...originalEnv };
+    process.env = { ...originalEnvSnapshot };
+    appEnvKeys.forEach(key => {
+      delete process.env[key];
+    });
   });
 
   afterAll(() => {
-    process.env = originalEnv;
+    process.env = originalEnvRef;
   });
 
   describe('Default Configuration', () => {
     test('should load default values', () => {
+      const config = loadConfig();
+
       expect(config.server.port).toBeDefined();
       expect(config.server.nodeEnv).toBeDefined();
       expect(typeof config.server.port).toBe('number');
@@ -22,6 +57,8 @@ describe('Environment Configuration', () => {
     });
 
     test('should have required configuration sections', () => {
+      const config = loadConfig();
+
       expect(config).toHaveProperty('redis');
       expect(config).toHaveProperty('huggingface');
       expect(config).toHaveProperty('database');
@@ -33,23 +70,17 @@ describe('Environment Configuration', () => {
       process.env.UPSTASH_REDIS_URL = 'redis://test-url';
       process.env.UPSTASH_REDIS_TOKEN = 'test-token';
 
-      // Re-import config to get updated values
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
+      const config = loadConfig();
 
-      expect(newConfig.redis.url).toBe('redis://test-url');
-      expect(newConfig.redis.token).toBe('test-token');
+      expect(config.redis.url).toBe('redis://test-url');
+      expect(config.redis.token).toBe('test-token');
     });
 
     test('should handle missing Redis configuration', () => {
-      delete process.env.UPSTASH_REDIS_URL;
-      delete process.env.UPSTASH_REDIS_TOKEN;
+      const config = loadConfig();
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
-
-      expect(newConfig.redis.url).toBe('');
-      expect(newConfig.redis.token).toBe('');
+      expect(config.redis.url).toBe('');
+      expect(config.redis.token).toBe('');
     });
   });
 
@@ -57,13 +88,14 @@ describe('Environment Configuration', () => {
     test('should load HuggingFace API key', () => {
       process.env.HUGGINGFACE_API_KEY = 'hf-test-key';
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
+      const config = loadConfig();
 
-      expect(newConfig.huggingface.apiKey).toBe('hf-test-key');
+      expect(config.huggingface.apiKey).toBe('hf-test-key');
     });
 
     test('should have base URL configuration', () => {
+      const config = loadConfig();
+
       expect(config.huggingface).toHaveProperty('baseUrl');
       expect(config.huggingface.baseUrl).toBeDefined();
     });
@@ -71,13 +103,17 @@ describe('Environment Configuration', () => {
 
   describe('Embedding Models Configuration', () => {
     test('should have embedding model configuration', () => {
+      const config = loadConfig();
+
       expect(config).toHaveProperty('embeddingModels');
       expect(config.embeddingModels).toHaveProperty('model1');
       expect(config.embeddingModels.model1).toBeDefined();
     });
 
     test('should have multiple embedding models configured', () => {
+      const config = loadConfig();
       const models = Object.keys(config.embeddingModels);
+
       expect(models.length).toBeGreaterThan(0);
       expect(models).toContain('model1');
     });
@@ -87,13 +123,14 @@ describe('Environment Configuration', () => {
     test('should load database configuration', () => {
       process.env.MYSQL_HOST = 'test-host';
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
+      const config = loadConfig();
 
-      expect(newConfig.database.host).toBe('test-host');
+      expect(config.database.host).toBe('test-host');
     });
 
     test('should have default database configuration', () => {
+      const config = loadConfig();
+
       expect(config.database).toHaveProperty('host');
       expect(config.database).toHaveProperty('port');
       expect(config.database).toHaveProperty('user');
@@ -104,28 +141,23 @@ describe('Environment Configuration', () => {
     test('should detect test environment', () => {
       process.env.NODE_ENV = 'test';
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
+      const config = loadConfig();
 
-      expect(newConfig.server.nodeEnv).toBe('test');
+      expect(config.server.nodeEnv).toBe('test');
     });
 
     test('should detect production environment', () => {
       process.env.NODE_ENV = 'production';
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
+      const config = loadConfig();
 
-      expect(newConfig.server.nodeEnv).toBe('production');
+      expect(config.server.nodeEnv).toBe('production');
     });
 
     test('should default to development environment', () => {
-      delete process.env.NODE_ENV;
+      const config = loadConfig();
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
-
-      expect(newConfig.server.nodeEnv).toBe('development');
+      expect(config.server.nodeEnv).toBe('development');
     });
   });
 
@@ -133,59 +165,47 @@ describe('Environment Configuration', () => {
     test('should use PORT environment variable', () => {
       process.env.PORT = '8080';
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
+      const config = loadConfig();
 
-      expect(newConfig.server.port).toBe(8080);
+      expect(config.server.port).toBe(8080);
     });
 
     test('should default to 4000', () => {
-      delete process.env.PORT;
+      const config = loadConfig();
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
-
-      expect(newConfig.server.port).toBe(4000);
+      expect(config.server.port).toBe(4000);
     });
 
     test('should parse string port to number', () => {
       process.env.PORT = '3000';
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
+      const config = loadConfig();
 
-      expect(typeof newConfig.server.port).toBe('number');
-      expect(newConfig.server.port).toBe(3000);
+      expect(typeof config.server.port).toBe('number');
+      expect(config.server.port).toBe(3000);
     });
   });
 
   describe('Configuration Validation', () => {
     test('should validate required configurations in production', () => {
       process.env.NODE_ENV = 'production';
-      delete process.env.UPSTASH_REDIS_URL;
-      delete process.env.UPSTASH_REDIS_TOKEN;
 
-      // This might throw an error or have validation logic
-      // depending on how the config module is implemented
       expect(() => {
-        delete require.cache[require.resolve('../../src/config/environment')];
-        require('../../src/config/environment');
-      }).not.toThrow(); // Adjust based on actual implementation
+        loadConfig();
+      }).not.toThrow();
     });
   });
 
   describe('Security Configuration', () => {
-    test('should not expose sensitive data in non-secure contexts', () => {
+    test('should limit exposure of sensitive data to required fields', () => {
       process.env.OPENAI_API_KEY = 'sk-secret-key';
       process.env.UPSTASH_REDIS_TOKEN = 'secret-token';
 
-      delete require.cache[require.resolve('../../src/config/environment')];
-      const { config: newConfig } = require('../../src/config/environment');
+      const config = loadConfig();
+      const configString = JSON.stringify(config);
 
-      // Ensure config doesn't accidentally log or expose sensitive data
-      const configString = JSON.stringify(newConfig);
-      expect(configString.includes('sk-secret-key')).toBe(false); // Config should not expose the exact secret key in logs
-      // But we'd want to ensure it's not logged elsewhere
+      expect(config.redis.token).toBe('secret-token');
+      expect(configString.includes('sk-secret-key')).toBe(false);
     });
   });
 });

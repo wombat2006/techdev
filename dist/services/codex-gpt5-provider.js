@@ -14,17 +14,18 @@ class CodexGPT5Provider {
      * Codex MCP経由でGPT-5を実行
      */
     async invoke(prompt, options) {
-        const startTime = Date.now();
         try {
             logger_1.logger.info('🤖 Codex GPT-5 Codex実行開始', {
                 model: this.model,
                 prompt: prompt.substring(0, 100) + '...'
             });
-            // シンプルなタイムアウト制御を使用
-            const result = await simple_codex_timeout_handler_1.simpleCodexHandler.executeCodexWithSmartTimeout(prompt, 'gpt-5-codex', {
-                initialResponse: 600000, // 10分 - より現実的な初期レスポンス待ち
-                inactivity: 90000 // 90秒 - より長い無反応タイムアウト
-            });
+            // Wall-Bounce用の高速タイムアウト制御
+            const timeoutOptions = {
+                initialResponse: 30000,
+                inactivity: 20000,
+                ...(options ?? {})
+            };
+            const result = await simple_codex_timeout_handler_1.simpleCodexHandler.executeCodexWithSmartTimeout(prompt, 'gpt-5-codex', timeoutOptions);
             const actualCost = this.calculateActualCost(result.tokens.total);
             return {
                 content: result.response,
@@ -42,9 +43,11 @@ class CodexGPT5Provider {
             // フォールバック応答
             const mockResponse = this.generateMockResponse(prompt);
             return {
-                content: `[Codex MCP Error] ${error instanceof Error ? error.message : '不明なエラー'}`,
-                confidence: 0,
-                reasoning: 'Codex MCP実行時にエラーが発生',
+                content: `${mockResponse}
+
+[Codex MCP Error] ${error instanceof Error ? error.message : '不明なエラー'}`,
+                confidence: 0.25,
+                reasoning: 'Codex MCP実行時にエラーが発生したためモックレスポンスを返却',
                 cost: 0.001,
                 tokens: { input: 0, output: 0 }
             };
@@ -56,6 +59,9 @@ class CodexGPT5Provider {
     async executeCodexMCP(prompt, options) {
         try {
             logger_1.logger.info('🔄 Codex MCP実行開始', { promptLength: prompt.length });
+            if (options?.timeoutMs) {
+                logger_1.logger.debug('Codex MCP custom timeout applied', { timeoutMs: options.timeoutMs });
+            }
             // より安全なCodex実行アプローチ
             const { execSync } = require('child_process');
             // プロンプトをファイルに書き込んで安全に実行

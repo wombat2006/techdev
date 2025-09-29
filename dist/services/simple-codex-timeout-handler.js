@@ -6,13 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.simpleCodexHandler = exports.SimpleCodexTimeoutHandler = void 0;
 const child_process_1 = require("child_process");
 const logger_1 = require("../utils/logger");
+const environment_1 = require("../config/environment");
 class SimpleCodexTimeoutHandler {
     /**
      * シンプルな二段階タイムアウト制御
      */
     async executeCodexWithSmartTimeout(prompt, model = 'gpt-5-codex', timeouts = {
-        initialResponse: 600000, // 10分 - より長い初期レスポンス待ち
-        inactivity: 90000 // 90秒 - より現実的な無反応タイムアウト
+        initialResponse: environment_1.config.wallBounce.enableTimeout ? (environment_1.config.wallBounce.timeoutMs || 600000) : Number.MAX_SAFE_INTEGER,
+        inactivity: environment_1.config.wallBounce.enableTimeout ? (environment_1.config.wallBounce.timeoutMs || 90000) : Number.MAX_SAFE_INTEGER
     }) {
         const startTime = Date.now();
         const fs = require('fs');
@@ -187,6 +188,9 @@ class SimpleCodexTimeoutHandler {
      */
     isLikelyStuck(output, inactivityMs) {
         // シンプルな判定条件
+        // タイムアウト無効化時は常にfalse
+        if (!environment_1.config.wallBounce.enableTimeout)
+            return false;
         return inactivityMs > 30000 || // 30秒以上無出力
             (output.includes('[') && !output.includes('codex') && inactivityMs > 45000); // thinking段階で45秒以上
     }

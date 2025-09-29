@@ -39,6 +39,12 @@ export const config = {
     model4: process.env.EMBEDDING_MODEL_4 || 'rinna/japanese-roberta-base',
     model5: process.env.EMBEDDING_MODEL_5 || 'tohoku-nlp/bert-base-japanese-v2',
   },
+  wallBounce: {
+    enableFallback: process.env.ENABLE_WALL_BOUNCE_FALLBACK === 'true',
+    enableTimeout: process.env.ENABLE_WALL_BOUNCE_TIMEOUT === 'true',
+    timeoutMs: parseInt(process.env.WALL_BOUNCE_TIMEOUT_MS || '0', 10),
+    minProviders: parseInt(process.env.WALL_BOUNCE_MIN_PROVIDERS || '1', 10),
+  },
 };
 
 export const validateEnvironment = (): void => {

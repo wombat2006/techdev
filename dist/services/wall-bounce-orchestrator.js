@@ -73,7 +73,10 @@ class WallBounceOrchestrator {
                 logger_1.logger.debug(`Calling LLM provider: ${provider.name}`);
                 const response = await provider.invoke(prompt, {});
                 const processingTime = Date.now() - startTime;
-                // recordLLMResponse - 一時的にコメントアウト（メトリクス統合は後で実装）
+                logger_1.logger.debug('LLM provider response received', {
+                    provider: provider.name,
+                    processingTime
+                });
                 return {
                     provider: provider.name,
                     model: provider.model,
@@ -87,7 +90,6 @@ class WallBounceOrchestrator {
                     error: error instanceof Error ? error.message : String(error),
                     processingTime
                 });
-                // recordLLMResponse - 一時的にコメントアウト（メトリクス統合は後で実装）
                 // 失敗時のダミー応答
                 return {
                     provider: provider.name,

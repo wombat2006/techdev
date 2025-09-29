@@ -92,6 +92,10 @@ class MultiLLMSessionHandler {
         const contextPrompt = this.buildContextualPrompt(args.prompt, conversationHistory, turnNumber);
         // Wall-Bounce設定をターン数に応じて調整
         const config = this.getWallBounceConfig(turnNumber);
+        logger_1.logger.debug('Wall-bounce configuration applied', {
+            turnNumber,
+            config
+        });
         // Wall-Bounce分析実行
         const wallBounceResult = await this.wallBounceAnalyzer.executeWallBounce(contextPrompt, { taskType: 'premium' });
         // セッションを更新

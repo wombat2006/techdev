@@ -242,7 +242,7 @@ RAG回答: ${ragResult.results[0]?.content || 'N/A'}
 
       const wallBounceResponses = await Promise.allSettled(wallBouncePromises);
       
-      wallBounceResults = wallBounceResponses.reduce((acc, response, index) => {
+      wallBounceResults = wallBounceResponses.reduce((acc, response) => {
         if (response.status === 'fulfilled') {
           const modelResult = response.value as any;
           acc[modelResult.model] = modelResult.result || modelResult.error;

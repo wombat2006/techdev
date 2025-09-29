@@ -61,7 +61,7 @@ router.post('/session', async (req, res) => {
  */
 router.post('/continue', async (req, res) => {
     try {
-        const { prompt, conversationId, sessionId, model, sandbox, userId } = req.body;
+        const { prompt, conversationId, sessionId, userId } = req.body;
         if (!prompt) {
             return res.status(400).json({
                 error: 'Prompt is required'

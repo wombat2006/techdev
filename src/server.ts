@@ -9,6 +9,7 @@ import { WallBounceAnalyzer } from './services/wall-bounce-analyzer';
 import { LogAnalyzer } from './services/log-analyzer';
 import ragEndpoints from './routes/rag-endpoint';
 import codexSessionRoutes from './routes/codex-session';
+import pdfRoutes from './routes/pdf-routes';
 
 interface GeminiCliHealth {
   status: 'ok' | 'error' | 'unknown';
@@ -75,6 +76,9 @@ export function createServer() {
   
   // Codex Session API routes
   app.use('/api/codex', codexSessionRoutes);
+  
+  // PDF API routes
+  app.use('/api/v1/pdf', pdfRoutes);
 
   // Real-time metrics endpoint (Server-Sent Events)
   app.get('/api/v1/metrics/stream', (req, res) => {

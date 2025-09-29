@@ -140,6 +140,10 @@ export class HuggingFaceMockClient {
     maxRetries: number = 3,
     initialDelay: number = 1000
   ): Promise<T> {
+    logger.debug('Mock retryWithBackoff invoked', {
+      maxRetries,
+      initialDelay
+    });
     // Mock implementation - just execute once
     return await operation();
   }

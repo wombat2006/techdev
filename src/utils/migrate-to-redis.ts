@@ -39,7 +39,7 @@ interface MigrationToolOptions {
 }
 
 interface MigrationRunOptions {
-  onProgress?: (progress: MigrationProgress) => void;
+  onProgress?: (progress: MigrationProgress) => void; // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
 }
 
 class MigrationErrorList extends Array<string> {
@@ -248,7 +248,12 @@ function patchArrayFromForMigrationErrors(): void {
   }
 
   const originalArrayFrom = Array.from;
-  const patchedArrayFrom = function <T, U>(this: ArrayConstructor, items: ArrayLike<T> | Iterable<T>, mapFn?: (value: T, index: number) => U, thisArg?: unknown): Array<U> {
+  const patchedArrayFrom = function <T, U>(
+    this: ArrayConstructor,
+    items: ArrayLike<T> | Iterable<T>,
+    mapFn?: (value: T, index: number) => U, // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
+    thisArg?: unknown
+  ): Array<U> {
     const cloned = originalArrayFrom.call(this, items as any, mapFn as any, thisArg);
     if ((items as any)?.[MIGRATION_ERROR_LIST_SYMBOL]) {
       Object.defineProperty(cloned, 'indexOf', {
@@ -343,7 +348,7 @@ if (require.main === module) {
 interface MigrationOptions {
   createBackup?: boolean;
   enableRollback?: boolean;
-  onProgress?: (progress: MigrationProgress) => void;
+  onProgress?: (progress: MigrationProgress) => void; // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
 }
 
 interface MigrationResult {

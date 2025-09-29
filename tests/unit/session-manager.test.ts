@@ -19,6 +19,7 @@ describe('SessionManager', () => {
       expire: jest.fn(),
       smembers: jest.fn(),
       srem: jest.fn(),
+      sadd: jest.fn(),
       setSession: jest.fn(),
       getSession: jest.fn(),
       deleteSession: jest.fn(),

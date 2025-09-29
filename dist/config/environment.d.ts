@@ -35,6 +35,12 @@ export declare const config: {
         model4: string;
         model5: string;
     };
+    wallBounce: {
+        enableFallback: boolean;
+        enableTimeout: boolean;
+        timeoutMs: number;
+        minProviders: number;
+    };
 };
 export declare const validateEnvironment: () => void;
 export default config;

@@ -9,7 +9,10 @@ export declare class CodexGPT5Provider implements LLMProvider {
     /**
      * Codex MCP経由でGPT-5を実行
      */
-    invoke(prompt: string, options?: any): Promise<LLMResponse>;
+    invoke(prompt: string, options?: {
+        initialResponse?: number;
+        inactivity?: number;
+    }): Promise<LLMResponse>;
     /**
      * Codex MCP経由でのプロンプト実行（シンプル版）
      */

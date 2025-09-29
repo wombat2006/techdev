@@ -73,7 +73,7 @@ export declare function initializeMetrics(): void;
 export declare function recordWallBounceAnalysis(taskType: string, providers: string[], confidence: number, processingTime: number, totalCost: number, status: 'success' | 'error' | 'timeout'): void;
 export declare function recordHttpRequest(method: string, route: string, statusCode: number, duration: number, requestSize?: number, responseSize?: number): void;
 export declare function recordError(errorType: string, severity: 'low' | 'medium' | 'high' | 'critical', service: string): void;
-export declare function recordLLMResponse(provider: string, model: string, responseTime: number, inputTokens: number, outputTokens: number, cost: number, status: 'success' | 'error' | 'timeout'): void;
+export declare function recordLLMResponse(provider: string, model: string, responseTime: number, inputTokens: number, outputTokens: number, _cost: number, _status: 'success' | 'error' | 'timeout'): void;
 /**
  * RAG & Webhook メトリクス記録関数群
  */

@@ -1,6 +1,7 @@
 import { Redis } from '@upstash/redis';
 import { config } from '../config/environment';
 
+/* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
 export interface RedisService {
   get<T = any>(key: string): Promise<T | null>;
   set(key: string, value: any, options?: { ex?: number; px?: number }): Promise<void>;
@@ -21,6 +22,7 @@ export interface RedisService {
   keys(pattern: string): Promise<string[]>;
   flushdb(): Promise<void>;
 }
+/* eslint-enable @typescript-eslint/no-unused-vars, no-unused-vars */
 
 class UpstashRedisService implements RedisService {
   private redis: Redis;

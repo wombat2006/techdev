@@ -28,7 +28,7 @@ export interface MCPApprovalConfig {
   never?: { tool_names: string[] };
   conditional?: {
     tool_names: string[];
-    conditions: (context: any) => boolean;
+    conditions: (context: any) => boolean; // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
   };
 }
 
@@ -167,7 +167,7 @@ export class MCPConfigManager {
       }
 
       // Environment availability check
-      if (!this.isToolEnvironmentReady(toolName, toolConfig)) {
+      if (!this.isToolEnvironmentReady(toolName)) {
         logger.debug('⚠️ Tool skipped - environment not ready', { tool: toolName });
         continue;
       }
@@ -228,7 +228,7 @@ export class MCPConfigManager {
     return toolLevelIndex <= contextLevelIndex;
   }
 
-  private isToolEnvironmentReady(toolName: string, config: MCPToolConfig): boolean {
+  private isToolEnvironmentReady(toolName: string): boolean {
     const envChecks: Record<string, () => boolean> = {
       cipher: () => process.env.CIPHER_MCP_ENABLED === 'true',
       context7: () => process.env.CONTEXT7_MCP_ENABLED === 'true' && !!process.env.CONTEXT7_API_KEY,
@@ -366,7 +366,7 @@ export class MCPConfigManager {
   } {
     const allTools = Array.from(this.toolConfigurations.keys());
     const enabledTools = allTools.filter(tool => 
-      this.isToolEnvironmentReady(tool, this.toolConfigurations.get(tool)!)
+      this.isToolEnvironmentReady(tool)
     );
     const disabledTools = allTools.filter(tool => !enabledTools.includes(tool));
 

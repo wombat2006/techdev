@@ -127,7 +127,7 @@ class MCPConfigManager {
                 continue;
             }
             // Environment availability check
-            if (!this.isToolEnvironmentReady(toolName, toolConfig)) {
+            if (!this.isToolEnvironmentReady(toolName)) {
                 logger_1.logger.debug('⚠️ Tool skipped - environment not ready', { tool: toolName });
                 continue;
             }
@@ -179,7 +179,7 @@ class MCPConfigManager {
         // Tool security level must be <= context security level
         return toolLevelIndex <= contextLevelIndex;
     }
-    isToolEnvironmentReady(toolName, config) {
+    isToolEnvironmentReady(toolName) {
         const envChecks = {
             cipher: () => process.env.CIPHER_MCP_ENABLED === 'true',
             context7: () => process.env.CONTEXT7_MCP_ENABLED === 'true' && !!process.env.CONTEXT7_API_KEY,
@@ -281,7 +281,7 @@ class MCPConfigManager {
      */
     getConfigurationStatus() {
         const allTools = Array.from(this.toolConfigurations.keys());
-        const enabledTools = allTools.filter(tool => this.isToolEnvironmentReady(tool, this.toolConfigurations.get(tool)));
+        const enabledTools = allTools.filter(tool => this.isToolEnvironmentReady(tool));
         const disabledTools = allTools.filter(tool => !enabledTools.includes(tool));
         const costDistribution = {};
         for (const [, config] of this.toolConfigurations) {

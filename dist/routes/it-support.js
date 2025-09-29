@@ -7,9 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleCriticalSupport = handleCriticalSupport;
-exports.handlePremiumSupport = handlePremiumSupport;
-exports.handleBasicSupport = handleBasicSupport;
+exports.handleBasicSupport = exports.handlePremiumSupport = exports.handleCriticalSupport = void 0;
 const express_1 = __importDefault(require("express"));
 const winston_1 = __importDefault(require("winston"));
 const log_analyzer_1 = require("../services/log-analyzer");
@@ -187,127 +185,6 @@ exports.default = router;
  * 🔄 UNIVERSAL MANDATORY Wall-Bounce Analysis for Technical Support
  * すべての技術支援レベルで複数LLMによる壁打ち分析を必須実行
  */
-async function performTechnicalWallBounceAnalysis(prompt, context, supportLevel) {
-    try {
-        logger.info('🔄 Technical Support Wall-Bounce Analysis started', { supportLevel });
-        // 🎯 Phase 1: GPT-5 高精度技術分析
-        const technicalAnalysis = await performGpt5TechnicalAnalysis(prompt, context, supportLevel);
-        // 🎯 Phase 2: Gemini 環境依存性分析
-        const environmentAnalysis = await performGeminiTechnicalAnalysis(prompt, context, technicalAnalysis);
-        // 🎯 Phase 3: 統合技術支援レスポンス生成
-        const integratedResponse = generateIntegratedTechnicalResponse(prompt, context, supportLevel, technicalAnalysis, environmentAnalysis);
-        logger.info('🎉 Technical Support Wall-Bounce Analysis completed successfully', {
-            supportLevel,
-            responseLength: integratedResponse.length
-        });
-        return integratedResponse;
-    }
-    catch (error) {
-        logger.error('🚨 Technical Support Wall-Bounce Analysis failed', {
-            supportLevel,
-            error: error instanceof Error ? error.message : 'Unknown error'
-        });
-        throw error;
-    }
-}
-/**
- * GPT-5による高精度技術分析
- */
-async function performGpt5TechnicalAnalysis(prompt, context, level) {
-    try {
-        const analysisPrompt = `Technical support analysis (${level} level):
-
-User Query: ${prompt}
-Context: ${context || 'General technical support'}
-
-Provide detailed technical analysis:
-1. Problem identification and scope
-2. Root cause analysis
-3. Step-by-step resolution
-4. Risk assessment
-5. Best practices recommendations
-
-Focus on accuracy, safety, and industry standards.`;
-        // MCP GPT-5呼び出し (シミュレート)
-        return {
-            problemScope: 'Technical issue requiring systematic approach',
-            rootCause: 'Multi-factor technical challenge identified',
-            resolution: ['Systematic diagnostic approach', 'Controlled implementation', 'Verification testing'],
-            riskLevel: level === 'critical' ? 'high' : level === 'premium' ? 'medium' : 'low'
-        };
-    }
-    catch (error) {
-        logger.error('GPT-5 technical analysis failed', { error });
-        throw error;
-    }
-}
-/**
- * Geminiによる環境依存性分析
- */
-async function performGeminiTechnicalAnalysis(prompt, context, gpt5Analysis) {
-    try {
-        const environmentPrompt = `Environment-specific technical analysis:
-
-Original Query: ${prompt}
-Context: ${context}
-Technical Analysis: ${JSON.stringify(gpt5Analysis, null, 2)}
-
-Analyze environment factors:
-1. Platform/OS considerations
-2. Configuration dependencies
-3. Integration requirements
-4. Compatibility issues
-5. Implementation constraints`;
-        // MCP Gemini呼び出し (シミュレート)
-        return {
-            platformConsiderations: ['Cross-platform compatibility', 'Version requirements'],
-            configurationNeeds: ['Environment-specific settings', 'Service dependencies'],
-            implementationGuidance: ['Phased rollout recommended', 'Testing protocols']
-        };
-    }
-    catch (error) {
-        logger.error('Gemini technical analysis failed', { error });
-        throw error;
-    }
-}
-/**
- * 統合技術支援レスポンス生成
- */
-function generateIntegratedTechnicalResponse(prompt, context, supportLevel, gpt5Analysis, environmentAnalysis) {
-    const levelEmojis = {
-        critical: '🚨',
-        premium: '🔧',
-        basic: '⚡'
-    };
-    const levelNames = {
-        critical: '緑急技術支援',
-        premium: '高度技術支援',
-        basic: '基本技術支援'
-    };
-    return `${levelEmojis[supportLevel]} 【${levelNames[supportLevel]}】🔄 Wall-Bounce Collaborative Analysis
-
-**問題分析:**
-${prompt}
-
-**🎯 根本原因分析 (Multi-LLM):**
-${gpt5Analysis.rootCause}
-
-**🌐 環境依存性考慮:**
-${environmentAnalysis.platformConsiderations?.join(', ')}
-
-**🔄 統合解決手順:**
-${gpt5Analysis.resolution?.map((step, i) => `${i + 1}. ${step}`).join('\n')}
-
-**🛡️ リスク評価:**
-リスクレベル: ${gpt5Analysis.riskLevel}
-
-**📊 品質保証:**
-✓ 複数LLMによる壁打ち分析完了
-✓ 環境依存性を考慮した解決策
-✓ リスクアセスメント完了
-
-*処理モデル: Multi-LLM Wall-Bounce Analysis (gpt-5 + Gemini + Claude)*`;
-}
 /**
  * Handle critical support requests with Claude Opus 4.1
  */
@@ -318,6 +195,9 @@ async function handleCriticalSupport(prompt, context) {
 
 **問題分析:**
 ${prompt}
+
+**提供されたコンテキスト:**
+${context ?? '※追加情報は提供されていません'}
 
 **緊急対応手順:**
 1. 即座にシステム状況を確認
@@ -337,6 +217,7 @@ ${prompt}
 
 *処理モデル: Claude Opus 4.1 (最高品質)*`;
 }
+exports.handleCriticalSupport = handleCriticalSupport;
 /**
  * Handle premium support requests with Claude Sonnet 4
  */
@@ -347,6 +228,9 @@ async function handlePremiumSupport(prompt, context) {
 
 **問題の詳細分析:**
 ${prompt}
+
+**提供されたコンテキスト:**
+${context ?? '※追加情報は提供されていません'}
 
 **技術的診断:**
 1. システムアーキテクチャの確認
@@ -366,6 +250,7 @@ ${prompt}
 
 *処理モデル: Claude Sonnet 4 (高品質分析)*`;
 }
+exports.handlePremiumSupport = handlePremiumSupport;
 /**
  * Handle basic support requests with Tier 2 models
  */
@@ -376,6 +261,9 @@ async function handleBasicSupport(prompt, context) {
 
 **問題概要:**
 ${prompt}
+
+**提供されたコンテキスト:**
+${context ?? '※追加情報は提供されていません'}
 
 **基本的な対応手順:**
 1. 現在の状況確認
@@ -395,6 +283,7 @@ ${prompt}
 
 *処理モデル: Gemini 2.5 Flash + Claude Haiku 3.5 (効率的な基本支援)*`;
 }
+exports.handleBasicSupport = handleBasicSupport;
 /**
  * GET /health
  * IT Support Health Check

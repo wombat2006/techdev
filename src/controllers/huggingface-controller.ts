@@ -73,7 +73,7 @@ export class HuggingFaceController {
   // Generate embeddings
   generateEmbeddings = asyncHandler(async (req: Request, res: Response) => {
     const { text, model, options } = req.body;
-    const userId = req.headers['x-user-id'] as string || 'anonymous';
+    const userId = (req.headers['x-user-id'] as string) || 'anonymous';
     const sessionId = req.headers['x-session-id'] as string || uuidv4();
 
     logger.info('Generating embeddings', {
@@ -332,7 +332,10 @@ export class HuggingFaceController {
           content: entry.content,
           timestamp: entry.timestamp
         })),
-        metadata: history.metadata,
+        metadata: {
+          ...(history.metadata || {}),
+          requestedBy: userId
+        },
         totalMessages: history.history.length
       }
     });

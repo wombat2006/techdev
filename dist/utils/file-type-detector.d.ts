@@ -2,6 +2,8 @@
  * File Type Detection Utility
  * マジックナンバーを使用した正確なファイル形式判別
  */
+/// <reference types="node" />
+/// <reference types="node" />
 export interface FileTypeInfo {
     extension: string;
     mimeType: string;

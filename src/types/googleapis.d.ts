@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, no-unused-vars */
 declare module 'googleapis' {
   export const google: {
     drive: (options: any) => {
@@ -21,3 +22,4 @@ declare module 'googleapis' {
     };
   };
 }
+/* eslint-enable @typescript-eslint/no-unused-vars, no-unused-vars */

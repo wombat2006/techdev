@@ -1,0 +1,2430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSapo 基本設計書 - 詳細版</title>
+    <style>
+/* 印刷最適化CSS */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Source+Code+Pro:wght@400;500;600&display=swap');
+
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #e74c3c;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --text-color: #2c3e50;
+  --text-muted: #6c757d;
+  --light-bg: #f8f9fa;
+  --border-color: #e9ecef;
+  --code-bg: #f1f3f4;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+@page {
+  size: A4;
+  margin: 25mm 20mm;
+  
+  @top-center {
+    content: "TechSapo 設計書";
+    font-family: "Noto Sans JP", sans-serif;
+    font-size: 9pt;
+    color: #666;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+  
+  @bottom-center {
+    content: "ページ " counter(page) " / " counter(pages);
+    font-family: "Noto Sans JP", sans-serif;
+    font-size: 9pt;
+    color: #666;
+    border-top: 1px solid #eee;
+    padding-top: 5px;
+  }
+}
+
+body {
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  color: var(--text-color);
+  background: white;
+  hyphens: auto;
+  word-break: break-word;
+}
+
+/* ドキュメントヘッダー */
+.document-header {
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: white;
+  padding: 30px 20px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  page-break-after: always;
+}
+
+.document-title {
+  font-size: 24pt;
+  font-weight: 900;
+  margin: 0 0 10px 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.document-subtitle {
+  font-size: 12pt;
+  font-weight: 300;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+.document-meta {
+  font-size: 10pt;
+  background: rgba(255,255,255,0.1);
+  padding: 10px;
+  border-radius: 6px;
+}
+
+/* 見出しスタイル */
+h1 {
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 30px 0 15px 0;
+  padding: 10px 0;
+  border-bottom: 2px solid var(--secondary-color);
+  page-break-after: avoid;
+}
+
+h2 {
+  font-size: 14pt;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 25px 0 12px 0;
+  padding: 8px 0 8px 15px;
+  border-left: 4px solid var(--secondary-color);
+  background: linear-gradient(90deg, var(--light-bg) 0%, white 100%);
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 20px 0 10px 0;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color);
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 11pt;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 15px 0 8px 0;
+  page-break-after: avoid;
+}
+
+/* 段落・テキスト */
+p {
+  margin: 8px 0;
+  text-align: justify;
+  line-height: 1.6;
+}
+
+strong, b {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* リスト */
+ul, ol {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+li {
+  margin: 4px 0;
+  line-height: 1.5;
+}
+
+/* テーブル */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 9pt;
+  page-break-inside: avoid;
+}
+
+th {
+  background: var(--secondary-color);
+  color: white;
+  padding: 8px 6px;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+td {
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  vertical-align: top;
+  line-height: 1.4;
+}
+
+tr:nth-child(even) {
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+/* コードブロック */
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 15px 0;
+  font-family: "Source Code Pro", "Monaco", "Menlo", monospace;
+  font-size: 8pt;
+  line-height: 1.4;
+  overflow-x: auto;
+  page-break-inside: avoid;
+}
+
+code {
+  font-family: "Source Code Pro", "Monaco", "Menlo", monospace;
+  font-size: 8pt;
+  background: var(--code-bg);
+  padding: 2px 4px;
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Mermaid図表プレースホルダー */
+.mermaid-diagram {
+  background: linear-gradient(135deg, #e8f4f8 0%, #d5eaf2 100%);
+  border: 2px solid var(--secondary-color);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+  page-break-inside: avoid;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.diagram-title {
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+
+.diagram-code {
+  background: rgba(255,255,255,0.8);
+  padding: 10px;
+  border-radius: 4px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 7pt;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  max-height: 100px;
+  overflow-y: auto;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* ブロッククォート */
+blockquote {
+  border-left: 4px solid var(--secondary-color);
+  background: var(--light-bg);
+  padding: 15px 15px 15px 20px;
+  margin: 15px 0;
+  font-style: italic;
+  border-radius: 0 6px 6px 0;
+}
+
+/* リンク */
+a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+a:hover {
+  border-bottom-color: var(--secondary-color);
+}
+
+/* ページブレーク */
+.page-break {
+  page-break-before: always;
+}
+
+.no-break {
+  page-break-inside: avoid;
+}
+
+/* 印刷最適化 */
+@media print {
+  body {
+    font-size: 10pt;
+    line-height: 1.5;
+  }
+  
+  .document-header {
+    page-break-after: always;
+  }
+  
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+  }
+  
+  pre, table, .mermaid-diagram {
+    page-break-inside: avoid;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+  }
+}</style>
+</head>
+<body>
+    <div class="document-header">
+        <h1 class="document-title">TechSapo 基本設計書 - 詳細版</h1>
+        <p class="document-subtitle">システム全体設計・アーキテクチャ・技術仕様</p>
+        <div class="document-meta">
+            生成日: 2025年9月28日 | バージョン: 2.0 | TechSapo Development Team
+        </div>
+    </div>
+    
+    <div class="content">
+        <h1>TechSapo 基本設計書 - 詳細版</h1>
+<div class="page-break"></div>
+
+<h2>📋 目次</h2>
+<ol>
+<li><a href="#1-%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E6%A6%82%E8%A6%81">システム概要</a></li>
+<li><a href="#2-%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E5%85%A8%E4%BD%93%E6%A7%8B%E6%88%90">システム全体構成</a></li>
+<li><a href="#3-%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3%E8%A8%AD%E8%A8%88%E5%8E%9F%E5%89%87">アーキテクチャ設計原則</a></li>
+<li><a href="#4-%E6%A9%9F%E8%83%BD%E8%A8%AD%E8%A8%88">機能設計</a></li>
+<li><a href="#5-%E3%83%87%E3%83%BC%E3%82%BF%E8%A8%AD%E8%A8%88">データ設計</a></li>
+<li><a href="#6-%E3%82%BB%E3%82%AD%E3%83%A5%E3%83%AA%E3%83%86%E3%82%A3%E8%A8%AD%E8%A8%88">セキュリティ設計</a></li>
+<li><a href="#7-%E3%83%91%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%B3%E3%82%B9%E8%A8%AD%E8%A8%88">パフォーマンス設計</a></li>
+<li><a href="#8-%E9%81%8B%E7%94%A8%E7%9B%A3%E8%A6%96%E8%A8%AD%E8%A8%88">運用・監視設計</a></li>
+<li><a href="#9-%E3%83%86%E3%82%B9%E3%83%88%E6%88%A6%E7%95%A5">テスト戦略</a></li>
+<li><a href="#10-%E4%BB%8A%E5%BE%8C%E3%81%AE%E7%99%BA%E5%B1%95%E8%A8%88%E7%94%BB">今後の発展計画</a></li>
+</ol>
+<div class="page-break"></div>
+
+<h2>1. システム概要</h2>
+<h3>1.1 システム目的</h3>
+<p>TechSapoは、複数のLLM（Large Language Model）を活用した**「Wall-Bounce」技術**により、高品質で信頼性の高いIT技術サポートを提供する次世代プラットフォームです。</p>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph LR
+    A[ユーザーの技術的課題] --> B[TechSapo Platform]
+    B --> C[AI分析・解決策提示]
+    C --> D[高品質な解決策]
+    
+<pre><code>B --&gt; E[Wall-Bounce分析]
+B --&gt; F[RAG知識ベース]
+B --&gt; G[ログ分析エンジン]
+
+style A fill:#e1f5fe
+style D fill:#c8e6c9
+style B fill:#fff3e0&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>1.2 システムの特徴</h3>
+<h4>🏓 Core Features Overview</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 マインドマップ</div>
+      <div class="diagram-code">mindmap
+  root((TechSapo Core))
+    Wall-Bounce分析
+      複数LLMオーケストレーション
+      コンセンサス形成
+      品質保証メカニズム
+    知識ベース統合
+      Google Drive RAG
+      Vector Search
+      リアルタイム同期
+    監視・運用
+      Prometheus Metrics
+      Grafana Dashboard
+      アラート機能
+    セキュリティ
+      API Key管理
+      レート制限
+      暗号化通信</div>
+    </div>
+
+<h3>1.3 対象ユーザー</h3>
+<table>
+<thead>
+<tr>
+<th>ユーザー種別</th>
+<th>利用シーナリオ</th>
+<th>主要機能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>IT技術者・エンジニア</strong></td>
+<td>技術的問題解決、設計レビュー</td>
+<td>Wall-Bounce分析、RAG検索</td>
+</tr>
+<tr>
+<td><strong>システム管理者</strong></td>
+<td>障害対応、ログ解析</td>
+<td>ログ分析、リアルタイム監視</td>
+</tr>
+<tr>
+<td><strong>技術サポート担当者</strong></td>
+<td>ユーザーサポート、FAQ対応</td>
+<td>知識ベース検索、セッション管理</td>
+</tr>
+<tr>
+<td><strong>開発チーム</strong></td>
+<td>コードレビュー、技術調査</td>
+<td>Wall-Bounce分析、API統合</td>
+</tr>
+</tbody></table>
+<h3>1.4 システム価値提案</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TD
+    A[従来の問題] --> A1[単一AIモデルの限界]
+    A --> A2[知識の分散・断片化]
+    A --> A3[手動分析の時間コスト]
+    
+<pre><code>B[TechSapoによる解決] --&gt; B1[複数AIモデル協調]
+B --&gt; B2[統合知識ベース]
+B --&gt; B3[自動化・効率化]
+
+B1 --&gt; C[高品質・高信頼性]
+B2 --&gt; C
+B3 --&gt; C
+
+style A fill:#ffcdd2
+style B fill:#c8e6c9
+style C fill:#fff3e0&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>2. システム全体構成</h2>
+<h3>2.1 システム構成図</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Frontend Layer"
+        UI[Web UI<br/>SPA Application<br/>🖥️ HTML5 + JS]
+        Mobile[Mobile Interface<br/>Progressive Web App<br/>📱 PWA]
+    end
+
+<pre><code>subgraph &quot;API Gateway Layer&quot;
+    Gateway[Express.js API Gateway&lt;br/&gt;🛡️ Security &amp; Rate Limiting&lt;br/&gt;📊 Request/Response Logging]
+end
+
+subgraph &quot;Core Services Layer&quot;
+    WB[Wall-Bounce Analyzer&lt;br/&gt;🤖 Multi-LLM Orchestration&lt;br/&gt;⚖️ Consensus Engine]
+    RAG[RAG Service&lt;br/&gt;📚 Knowledge Base Search&lt;br/&gt;🔍 Vector Similarity]
+    LOG[Log Analyzer&lt;br/&gt;🔧 Intelligent Diagnostics&lt;br/&gt;📈 Pattern Recognition]
+    SESSION[Session Manager&lt;br/&gt;💾 State Management&lt;br/&gt;🕒 Lifecycle Control]
+end
+
+subgraph &quot;Data Layer&quot;
+    Redis[(Redis Cache&lt;br/&gt;⚡ Session Store&lt;br/&gt;🔄 Real-time Data)]
+    Vector[(Vector Store&lt;br/&gt;📄 Document Embeddings&lt;br/&gt;🧠 Semantic Search)]
+    Config[(Configuration&lt;br/&gt;⚙️ Environment Vars&lt;br/&gt;🔒 Secure Storage)]
+end
+
+subgraph &quot;External Integrations&quot;
+    Gemini[Gemini CLI&lt;br/&gt;🟢 2.5 Pro/Flash&lt;br/&gt;📊 Cost: $0.002/1K]
+    OpenAI[OpenAI Codex&lt;br/&gt;🔵 GPT-5&lt;br/&gt;💰 Cost: $0.03/1K]
+    Anthropic[Anthropic Claude&lt;br/&gt;🟣 Opus 4.1/Sonnet 4&lt;br/&gt;💎 Premium Tier]
+    Drive[Google Drive&lt;br/&gt;☁️ Knowledge Base&lt;br/&gt;📁 Document Storage]
+end
+
+UI --&gt; Gateway
+Mobile --&gt; Gateway
+Gateway --&gt; WB
+Gateway --&gt; RAG
+Gateway --&gt; LOG
+Gateway --&gt; SESSION
+
+WB --&gt; Redis
+RAG --&gt; Redis
+LOG --&gt; Redis
+SESSION --&gt; Redis
+
+RAG --&gt; Vector
+SESSION --&gt; Config
+
+WB --&gt; Gemini
+WB --&gt; OpenAI
+WB --&gt; Anthropic
+RAG --&gt; Drive
+
+style UI fill:#e3f2fd
+style Mobile fill:#e3f2fd
+style Gateway fill:#fff3e0
+style WB fill:#f3e5f5
+style RAG fill:#e8f5e8
+style LOG fill:#fff8e1
+style SESSION fill:#fce4ec&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>2.2 技術スタック詳細</h3>
+<h4>Frontend技術構成</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph LR
+    subgraph "Frontend Stack"
+        A[HTML5 Semantic] --> B[CSS3 Grid/Flexbox]
+        B --> C[Vanilla JavaScript ES2022]
+        C --> D[Server-Sent Events]
+        D --> E[Progressive Web App]
+    end
+    
+<pre><code>subgraph &quot;UI Components&quot;
+    F[Font Awesome 6.4.0] --&gt; G[Noto Sans JP]
+    G --&gt; H[Responsive Design]
+    H --&gt; I[Dark/Light Theme]
+end
+
+subgraph &quot;Performance&quot;
+    J[Code Splitting] --&gt; K[Lazy Loading]
+    K --&gt; L[Service Worker]
+    L --&gt; M[Offline Support]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>Backend技術構成</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Runtime Environment"
+        A[Node.js 18+] --> B[TypeScript ES2022]
+        B --> C[CommonJS Modules]
+    end
+    
+<pre><code>subgraph &quot;Framework &amp; Libraries&quot;
+    D[Express.js 4.x] --&gt; E[Helmet.js Security]
+    E --&gt; F[CORS Policy]
+    F --&gt; G[Winston Logging]
+end
+
+subgraph &quot;Data &amp; Cache&quot;
+    H[Redis 7.x] --&gt; I[ioredis Client]
+    I --&gt; J[TTL Management]
+    J --&gt; K[Cluster Support]
+end
+
+subgraph &quot;Process Management&quot;
+    L[PM2 Cluster] --&gt; M[Auto Restart]
+    M --&gt; N[Load Balancing]
+    N --&gt; O[Health Monitoring]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>2.3 ネットワーク構成図</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "External Users"
+        U1[Web Users] 
+        U2[API Clients]
+        U3[Mobile Users]
+    end
+    
+<pre><code>subgraph &quot;Load Balancer&quot;
+    LB[Nginx&lt;br/&gt;SSL Termination&lt;br/&gt;Rate Limiting]
+end
+
+subgraph &quot;Application Tier&quot;
+    APP1[TechSapo Instance 1&lt;br/&gt;Port: 4000]
+    APP2[TechSapo Instance 2&lt;br/&gt;Port: 4001] 
+    APP3[Wall-Bounce Server&lt;br/&gt;Port: 4002]
+end
+
+subgraph &quot;Cache Tier&quot;
+    R1[Redis Primary&lt;br/&gt;Port: 6379]
+    R2[Redis Replica&lt;br/&gt;Port: 6380]
+end
+
+subgraph &quot;External Services&quot;
+    EX1[Google APIs&lt;br/&gt;Drive + Gemini]
+    EX2[OpenAI Codex&lt;br/&gt;GPT-5]
+    EX3[Anthropic&lt;br/&gt;Claude API]
+end
+
+U1 --&gt; LB
+U2 --&gt; LB  
+U3 --&gt; LB
+
+LB --&gt; APP1
+LB --&gt; APP2
+LB --&gt; APP3
+
+APP1 --&gt; R1
+APP2 --&gt; R1
+APP3 --&gt; R1
+R1 --&gt; R2
+
+APP1 --&gt; EX1
+APP2 --&gt; EX2
+APP3 --&gt; EX3&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>3. アーキテクチャ設計原則</h2>
+<h3>3.1 Wall-Bounce必須原則</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart TD
+    A[ユーザークエリ] --> B{2以上のLLMモデル<br/>利用可能？}
+    B -->|No| C[エラー: 最小要件未満]
+    B -->|Yes| D[Wall-Bounce開始]
+    
+<pre><code>D --&gt; E[LLM Provider 1]
+D --&gt; F[LLM Provider 2] 
+D --&gt; G[LLM Provider 3&lt;br/&gt;オプション]
+
+E --&gt; H[Response 1]
+F --&gt; I[Response 2]
+G --&gt; J[Response 3]
+
+H --&gt; K[Consensus Analysis]
+I --&gt; K
+J --&gt; K
+
+K --&gt; L{Confidence ≥ 0.7&lt;br/&gt;AND&lt;br/&gt;Consensus ≥ 0.6?}
+L --&gt;|No| M[追加Provider呼び出し]
+L --&gt;|Yes| N[統合レスポンス生成]
+
+M --&gt; O[Provider 4]
+O --&gt; P[Response 4]
+P --&gt; K
+
+N --&gt; Q[ユーザーへ返答]
+
+style A fill:#e1f5fe
+style N fill:#c8e6c9
+style Q fill:#c8e6c9
+style C fill:#ffcdd2&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>3.2 プロバイダー制約・ガードレール</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Provider Constraints"
+        A[OpenAI] --> A1[❌ 直接API使用禁止]
+        A --> A2[✅ Codex経由のみ]
+        A --> A3[💰 コスト: $0.03/1K tokens]
+        
+<pre><code>    B[Anthropic] --&gt; B1[❌ API_KEY使用禁止]
+    B --&gt; B2[✅ Claude Code直接のみ]
+    B --&gt; B3[💎 Premium Tier]
+    
+    C[Google] --&gt; C1[❌ API_KEY使用禁止]
+    C --&gt; C2[✅ Gemini CLI経由のみ]
+    C --&gt; C3[💚 コスト効率最高]
+end
+
+subgraph &quot;Quality Gates&quot;
+    D[Confidence Threshold] --&gt; D1[≥ 0.7 必須]
+    E[Consensus Threshold] --&gt; E1[≥ 0.6 必須]
+    F[Timeout Control] --&gt; F1[設定ベース制御]
+end
+
+style A1 fill:#ffcdd2
+style B1 fill:#ffcdd2
+style C1 fill:#ffcdd2
+style A2 fill:#c8e6c9
+style B2 fill:#c8e6c9
+style C2 fill:#c8e6c9&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>3.3 アーキテクチャパターン</h3>
+<h4>レイヤードアーキテクチャ</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Layered Architecture"
+        P[Presentation Layer<br/>🖥️ UI/API Endpoints]
+        A[Application Layer<br/>🔧 Business Logic & Orchestration]
+        D[Domain Layer<br/>📋 Core Models & Rules]
+        I[Infrastructure Layer<br/>🔌 External Services & Data]
+    end
+    
+<pre><code>P --&gt; A
+A --&gt; D
+D --&gt; I
+
+subgraph &quot;Cross-Cutting Concerns&quot;
+    S[Security&lt;br/&gt;🛡️ Authentication &amp; Authorization]
+    L[Logging&lt;br/&gt;📝 Structured Logging]
+    M[Monitoring&lt;br/&gt;📊 Metrics &amp; Health Checks]
+    C[Caching&lt;br/&gt;⚡ Redis-based Performance]
+end
+
+S -.-&gt; P
+S -.-&gt; A
+L -.-&gt; P
+L -.-&gt; A
+L -.-&gt; D
+L -.-&gt; I
+M -.-&gt; P
+M -.-&gt; A
+C -.-&gt; A
+C -.-&gt; I&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>マイクロサービス指向設計</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph LR
+    subgraph "Service Boundaries"
+        WBS[Wall-Bounce Service<br/>🤖 独立したLLMオーケストレーション]
+        RAGS[RAG Service<br/>📚 知識ベース管理]
+        LOGS[Log Analysis Service<br/>🔍 ログ解析専門]
+        SESS[Session Service<br/>👤 ユーザー状態管理]
+    end
+    
+<pre><code>subgraph &quot;API-First Design&quot;
+    API[Unified API Gateway&lt;br/&gt;📡 統一インターフェース]
+end
+
+subgraph &quot;Shared Infrastructure&quot;
+    CACHE[Redis Cache&lt;br/&gt;⚡ 共有キャッシュ]
+    LOG[Central Logging&lt;br/&gt;📝 集約ログ]
+    MON[Monitoring&lt;br/&gt;📊 統合監視]
+end
+
+API --&gt; WBS
+API --&gt; RAGS
+API --&gt; LOGS
+API --&gt; SESS
+
+WBS --&gt; CACHE
+RAGS --&gt; CACHE
+LOGS --&gt; CACHE
+SESS --&gt; CACHE
+
+WBS --&gt; LOG
+RAGS --&gt; LOG
+LOGS --&gt; LOG
+SESS --&gt; LOG
+
+WBS --&gt; MON
+RAGS --&gt; MON
+LOGS --&gt; MON
+SESS --&gt; MON&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>4. 機能設計</h2>
+<h3>4.1 主要機能マップ</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 マインドマップ</div>
+      <div class="diagram-code">mindmap
+  root((TechSapo 機能))
+    Wall-Bounce分析
+      並列実行モード
+        複数Provider同時実行
+        レスポンス統合
+      順次実行モード
+        順番実行
+        品質向上
+      コンセンサス分析
+        信頼度計算
+        合意スコア算出
+      品質保証
+        閾値チェック
+        フォールバック
+    ログ解析
+      パターン認識
+        dependency
+        configuration
+        network
+        permission
+        resource
+      解決策提示
+        段階的手順
+        重要度評価
+        予防策
+    RAG検索
+      Vector Search
+        埋め込み生成
+        類似度計算
+      ドキュメント管理
+        Google Drive同期
+        メタデータ管理
+      検索最適化
+        クエリ最適化
+        結果ランキング
+    セッション管理
+      状態管理
+        Redis backed
+        TTL制御
+      履歴管理
+        会話履歴
+        分析履歴
+      ユーザー管理
+        識別子管理
+        設定保持</div>
+    </div>
+
+<h3>4.2 Wall-Bounce分析機能詳細</h3>
+<h4>処理フロー図</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 シーケンス図</div>
+      <div class="diagram-code">sequenceDiagram
+    participant User as 👤 User
+    participant API as 🌐 API Gateway
+    participant WB as 🤖 Wall-Bounce Analyzer
+    participant G as 🟢 Gemini CLI
+    participant O as 🔵 OpenAI Codex
+    participant A as 🟣 Anthropic Claude
+    participant R as ⚡ Redis Cache
+
+<pre><code>User-&gt;&gt;API: POST /api/v1/generate
+Note over User,API: プロンプト + オプション
+
+API-&gt;&gt;API: 入力検証 &amp; レート制限チェック
+API-&gt;&gt;WB: executeWallBounce(prompt, options)
+
+WB-&gt;&gt;R: キャッシュ確認
+alt キャッシュヒット
+    R--&gt;&gt;WB: cached result
+    WB--&gt;&gt;API: return cached response
+else キャッシュミス
+    
+    par 並列実行 (Parallel Mode)
+        WB-&gt;&gt;G: CLI実行 (Pro/Flash)
+        WB-&gt;&gt;O: Codex呼び出し
+    end
+    
+    WB-&gt;&gt;A: 内部API呼び出し
+    
+    G--&gt;&gt;WB: Response 1 (confidence: 0.85)
+    O--&gt;&gt;WB: Response 2 (confidence: 0.92)
+    A--&gt;&gt;WB: Response 3 (confidence: 0.88)
+    
+    WB-&gt;&gt;WB: コンセンサス分析
+    Note over WB: 信頼度: 0.88, 合意: 0.91
+    
+    alt 品質閾値OK
+        WB-&gt;&gt;WB: 統合レスポンス生成
+        WB-&gt;&gt;R: 結果キャッシュ (TTL: 300s)
+        WB--&gt;&gt;API: Wall-Bounce結果
+    else 品質閾値NG
+        WB-&gt;&gt;WB: 追加Provider実行
+        Note over WB: Provider 4を呼び出し
+    end
+end
+
+API--&gt;&gt;User: 統合された高品質回答&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>コンセンサス分析アルゴリズム</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart TD
+    A[複数LLMレスポンス] --> B[レスポンス解析]
+    B --> C[キーワード抽出]
+    B --> D[セマンティック類似度]
+    B --> E[構造的類似度]
+    
+<pre><code>C --&gt; F[重複度計算]
+D --&gt; G[意味的合意度]
+E --&gt; H[形式的一貫性]
+
+F --&gt; I[統合スコア算出]
+G --&gt; I
+H --&gt; I
+
+I --&gt; J{スコア ≥ 0.6？}
+J --&gt;|Yes| K[高品質統合レスポンス]
+J --&gt;|No| L[追加Provider実行]
+
+L --&gt; M[Provider 4]
+M --&gt; N[新しいレスポンス]
+N --&gt; B
+
+style K fill:#c8e6c9
+style L fill:#fff3e0&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>4.3 ログ分析機能詳細</h3>
+<h4>分析パイプライン</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart LR
+    subgraph "入力処理"
+        A[ユーザーコマンド] --> B[エラー出力]
+        B --> C[システムコンテキスト]
+    end
+    
+<pre><code>subgraph &quot;前処理&quot;
+    C --&gt; D[ログ正規化]
+    D --&gt; E[パターン抽出]
+    E --&gt; F[キーワード特定]
+end
+
+subgraph &quot;AI分析&quot;
+    F --&gt; G[Wall-Bounce分析]
+    G --&gt; H[問題カテゴリ分類]
+    H --&gt; I[根本原因特定]
+end
+
+subgraph &quot;解決策生成&quot;
+    I --&gt; J[段階的手順作成]
+    J --&gt; K[重要度評価]
+    K --&gt; L[予防策提示]
+end
+
+subgraph &quot;出力&quot;
+    L --&gt; M[構造化レスポンス]
+    M --&gt; N[アクション可能な手順]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>問題分類マトリクス</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Problem Categories"
+        A[dependency<br/>依存関係問題<br/>📦]
+        B[configuration<br/>設定問題<br/>⚙️]
+        C[network<br/>ネットワーク問題<br/>🌐]
+        D[permission<br/>権限問題<br/>🔒]
+        E[resource<br/>リソース問題<br/>💾]
+        F[unknown<br/>未分類問題<br/>❓]
+    end
+    
+<pre><code>subgraph &quot;Severity Levels&quot;
+    S1[Low&lt;br/&gt;軽微&lt;br/&gt;🟢]
+    S2[Medium&lt;br/&gt;中程度&lt;br/&gt;🟡]
+    S3[High&lt;br/&gt;重大&lt;br/&gt;🔴]
+end
+
+subgraph &quot;Resolution Time&quot;
+    T1[&lt; 30分&lt;br/&gt;即座対応]
+    T2[30分-2時間&lt;br/&gt;短期対応]
+    T3[&gt; 2時間&lt;br/&gt;長期対応]
+end
+
+A --&gt; S1
+A --&gt; S2
+B --&gt; S2
+B --&gt; S3
+C --&gt; S1
+C --&gt; S3
+D --&gt; S2
+D --&gt; S3
+E --&gt; S3
+F --&gt; S1
+F --&gt; S2
+F --&gt; S3&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>4.4 RAG検索機能詳細</h3>
+<h4>ベクトル検索パイプライン</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart TD
+    subgraph "クエリ処理"
+        A[自然言語クエリ] --> B[クエリ正規化]
+        B --> C[キーワード拡張]
+        C --> D[埋め込み生成]
+    end
+    
+<pre><code>subgraph &quot;ドキュメント管理&quot;
+    E[Google Drive] --&gt; F[ドキュメント同期]
+    F --&gt; G[テキスト抽出]
+    G --&gt; H[チャンク分割]
+    H --&gt; I[埋め込み生成]
+    I --&gt; J[Vector Store保存]
+end
+
+subgraph &quot;検索実行&quot;
+    D --&gt; K[類似度計算]
+    K --&gt; L[Vector Store検索]
+    L --&gt; M[結果ランキング]
+end
+
+subgraph &quot;結果処理&quot;
+    M --&gt; N[メタデータ付加]
+    N --&gt; O[コンテキスト拡張]
+    O --&gt; P[レスポンス生成]
+end
+
+J --&gt; L&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>ドキュメント同期フロー</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 シーケンス図</div>
+      <div class="diagram-code">sequenceDiagram
+    participant GD as ☁️ Google Drive
+    participant WH as 🔔 Webhook Handler  
+    participant RAG as 📚 RAG Connector
+    participant VS as 🧠 Vector Store
+    participant R as ⚡ Redis
+
+<pre><code>Note over GD,R: 自動同期フロー
+
+GD-&gt;&gt;WH: ファイル変更通知
+WH-&gt;&gt;WH: 変更タイプ判定
+
+alt ファイル追加/更新
+    WH-&gt;&gt;RAG: syncDocument(fileId)
+    RAG-&gt;&gt;GD: ファイル取得
+    RAG-&gt;&gt;RAG: テキスト抽出 &amp; チャンク分割
+    RAG-&gt;&gt;VS: 埋め込み生成 &amp; 保存
+    RAG-&gt;&gt;R: メタデータキャッシュ
+else ファイル削除
+    WH-&gt;&gt;VS: deleteDocument(fileId)
+    WH-&gt;&gt;R: キャッシュクリア
+end
+
+RAG--&gt;&gt;WH: 同期完了
+WH--&gt;&gt;GD: ACK
+
+Note over GD,R: 手動同期フロー
+
+participant U as 👤 User
+U-&gt;&gt;RAG: POST /api/v1/rag/sync
+RAG-&gt;&gt;GD: フォルダー一覧取得
+
+loop 各ファイル
+    RAG-&gt;&gt;GD: ファイル内容取得
+    RAG-&gt;&gt;VS: 埋め込み更新
+    RAG-&gt;&gt;R: メタデータ更新
+end
+
+RAG--&gt;&gt;U: 同期レポート&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>5. データ設計</h2>
+<h3>5.1 データフロー概要</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart LR
+    subgraph "Input Sources"
+        UI[Web UI<br/>👤 User Input]
+        API[API Clients<br/>🔌 External Apps]
+        WH[Webhooks<br/>🔔 External Events]
+    end
+    
+<pre><code>subgraph &quot;Processing Layer&quot;
+    VAL[Input Validation&lt;br/&gt;✅ Schema Check]
+    AUTH[Authentication&lt;br/&gt;🔐 Security Layer]
+    RATE[Rate Limiting&lt;br/&gt;🚦 Traffic Control]
+end
+
+subgraph &quot;Business Logic&quot;
+    WB[Wall-Bounce&lt;br/&gt;🤖 AI Processing]
+    RAG[RAG Search&lt;br/&gt;📚 Knowledge Retrieval] 
+    LOG[Log Analysis&lt;br/&gt;🔍 Problem Diagnosis]
+    SESS[Session Mgmt&lt;br/&gt;👤 State Management]
+end
+
+subgraph &quot;Data Storage&quot;
+    REDIS[(Redis&lt;br/&gt;⚡ Cache &amp; Sessions)]
+    VECTOR[(Vector Store&lt;br/&gt;🧠 Embeddings)]
+    CONFIG[(Config Store&lt;br/&gt;⚙️ Environment)]
+end
+
+subgraph &quot;External APIs&quot;
+    GEMINI[Gemini CLI&lt;br/&gt;🟢 Google AI]
+    OPENAI[OpenAI Codex&lt;br/&gt;🔵 GPT Models]
+    CLAUDE[Claude API&lt;br/&gt;🟣 Anthropic]
+    DRIVE[Google Drive&lt;br/&gt;☁️ Documents]
+end
+
+UI --&gt; VAL
+API --&gt; VAL
+WH --&gt; VAL
+
+VAL --&gt; AUTH
+AUTH --&gt; RATE
+
+RATE --&gt; WB
+RATE --&gt; RAG
+RATE --&gt; LOG
+RATE --&gt; SESS
+
+WB --&gt; REDIS
+RAG --&gt; REDIS
+LOG --&gt; REDIS
+SESS --&gt; REDIS
+
+RAG --&gt; VECTOR
+SESS --&gt; CONFIG
+
+WB --&gt; GEMINI
+WB --&gt; OPENAI
+WB --&gt; CLAUDE
+RAG --&gt; DRIVE&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>5.2 Redis データ構造詳細</h3>
+<h4>セッション管理スキーマ</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 ER図</div>
+      <div class="diagram-code">erDiagram
+    SESSION_DATA {
+        string session_id PK
+        string user_id FK
+        timestamp created_at
+        timestamp last_accessed
+        timestamp expires_at
+        json session_data
+        string session_name
+        enum status "active|inactive|expired"
+        number request_count
+        json preferences
+    }
+    
+<pre><code>USER_SESSIONS {
+    string user_id PK
+    set active_sessions
+    number total_sessions
+    timestamp last_login
+    json user_preferences
+}
+
+SESSION_HISTORY {
+    string session_id PK
+    string user_id FK
+    array conversation_history
+    array analysis_history
+    timestamp archived_at
+    json metadata
+}
+
+SESSION_DATA ||--o{ SESSION_HISTORY : &quot;has&quot;
+SESSION_DATA }o--|| USER_SESSIONS : &quot;belongs_to&quot;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>キャッシュ管理スキーマ</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 ER図</div>
+      <div class="diagram-code">erDiagram
+    WALL_BOUNCE_CACHE {
+        string prompt_hash PK
+        json result
+        number confidence
+        number consensus_score
+        array providers_used
+        timestamp created_at
+        timestamp expires_at
+        number access_count
+    }
+    
+<pre><code>RAG_CACHE {
+    string query_hash PK
+    json search_results
+    array document_ids
+    number total_documents
+    timestamp created_at
+    timestamp expires_at
+    string embedding_model
+}
+
+CONTEXT7_CACHE {
+    string library_key PK
+    json documentation
+    string version
+    timestamp created_at
+    timestamp expires_at
+    number tokens_used
+}
+
+METRICS_CACHE {
+    string metric_key PK
+    json realtime_data
+    timestamp updated_at
+    number requests_count
+    number active_sessions
+    number response_time_avg
+}&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>Vector Store マッピング</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 ER図</div>
+      <div class="diagram-code">erDiagram
+    DRIVE_VECTOR_MAPPING {
+        string drive_file_id PK
+        string vector_store_file_id UK
+        string file_name
+        number file_size
+        string file_type
+        timestamp created_at
+        timestamp updated_at
+        string folder_path
+        json metadata
+    }
+    
+<pre><code>DOCUMENT_CHUNKS {
+    string chunk_id PK
+    string drive_file_id FK
+    string content
+    number chunk_index
+    array embedding_vector
+    json chunk_metadata
+    timestamp created_at
+}
+
+SEARCH_INDEX {
+    string keyword PK
+    array document_ids
+    array chunk_ids
+    number frequency
+    timestamp last_updated
+}
+
+DRIVE_VECTOR_MAPPING ||--o{ DOCUMENT_CHUNKS : &quot;contains&quot;
+DOCUMENT_CHUNKS }o--|| SEARCH_INDEX : &quot;indexed_by&quot;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>5.3 設定管理詳細</h3>
+<h4>環境変数構成図</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Configuration Hierarchy"
+        A[Environment Variables<br/>🔧 System Level]
+        B[Config Files<br/>📁 Application Level]
+        C[Redis Config<br/>⚡ Runtime Level]
+        D[Default Values<br/>🛡️ Fallback Level]
+    end
+    
+<pre><code>subgraph &quot;Config Categories&quot;
+    E[Server Config&lt;br/&gt;🌐 Port, Host, Environment]
+    F[LLM Provider Config&lt;br/&gt;🤖 API Keys, Endpoints]
+    G[Database Config&lt;br/&gt;💾 Redis, Vector Store]
+    H[Security Config&lt;br/&gt;🔒 Auth, Rate Limits]
+    I[Feature Flags&lt;br/&gt;🚩 A/B Testing]
+end
+
+A --&gt; E
+A --&gt; F
+A --&gt; G
+A --&gt; H
+
+B --&gt; E
+B --&gt; I
+
+C --&gt; H
+C --&gt; I
+
+D --&gt; E
+D --&gt; F
+D --&gt; G
+D --&gt; H
+D --&gt; I&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>設定検証フロー</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart TD
+    A[アプリケーション起動] --> B[環境変数読み込み]
+    B --> C[スキーマ検証]
+    C --> D{必須項目チェック}
+    D -->|Missing| E[エラー: 設定不足]
+    D -->|OK| F[型変換 & 正規化]
+    F --> G[デフォルト値適用]
+    G --> H[依存関係チェック]
+    H --> I{整合性確認}
+    I -->|Invalid| J[警告: 設定不整合]
+    I -->|Valid| K[設定完了]
+    
+<pre><code>E --&gt; L[アプリケーション終了]
+J --&gt; M[フォールバック値使用]
+M --&gt; K
+K --&gt; N[サービス開始]
+
+style E fill:#ffcdd2
+style J fill:#fff3e0
+style K fill:#c8e6c9&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>6. セキュリティ設計</h2>
+<h3>6.1 セキュリティ層構成</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Defense in Depth"
+        L1[Network Security<br/>🌐 Firewall, DDoS Protection]
+        L2[Application Security<br/>🛡️ Input Validation, HTTPS]
+        L3[Authentication & Authorization<br/>🔐 JWT, RBAC]
+        L4[Data Security<br/>🔒 Encryption, Masking]
+        L5[Infrastructure Security<br/>🏗️ Container, OS Hardening]
+    end
+    
+<pre><code>subgraph &quot;Security Controls&quot;
+    SC1[Rate Limiting&lt;br/&gt;🚦 API Throttling]
+    SC2[Input Sanitization&lt;br/&gt;🧹 XSS/SQLi Prevention]
+    SC3[Secret Management&lt;br/&gt;🗝️ API Key Protection]
+    SC4[Audit Logging&lt;br/&gt;📝 Security Events]
+    SC5[Monitoring&lt;br/&gt;👁️ Threat Detection]
+end
+
+L1 --&gt; SC1
+L2 --&gt; SC2
+L3 --&gt; SC3
+L4 --&gt; SC4
+L5 --&gt; SC5&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>6.2 API Key管理戦略</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart LR
+    subgraph "Provider Security Model"
+        A[Gemini] --> A1[❌ API_KEY除去済み]
+        A --> A2[✅ CLI認証のみ]
+        A --> A3[🔒 環境分離]
+        
+<pre><code>    B[OpenAI] --&gt; B1[❌ 直接API禁止]
+    B --&gt; B2[✅ Codex Proxy]
+    B --&gt; B3[🔑 Token管理]
+    
+    C[Anthropic] --&gt; C1[❌ API_KEY使用禁止]
+    C --&gt; C2[✅ 内部SDK専用]
+    C --&gt; C3[🛡️ セキュアライン]
+end
+
+subgraph &quot;Key Lifecycle&quot;
+    D[生成] --&gt; E[配布]
+    E --&gt; F[使用]
+    F --&gt; G[監視]
+    G --&gt; H[ローテーション]
+    H --&gt; I[無効化]
+end
+
+subgraph &quot;Access Control&quot;
+    J[RBAC&lt;br/&gt;Role-Based Access]
+    K[Principle of Least Privilege]
+    L[Audit Trail]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>6.3 認証・認可フロー</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 シーケンス図</div>
+      <div class="diagram-code">sequenceDiagram
+    participant C as 👤 Client
+    participant G as 🌐 API Gateway
+    participant A as 🔐 Auth Service
+    participant R as ⚡ Redis
+    participant S as 🔧 Service
+
+<pre><code>Note over C,S: 認証フロー
+
+C-&gt;&gt;G: Request with credentials
+G-&gt;&gt;A: Validate credentials
+A-&gt;&gt;R: Check user session
+
+alt Valid credentials
+    A-&gt;&gt;A: Generate JWT token
+    A-&gt;&gt;R: Store session
+    A--&gt;&gt;G: Token + permissions
+    G--&gt;&gt;C: Authenticated response
+else Invalid credentials
+    A--&gt;&gt;G: 401 Unauthorized
+    G--&gt;&gt;C: Authentication failed
+end
+
+Note over C,S: 認可フロー
+
+C-&gt;&gt;G: API request with token
+G-&gt;&gt;G: Validate JWT signature
+G-&gt;&gt;A: Check permissions
+A-&gt;&gt;R: Verify session active
+
+alt Authorized
+    G-&gt;&gt;S: Forward request
+    S--&gt;&gt;G: Service response
+    G--&gt;&gt;C: Authorized response
+else Unauthorized
+    G--&gt;&gt;C: 403 Forbidden
+end
+
+Note over C,S: セッション管理
+
+loop Session monitoring
+    A-&gt;&gt;R: Update last_accessed
+    A-&gt;&gt;A: Check session expiry
+    A-&gt;&gt;R: Cleanup expired sessions
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>6.4 レート制限・DDoS対策</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Rate Limiting Layers"
+        L1[Global Rate Limit<br/>🌍 Server-wide Protection]
+        L2[IP-based Rate Limit<br/>🏠 Per-IP Throttling]
+        L3[User-based Rate Limit<br/>👤 Per-User Quotas]
+        L4[Endpoint-specific Limit<br/>🎯 API-specific Rules]
+    end
+    
+<pre><code>subgraph &quot;Detection &amp; Response&quot;
+    D1[Pattern Analysis&lt;br/&gt;📊 Anomaly Detection]
+    D2[Threshold Monitoring&lt;br/&gt;⚠️ Alert Triggers]
+    D3[Automatic Blocking&lt;br/&gt;🚫 IP Blacklisting]
+    D4[Graceful Degradation&lt;br/&gt;⬇️ Service Throttling]
+end
+
+subgraph &quot;Rate Limit Matrix&quot;
+    RL1[/api/v1/generate&lt;br/&gt;10 req/min per IP]
+    RL2[/api/v1/analyze-logs&lt;br/&gt;20 req/min per IP]
+    RL3[/api/v1/rag/search&lt;br/&gt;30 req/min per IP]
+    RL4[/health&lt;br/&gt;Unlimited]
+end
+
+L1 --&gt; D1
+L2 --&gt; D2
+L3 --&gt; D3
+L4 --&gt; D4&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>6.5 データ保護・プライバシー</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart TD
+    subgraph "Data Classification"
+        A[Public Data<br/>🌐 Documentation]
+        B[Internal Data<br/>🏢 Logs, Metrics]
+        C[Confidential Data<br/>🔒 User Sessions]
+        D[Restricted Data<br/>🚨 API Keys, Secrets]
+    end
+    
+<pre><code>subgraph &quot;Protection Mechanisms&quot;
+    E[Encryption at Rest&lt;br/&gt;💾 AES-256]
+    F[Encryption in Transit&lt;br/&gt;🔄 TLS 1.3]
+    G[Data Masking&lt;br/&gt;🎭 PII Protection]
+    H[Access Logging&lt;br/&gt;📝 Audit Trail]
+end
+
+subgraph &quot;Compliance&quot;
+    I[GDPR&lt;br/&gt;🇪🇺 EU Privacy]
+    J[CCPA&lt;br/&gt;🇺🇸 CA Privacy]
+    K[SOC 2&lt;br/&gt;🏛️ Security Framework]
+    L[ISO 27001&lt;br/&gt;📋 Security Standards]
+end
+
+A --&gt; E
+B --&gt; E
+C --&gt; E
+C --&gt; F
+D --&gt; F
+D --&gt; G
+
+C --&gt; H
+D --&gt; H
+
+E --&gt; I
+F --&gt; J
+G --&gt; K
+H --&gt; L&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>7. パフォーマンス設計</h2>
+<h3>7.1 性能要件マトリクス</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Performance Targets"
+        A[Wall-Bounce Response<br/>⏱️ < 60 seconds<br/>🎯 Target: 45s]
+        B[Log Analysis<br/>⏱️ < 30 seconds<br/>🎯 Target: 20s]
+        C[RAG Search<br/>⏱️ < 10 seconds<br/>🎯 Target: 5s]
+        D[Health Check<br/>⏱️ < 1 second<br/>🎯 Target: 200ms]
+    end
+    
+<pre><code>subgraph &quot;Scalability Targets&quot;
+    E[Concurrent Users&lt;br/&gt;👥 100 active&lt;br/&gt;📈 Peak: 200]
+    F[Requests per Minute&lt;br/&gt;📊 1000 RPM&lt;br/&gt;🚀 Burst: 2000]
+    G[Cache Hit Rate&lt;br/&gt;⚡ &gt; 80%&lt;br/&gt;🏆 Target: 90%]
+    H[System Uptime&lt;br/&gt;🔄 99.9%&lt;br/&gt;💯 Target: 99.95%]
+end
+
+subgraph &quot;Resource Limits&quot;
+    I[Memory Usage&lt;br/&gt;💾 &lt; 2GB per instance&lt;br/&gt;⚠️ Alert: 1.5GB]
+    J[CPU Usage&lt;br/&gt;🔥 &lt; 80% average&lt;br/&gt;🚨 Alert: 90%]
+    K[Disk I/O&lt;br/&gt;💿 &lt; 100 IOPS&lt;br/&gt;📈 Monitor: 80]
+    L[Network I/O&lt;br/&gt;🌐 &lt; 100 Mbps&lt;br/&gt;📊 Monitor: 80]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>7.2 最適化戦略</h3>
+<h4>並列処理最適化</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart LR
+    subgraph "Wall-Bounce Parallelization"
+        A[User Request] --> B[Load Balancer]
+        B --> C[Provider Pool]
+        
+<pre><code>    C --&gt; D[Gemini CLI]
+    C --&gt; E[OpenAI Codex]
+    C --&gt; F[Anthropic Claude]
+    
+    D --&gt; G[Response 1]
+    E --&gt; H[Response 2]
+    F --&gt; I[Response 3]
+    
+    G --&gt; J[Consensus Engine]
+    H --&gt; J
+    I --&gt; J
+    
+    J --&gt; K[Unified Response]
+end
+
+subgraph &quot;Optimization Techniques&quot;
+    L[Connection Pooling&lt;br/&gt;🔄 Reuse Connections]
+    M[Request Batching&lt;br/&gt;📦 Group Similar Requests]
+    N[Async Processing&lt;br/&gt;⚡ Non-blocking I/O]
+    O[Streaming Responses&lt;br/&gt;🌊 Real-time Results]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>キャッシュ戦略階層</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Cache Hierarchy"
+        L1[L1: Application Cache<br/>⚡ In-Memory (Node.js)<br/>TTL: 60s, Size: 100MB]
+        L2[L2: Redis Cache<br/>🔄 Distributed Cache<br/>TTL: 300s, Size: 1GB]
+        L3[L3: CDN Cache<br/>🌐 Edge Caching<br/>TTL: 3600s, Global]
+        L4[L4: Database<br/>💾 Persistent Storage<br/>永続化データ]
+    end
+    
+<pre><code>subgraph &quot;Cache Patterns&quot;
+    P1[Cache-Aside&lt;br/&gt;👁️ Lazy Loading]
+    P2[Write-Through&lt;br/&gt;✍️ Immediate Consistency]
+    P3[Write-Behind&lt;br/&gt;⏰ Deferred Writes]
+    P4[Refresh-Ahead&lt;br/&gt;🔄 Proactive Updates]
+end
+
+subgraph &quot;Cache Keys&quot;
+    K1[wall_bounce:{hash}&lt;br/&gt;🤖 AI Responses]
+    K2[rag_search:{query_hash}&lt;br/&gt;📚 Search Results]
+    K3[context7:{library_key}&lt;br/&gt;📖 Documentation]
+    K4[sessions:{session_id}&lt;br/&gt;👤 User Sessions]
+end
+
+L1 --&gt; P1
+L2 --&gt; P2
+L3 --&gt; P3
+L4 --&gt; P4&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>7.3 リソース管理・スケーリング</h3>
+<h4>水平スケーリング設計</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Load Balancer Tier"
+        LB[Nginx Load Balancer<br/>⚖️ Round Robin + Health Check]
+    end
+    
+<pre><code>subgraph &quot;Application Tier&quot;
+    APP1[TechSapo Instance 1&lt;br/&gt;📊 Port 4000]
+    APP2[TechSapo Instance 2&lt;br/&gt;📊 Port 4001]
+    APP3[TechSapo Instance 3&lt;br/&gt;📊 Port 4002]
+    APPN[TechSapo Instance N&lt;br/&gt;📊 Port 400N]
+end
+
+subgraph &quot;Shared Services&quot;
+    REDIS[Redis Cluster&lt;br/&gt;⚡ Shared Cache &amp; Sessions]
+    VECTOR[Vector Store&lt;br/&gt;🧠 Shared Knowledge Base]
+    METRICS[Metrics Store&lt;br/&gt;📊 Shared Monitoring]
+end
+
+subgraph &quot;Auto-Scaling Rules&quot;
+    CPU[CPU &gt; 80% for 5min&lt;br/&gt;→ Scale Up]
+    MEM[Memory &gt; 85% for 3min&lt;br/&gt;→ Scale Up]
+    RPS[RPS &gt; 80% capacity&lt;br/&gt;→ Scale Up]
+    IDLE[Low utilization for 15min&lt;br/&gt;→ Scale Down]
+end
+
+LB --&gt; APP1
+LB --&gt; APP2
+LB --&gt; APP3
+LB --&gt; APPN
+
+APP1 --&gt; REDIS
+APP2 --&gt; REDIS
+APP3 --&gt; REDIS
+APPN --&gt; REDIS
+
+APP1 --&gt; VECTOR
+APP2 --&gt; VECTOR
+APP3 --&gt; VECTOR
+APPN --&gt; VECTOR&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>リソース監視・アラート</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart TD
+    subgraph "Monitoring Metrics"
+        A[System Metrics<br/>💻 CPU, Memory, Disk]
+        B[Application Metrics<br/>📊 Requests, Response Time]
+        C[Business Metrics<br/>💼 Wall-Bounce Success Rate]
+        D[External Metrics<br/>🌐 Provider Response Time]
+    end
+    
+<pre><code>subgraph &quot;Alert Conditions&quot;
+    E[Critical&lt;br/&gt;🚨 Service Down&lt;br/&gt;Response &lt; 5min]
+    F[Warning&lt;br/&gt;⚠️ Performance Degraded&lt;br/&gt;Response &lt; 30min]
+    G[Info&lt;br/&gt;ℹ️ Capacity Planning&lt;br/&gt;Daily Report]
+end
+
+subgraph &quot;Response Actions&quot;
+    H[Auto-Scaling&lt;br/&gt;🔄 Instance Management]
+    I[Circuit Breaker&lt;br/&gt;⚡ Failure Isolation]
+    J[Graceful Degradation&lt;br/&gt;⬇️ Feature Limiting]
+    K[Alerting&lt;br/&gt;📢 Team Notification]
+end
+
+A --&gt; E
+A --&gt; F
+B --&gt; E
+B --&gt; F
+C --&gt; F
+C --&gt; G
+D --&gt; F
+
+E --&gt; H
+E --&gt; I
+E --&gt; K
+F --&gt; J
+F --&gt; K
+G --&gt; K&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>8. 運用・監視設計</h2>
+<h3>8.1 監視アーキテクチャ</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Application Layer"
+        APP1[TechSapo Instance 1]
+        APP2[TechSapo Instance 2]
+        APP3[TechSapo Instance 3]
+    end
+    
+<pre><code>subgraph &quot;Metrics Collection&quot;
+    PROM[Prometheus&lt;br/&gt;📊 Time Series DB&lt;br/&gt;Port: 9090]
+    NODE[Node Exporter&lt;br/&gt;💻 System Metrics&lt;br/&gt;Port: 9100]
+    REDIS_EXP[Redis Exporter&lt;br/&gt;⚡ Cache Metrics&lt;br/&gt;Port: 9121]
+end
+
+subgraph &quot;Visualization&quot;
+    GRAFANA[Grafana&lt;br/&gt;📈 Dashboards&lt;br/&gt;Port: 3000]
+    ALERT[AlertManager&lt;br/&gt;🚨 Notifications&lt;br/&gt;Port: 9093]
+end
+
+subgraph &quot;Log Management&quot;
+    WINSTON[Winston Logger&lt;br/&gt;📝 Structured Logs]
+    LOG_AGG[Log Aggregator&lt;br/&gt;🔍 Centralized Logging]
+end
+
+subgraph &quot;External Monitoring&quot;
+    UPTIMEROBOT[UptimeRobot&lt;br/&gt;🌐 External Health Check]
+    PINGDOM[Pingdom&lt;br/&gt;⏱️ Performance Monitoring]
+end
+
+APP1 --&gt; PROM
+APP2 --&gt; PROM
+APP3 --&gt; PROM
+
+PROM --&gt; GRAFANA
+PROM --&gt; ALERT
+
+APP1 --&gt; WINSTON
+APP2 --&gt; WINSTON
+APP3 --&gt; WINSTON
+WINSTON --&gt; LOG_AGG
+
+NODE --&gt; PROM
+REDIS_EXP --&gt; PROM&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>8.2 ダッシュボード設計</h3>
+<h4>メインダッシュボード</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "System Overview Dashboard"
+        A[Service Health<br/>🟢 All Services Operational]
+        B[Request Rate<br/>📊 1,247 RPM]
+        C[Response Time<br/>⏱️ 245ms P95]
+        D[Error Rate<br/>🚨 0.02%]
+    end
+    
+<pre><code>subgraph &quot;Wall-Bounce Metrics&quot;
+    E[Success Rate&lt;br/&gt;✅ 94.3%]
+    F[Consensus Score&lt;br/&gt;🤝 0.87 avg]
+    G[Provider Health&lt;br/&gt;🟢 Gemini ✅ OpenAI ✅ Claude]
+    H[Cost Tracking&lt;br/&gt;💰 $42.15 / $70 budget]
+end
+
+subgraph &quot;Infrastructure Metrics&quot;
+    I[CPU Usage&lt;br/&gt;🔥 45% avg]
+    J[Memory Usage&lt;br/&gt;💾 1.2GB / 2GB]
+    K[Cache Hit Rate&lt;br/&gt;⚡ 89.2%]
+    L[Redis Connections&lt;br/&gt;🔄 23 active]
+end
+
+subgraph &quot;Business Metrics&quot;
+    M[Active Sessions&lt;br/&gt;👥 42 users]
+    N[Daily Queries&lt;br/&gt;📈 2,847 queries]
+    O[User Satisfaction&lt;br/&gt;⭐ 4.7/5.0]
+    P[Feature Usage&lt;br/&gt;📊 Wall-Bounce: 78%, RAG: 22%]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>Wall-Bounce専用ダッシュボード</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Provider Performance"
+        A[Gemini 2.5 Pro<br/>⏱️ 12.3s avg<br/>✅ 97.2% success]
+        B[Gemini 2.5 Flash<br/>⏱️ 3.1s avg<br/>✅ 98.1% success]
+        C[OpenAI Codex<br/>⏱️ 18.7s avg<br/>✅ 91.5% success]
+        D[Anthropic Claude<br/>⏱️ 8.9s avg<br/>✅ 95.8% success]
+    end
+    
+<pre><code>subgraph &quot;Quality Metrics&quot;
+    E[Confidence Distribution&lt;br/&gt;📊 0.7-0.8: 15%, 0.8-0.9: 45%, 0.9-1.0: 40%]
+    F[Consensus Trends&lt;br/&gt;📈 Last 24h: 0.89 avg]
+    G[Failed Analyses&lt;br/&gt;🚨 3 failures / 847 total]
+    H[Retry Patterns&lt;br/&gt;🔄 2.3% require extra provider]
+end
+
+subgraph &quot;Cost Analysis&quot;
+    I[Token Usage&lt;br/&gt;📝 1.2M tokens today]
+    J[Cost per Query&lt;br/&gt;💰 $0.048 avg]
+    K[Provider Cost Breakdown&lt;br/&gt;📊 Gemini: 45%, OpenAI: 35%, Claude: 20%]
+    L[Budget Projection&lt;br/&gt;📈 On track: $58/$70 monthly]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>8.3 ログ管理戦略</h3>
+<h4>構造化ログスキーマ</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph LR
+    subgraph "Log Levels"
+        A[ERROR<br/>🔴 システムエラー]
+        B[WARN<br/>🟡 注意事項]
+        C[INFO<br/>🔵 通常動作]
+        D[DEBUG<br/>⚪ 詳細情報]
+    end
+    
+<pre><code>subgraph &quot;Log Categories&quot;
+    E[Request Logs&lt;br/&gt;📝 API呼び出し]
+    F[Performance Logs&lt;br/&gt;⏱️ 応答時間]
+    G[Security Logs&lt;br/&gt;🔒 認証・認可]
+    H[Business Logs&lt;br/&gt;💼 Wall-Bounce実行]
+end
+
+subgraph &quot;Log Destinations&quot;
+    I[Console&lt;br/&gt;🖥️ 開発環境]
+    J[File&lt;br/&gt;📁 ローカルファイル]
+    K[External&lt;br/&gt;🌐 ログ集約サービス]
+    L[Database&lt;br/&gt;💾 検索可能ストレージ]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>ログ解析パイプライン</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart LR
+    subgraph "Log Sources"
+        A[Application Logs<br/>📱 TechSapo Services]
+        B[System Logs<br/>💻 OS & Infrastructure] 
+        C[Access Logs<br/>🌐 Nginx/Load Balancer]
+        D[Security Logs<br/>🔒 Auth & Rate Limiting]
+    end
+    
+<pre><code>subgraph &quot;Processing&quot;
+    E[Log Parser&lt;br/&gt;📊 Structure Extraction]
+    F[Filter &amp; Transform&lt;br/&gt;🔄 Data Normalization]
+    G[Enrichment&lt;br/&gt;➕ Context Addition]
+    H[Correlation&lt;br/&gt;🔗 Event Linking]
+end
+
+subgraph &quot;Storage &amp; Analysis&quot;
+    I[Search Index&lt;br/&gt;🔍 Full-text Search]
+    J[Time Series&lt;br/&gt;📈 Metrics Extraction]
+    K[Alert Rules&lt;br/&gt;🚨 Anomaly Detection]
+    L[Retention Policy&lt;br/&gt;🗄️ Data Lifecycle]
+end
+
+A --&gt; E
+B --&gt; E
+C --&gt; E
+D --&gt; E
+
+E --&gt; F
+F --&gt; G
+G --&gt; H
+
+H --&gt; I
+H --&gt; J
+H --&gt; K
+H --&gt; L&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>8.4 ヘルスチェック・SLI/SLO</h3>
+<h4>サービスレベル指標 (SLI)</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Availability SLI"
+        A[System Uptime<br/>🔄 99.95% target<br/>43m 48s downtime/month max]
+        B[API Success Rate<br/>✅ 99.9% target<br/>0.1% error rate max]
+        C[Health Check<br/>💓 100% target<br/>All endpoints responsive]
+    end
+    
+<pre><code>subgraph &quot;Performance SLI&quot;
+    D[Response Time&lt;br/&gt;⏱️ P95 &lt; 60s for Wall-Bounce&lt;br/&gt;P95 &lt; 10s for RAG]
+    E[Throughput&lt;br/&gt;📊 1000 RPM capacity&lt;br/&gt;Burst to 2000 RPM]
+    F[Cache Performance&lt;br/&gt;⚡ 90% hit rate target&lt;br/&gt;&lt; 1ms cache access]
+end
+
+subgraph &quot;Quality SLI&quot;
+    G[Wall-Bounce Quality&lt;br/&gt;🎯 Confidence ≥ 0.7&lt;br/&gt;Consensus ≥ 0.6]
+    H[RAG Relevance&lt;br/&gt;📚 User satisfaction ≥ 4.5/5&lt;br/&gt;Result accuracy &gt; 85%]
+    I[Cost Efficiency&lt;br/&gt;💰 &lt; $70/month&lt;br/&gt;&lt; $0.05 per query]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>ヘルスチェック階層</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart TD
+    subgraph "Health Check Levels"
+        L1[L1: Basic Health<br/>🟢 Service Running<br/>GET /health]
+        L2[L2: Dependencies<br/>🔄 External Services<br/>GET /api/v1/health]
+        L3[L3: End-to-End<br/>🎯 Full Workflow<br/>Synthetic Tests]
+        L4[L4: Business Logic<br/>💼 Feature Validation<br/>Wall-Bounce Test]
+    end
+    
+<pre><code>subgraph &quot;Check Frequency&quot;
+    F1[Every 30s&lt;br/&gt;⏰ Basic Health]
+    F2[Every 2min&lt;br/&gt;⏰ Dependencies]
+    F3[Every 10min&lt;br/&gt;⏰ End-to-End]
+    F4[Every 1hour&lt;br/&gt;⏰ Business Logic]
+end
+
+subgraph &quot;Failure Actions&quot;
+    A1[Alert&lt;br/&gt;🚨 Immediate notification]
+    A2[Auto-Restart&lt;br/&gt;🔄 Service recovery]
+    A3[Circuit Breaker&lt;br/&gt;⚡ Traffic redirection]
+    A4[Graceful Degradation&lt;br/&gt;⬇️ Feature disable]
+end
+
+L1 --&gt; F1
+L2 --&gt; F2
+L3 --&gt; F3
+L4 --&gt; F4
+
+F1 --&gt; A1
+F2 --&gt; A2
+F3 --&gt; A3
+F4 --&gt; A4&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>9. テスト戦略</h2>
+<h3>9.1 テストピラミッド</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Test Pyramid"
+        A[E2E Tests<br/>🌐 Browser Automation<br/>User Journey Validation<br/>~5% of total tests]
+        B[Integration Tests<br/>🔗 API & Service Integration<br/>External Dependencies<br/>~15% of total tests]
+        C[Unit Tests<br/>⚙️ Component Testing<br/>Business Logic Validation<br/>~80% of total tests]
+    end
+    
+<pre><code>subgraph &quot;Test Categories&quot;
+    D[Functional Tests&lt;br/&gt;✅ Feature Behavior]
+    E[Performance Tests&lt;br/&gt;⏱️ Load &amp; Stress]
+    F[Security Tests&lt;br/&gt;🔒 Vulnerability Scanning]
+    G[Compatibility Tests&lt;br/&gt;🔄 Browser &amp; Device]
+end
+
+subgraph &quot;Test Environments&quot;
+    H[Local Dev&lt;br/&gt;💻 Developer Machine]
+    I[CI/CD&lt;br/&gt;🤖 Automated Pipeline]
+    J[Staging&lt;br/&gt;🎭 Pre-production]
+    K[Production&lt;br/&gt;🚀 Live Monitoring]
+end
+
+A --&gt; D
+B --&gt; D
+C --&gt; D
+
+D --&gt; H
+E --&gt; I
+F --&gt; J
+G --&gt; K&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>9.2 Wall-Bounce機能テスト戦略</h3>
+<h4>テストケース設計</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart TD
+    subgraph "Happy Path Tests"
+        A[正常系: 基本機能<br/>✅ 3プロバイダー成功]
+        B[正常系: 高品質回答<br/>✅ 信頼度0.9+, 合意0.8+]
+        C[正常系: キャッシュヒット<br/>⚡ 同一クエリの高速応答]
+    end
+    
+<pre><code>subgraph &quot;Error Handling Tests&quot;
+    D[異常系: プロバイダー障害&lt;br/&gt;🚨 1プロバイダー失敗時]
+    E[異常系: タイムアウト&lt;br/&gt;⏰ 60秒制限超過]
+    F[異常系: 品質閾値未達&lt;br/&gt;⚠️ 信頼度0.6以下]
+end
+
+subgraph &quot;Edge Case Tests&quot;
+    G[境界値: 最小プロバイダー&lt;br/&gt;⚖️ 2プロバイダーのみ]
+    H[境界値: 最大トークン&lt;br/&gt;📝 制限値近接]
+    I[境界値: 複雑なクエリ&lt;br/&gt;🧩 マルチモーダル入力]
+end
+
+subgraph &quot;Performance Tests&quot;
+    J[負荷テスト: 同時実行&lt;br/&gt;⚡ 100並列リクエスト]
+    K[負荷テスト: 継続実行&lt;br/&gt;🔄 1時間連続実行]
+    L[ストレステスト: 限界性能&lt;br/&gt;🚀 システム限界測定]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>モック・スタブ戦略</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph LR
+    subgraph "External Dependencies"
+        A[Gemini CLI<br/>🟢 Google AI]
+        B[OpenAI Codex<br/>🔵 GPT Models]
+        C[Anthropic Claude<br/>🟣 Claude API]
+        D[Google Drive<br/>☁️ Documents]
+        E[Redis Cache<br/>⚡ Data Store]
+    end
+    
+<pre><code>subgraph &quot;Test Doubles&quot;
+    F[Gemini Mock&lt;br/&gt;🎭 Predefined Responses]
+    G[OpenAI Stub&lt;br/&gt;🤖 Success/Failure Simulation]
+    H[Claude Fake&lt;br/&gt;👻 Latency Simulation]
+    I[Drive Dummy&lt;br/&gt;📁 Static File Data]
+    J[Redis Mock&lt;br/&gt;💾 In-memory Store]
+end
+
+subgraph &quot;Test Scenarios&quot;
+    K[Fast Response&lt;br/&gt;⚡ &lt; 1s response]
+    L[Slow Response&lt;br/&gt;🐌 30s+ response]
+    M[Error Response&lt;br/&gt;❌ API failures]
+    N[Mixed Quality&lt;br/&gt;📊 Varied confidence]
+    O[Network Issues&lt;br/&gt;🌐 Connection problems]
+end
+
+A --&gt; F
+B --&gt; G
+C --&gt; H
+D --&gt; I
+E --&gt; J
+
+F --&gt; K
+G --&gt; L
+H --&gt; M
+I --&gt; N
+J --&gt; O&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>9.3 品質保証・Property-based Testing</h3>
+<h4>Property-based テスト設計</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Properties to Test"
+        A[Wall-Bounce Properties<br/>🎯 信頼度・合意スコア範囲]
+        B[Response Properties<br/>📝 レスポンス形式・完全性]
+        C[Cache Properties<br/>⚡ キャッシュ一貫性・TTL]
+        D[Session Properties<br/>👤 セッション整合性・有効期限]
+    end
+    
+<pre><code>subgraph &quot;Generation Strategy&quot;
+    E[Input Generation&lt;br/&gt;🎲 ランダム・境界値・無効値]
+    F[State Generation&lt;br/&gt;🔄 システム状態バリエーション]
+    G[Timing Generation&lt;br/&gt;⏱️ 実行タイミング・順序]
+    H[Load Generation&lt;br/&gt;📊 負荷パターン・スパイク]
+end
+
+subgraph &quot;Invariants&quot;
+    I[Response Time&lt;br/&gt;⏰ 60秒以内完了保証]
+    J[Data Consistency&lt;br/&gt;🔄 キャッシュ・DB整合性]
+    K[Security&lt;br/&gt;🔒 認証・認可保持]
+    L[Resource Limits&lt;br/&gt;💾 メモリ・CPU制限遵守]
+end
+
+A --&gt; E
+B --&gt; F
+C --&gt; G
+D --&gt; H
+
+E --&gt; I
+F --&gt; J
+G --&gt; K
+H --&gt; L&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>9.4 CI/CD テストパイプライン</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart LR
+    subgraph "Source Control"
+        A[Git Push<br/>📤 Code Changes]
+        B[PR Created<br/>🔀 Pull Request]
+    end
+    
+<pre><code>subgraph &quot;CI Pipeline&quot;
+    C[Code Quality&lt;br/&gt;🔍 ESLint + TypeScript]
+    D[Unit Tests&lt;br/&gt;⚙️ Jest Test Suite]
+    E[Integration Tests&lt;br/&gt;🔗 API Testing]
+    F[Security Scan&lt;br/&gt;🔒 Vulnerability Check]
+end
+
+subgraph &quot;CD Pipeline&quot;
+    G[Build&lt;br/&gt;🏗️ TypeScript Compilation]
+    H[Package&lt;br/&gt;📦 Docker Image]
+    I[Deploy Staging&lt;br/&gt;🎭 Test Environment]
+    J[E2E Tests&lt;br/&gt;🌐 Full Workflow]
+end
+
+subgraph &quot;Production Deployment&quot;
+    K[Blue-Green Deploy&lt;br/&gt;🔄 Zero Downtime]
+    L[Health Check&lt;br/&gt;💓 Service Validation]
+    M[Rollback Ready&lt;br/&gt;↩️ Quick Recovery]
+end
+
+A --&gt; C
+B --&gt; C
+C --&gt; D
+D --&gt; E
+E --&gt; F
+F --&gt; G
+G --&gt; H
+H --&gt; I
+I --&gt; J
+J --&gt; K
+K --&gt; L
+L --&gt; M&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<div class="page-break"></div>
+
+<h2>10. 今後の発展計画</h2>
+<h3>10.1 ロードマップ概要</h3>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 ガントチャート</div>
+      <div class="diagram-code">gantt
+    title TechSapo Development Roadmap
+    dateFormat  YYYY-MM-DD
+    section Phase 1 (Q1 2025)
+    認証・認可実装         :active, auth, 2025-01-01, 45d
+    モバイル対応強化       :mobile, after auth, 30d
+    パフォーマンス最適化   :perf, after mobile, 30d
+    
+<pre><code>section Phase 2 (Q2 2025)
+マイクロサービス分割   :micro, 2025-04-01, 60d
+Kubernetes対応        :k8s, after micro, 45d
+高可用性構成          :ha, after k8s, 30d
+
+section Phase 3 (Q3 2025)
+AI/ML機能拡張         :ai, 2025-07-01, 75d
+多言語対応            :i18n, after ai, 30d
+エンタープライズ機能   :enterprise, after i18n, 45d
+
+section Phase 4 (Q4 2025)
+グローバル展開        :global, 2025-10-01, 90d&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>10.2 短期計画 (3ヶ月)</h3>
+<h4>認証・認可システム</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Authentication System"
+        A[JWT Token Management<br/>🔑 Secure Token Lifecycle]
+        B[OAuth2 Integration<br/>🌐 Google, GitHub, Microsoft]
+        C[MFA Support<br/>🛡️ Two-Factor Authentication]
+        D[Session Management<br/>👤 Advanced User State]
+    end
+    
+<pre><code>subgraph &quot;Authorization System&quot;
+    E[RBAC Implementation&lt;br/&gt;👥 Role-Based Access Control]
+    F[Permission Matrix&lt;br/&gt;📋 Fine-grained Permissions]
+    G[API Key Management&lt;br/&gt;🗝️ Service-to-Service Auth]
+    H[Audit Logging&lt;br/&gt;📝 Complete Access Trail]
+end
+
+subgraph &quot;User Management&quot;
+    I[User Registration&lt;br/&gt;📝 Self-service Signup]
+    J[Profile Management&lt;br/&gt;⚙️ User Preferences]
+    K[Organization Support&lt;br/&gt;🏢 Multi-tenant Architecture]
+    L[Usage Analytics&lt;br/&gt;📊 User Behavior Insights]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>モバイル対応強化</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph LR
+    subgraph "Mobile Strategy"
+        A[Progressive Web App<br/>📱 PWA Enhancement]
+        B[Responsive Design<br/>📐 Mobile-first UI]
+        C[Offline Support<br/>🔌 Service Worker Cache]
+        D[Push Notifications<br/>🔔 Real-time Updates]
+    end
+    
+<pre><code>subgraph &quot;Performance Optimization&quot;
+    E[Code Splitting&lt;br/&gt;📦 Lazy Loading]
+    F[Image Optimization&lt;br/&gt;🖼️ WebP, Responsive Images]
+    G[Bundle Optimization&lt;br/&gt;⚡ Tree Shaking, Minification]
+    H[Caching Strategy&lt;br/&gt;💾 Aggressive Client Caching]
+end
+
+subgraph &quot;Native Features&quot;
+    I[Touch Gestures&lt;br/&gt;👆 Swipe, Pinch, Tap]
+    J[Device APIs&lt;br/&gt;📲 Camera, GPS, Sensors]
+    K[App Install&lt;br/&gt;⬇️ Add to Home Screen]
+    L[Background Sync&lt;br/&gt;🔄 Offline-first Architecture]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>10.3 中期計画 (6ヶ月)</h3>
+<h4>マイクロサービス分割戦略</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Service Decomposition"
+        A[Wall-Bounce Service<br/>🤖 AI Orchestration<br/>独立デプロイ可能]
+        B[RAG Service<br/>📚 Knowledge Management<br/>Vector Store専用]
+        C[Session Service<br/>👤 User State Management<br/>Redis Cluster対応]
+        D[Analytics Service<br/>📊 Metrics & Monitoring<br/>データ分析専門]
+    end
+    
+<pre><code>subgraph &quot;Inter-Service Communication&quot;
+    E[API Gateway&lt;br/&gt;🌐 Unified Entry Point]
+    F[Service Mesh&lt;br/&gt;🕸️ Istio/Linkerd]
+    G[Message Queue&lt;br/&gt;📬 Async Communication]
+    H[Event Sourcing&lt;br/&gt;📚 State Change Tracking]
+end
+
+subgraph &quot;Data Management&quot;
+    I[Database per Service&lt;br/&gt;💾 Data Isolation]
+    J[Shared Cache Layer&lt;br/&gt;⚡ Redis Cluster]
+    K[Event Store&lt;br/&gt;📋 Cross-service Events]
+    L[Data Synchronization&lt;br/&gt;🔄 Eventual Consistency]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>Kubernetes対応</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Kubernetes Architecture"
+        A[Namespace Isolation<br/>🏷️ Environment Separation]
+        B[Pod Autoscaling<br/>📈 HPA & VPA]
+        C[Service Discovery<br/>🔍 DNS-based Routing]
+        D[Config Management<br/>⚙️ ConfigMaps & Secrets]
+    end
+    
+<pre><code>subgraph &quot;Deployment Strategy&quot;
+    E[Helm Charts&lt;br/&gt;📦 Package Management]
+    F[GitOps Workflow&lt;br/&gt;🔄 ArgoCD/Flux]
+    G[Blue-Green Deployment&lt;br/&gt;🔄 Zero Downtime]
+    H[Canary Releases&lt;br/&gt;🐤 Gradual Rollout]
+end
+
+subgraph &quot;Observability&quot;
+    I[Prometheus Stack&lt;br/&gt;📊 Metrics Collection]
+    J[Jaeger Tracing&lt;br/&gt;🔍 Distributed Tracing]
+    K[ELK Stack&lt;br/&gt;📝 Log Aggregation]
+    L[Grafana Dashboards&lt;br/&gt;📈 Visualization]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>10.4 長期計画 (12ヶ月)</h3>
+<h4>AI/ML機能拡張</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 マインドマップ</div>
+      <div class="diagram-code">mindmap
+  root((AI/ML Enhancement))
+    Advanced Models
+      GPT-5 Integration
+      Gemini 3.0 Support
+      Claude 4 Integration
+      Custom Fine-tuning
+    Intelligent Features
+      Predictive Analytics
+      Anomaly Detection
+      Auto-categorization
+      Smart Recommendations
+    ML Pipeline
+      Data Pipeline
+      Model Training
+      A/B Testing
+      Performance Monitoring
+    Edge AI
+      Local Model Deployment
+      Federated Learning
+      Privacy-preserving ML
+      Real-time Inference</div>
+    </div>
+
+<h4>グローバル展開戦略</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 システム構成図</div>
+      <div class="diagram-code">graph TB
+    subgraph "Multi-Region Architecture"
+        A[US-East (Primary)<br/>🇺🇸 Virginia DC]
+        B[EU-West (Secondary)<br/>🇪🇺 Frankfurt DC]
+        C[APAC (Tertiary)<br/>🌏 Tokyo DC]
+        D[Global CDN<br/>🌐 Edge Locations]
+    end
+    
+<pre><code>subgraph &quot;Localization&quot;
+    E[Multi-language Support&lt;br/&gt;🌍 i18n Framework]
+    F[Regional Compliance&lt;br/&gt;📋 GDPR, CCPA, etc.]
+    G[Local Data Residency&lt;br/&gt;🏠 Data Sovereignty]
+    H[Currency Support&lt;br/&gt;💰 Multi-currency Billing]
+end
+
+subgraph &quot;Performance Optimization&quot;
+    I[Geo-routing&lt;br/&gt;🗺️ Closest DC Routing]
+    J[Data Replication&lt;br/&gt;📋 Cross-region Sync]
+    K[Edge Computing&lt;br/&gt;⚡ CDN-based Processing]
+    L[Latency Optimization&lt;br/&gt;⏱️ Sub-100ms Response]
+end
+
+subgraph &quot;Operational Excellence&quot;
+    M[24/7 Support&lt;br/&gt;🕐 Follow-the-sun Model]
+    N[Regional Teams&lt;br/&gt;👥 Local Expertise]
+    O[Compliance Automation&lt;br/&gt;🤖 Regulatory Adherence]
+    P[Cost Optimization&lt;br/&gt;💰 Multi-cloud Strategy]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>10.5 技術革新・研究開発</h3>
+<h4>新技術調査・実験</h4>
+<div class="mermaid-diagram">
+      <div class="diagram-title">📊 フローチャート</div>
+      <div class="diagram-code">flowchart LR
+    subgraph "Emerging Technologies"
+        A[WebAssembly<br/>⚡ High-performance Computing]
+        B[GraphQL Federation<br/>🕸️ Unified API Layer]
+        C[Serverless Architecture<br/>☁️ Function-as-a-Service]
+        D[Quantum Computing<br/>🔬 Future AI Acceleration]
+    end
+    
+<pre><code>subgraph &quot;AI/ML Innovations&quot;
+    E[Multimodal AI&lt;br/&gt;🎭 Text, Image, Audio]
+    F[Federated Learning&lt;br/&gt;🔐 Privacy-preserving ML]
+    G[AutoML&lt;br/&gt;🤖 Automated Model Selection]
+    H[Neural Architecture Search&lt;br/&gt;🧠 Optimal Model Design]
+end
+
+subgraph &quot;Infrastructure Evolution&quot;
+    I[Edge Computing&lt;br/&gt;📍 Distributed Processing]
+    J[5G Integration&lt;br/&gt;📶 Ultra-low Latency]
+    K[Sustainable Computing&lt;br/&gt;🌱 Green Technology]
+    L[Quantum Security&lt;br/&gt;🔒 Post-quantum Cryptography]
+end&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<hr>
+<div class="page-break"></div>
+
+<h2>付録</h2>
+<h3>A. 技術選定理由詳細</h3>
+<table>
+<thead>
+<tr>
+<th>技術</th>
+<th>選定理由</th>
+<th>代替案</th>
+<th>評価基準</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>TypeScript</strong></td>
+<td>型安全性、開発効率向上、大規模開発対応</td>
+<td>JavaScript, Flow</td>
+<td>型システム、ツール、コミュニティ</td>
+</tr>
+<tr>
+<td><strong>Express.js</strong></td>
+<td>成熟したエコシステム、軽量、カスタマイズ性</td>
+<td>Fastify, Koa, NestJS</td>
+<td>パフォーマンス、学習コスト、拡張性</td>
+</tr>
+<tr>
+<td><strong>Redis</strong></td>
+<td>高速キャッシュ、豊富なデータ構造、クラスター対応</td>
+<td>Memcached, Hazelcast</td>
+<td>速度、機能、スケーラビリティ</td>
+</tr>
+<tr>
+<td><strong>Jest</strong></td>
+<td>豊富な機能、優秀なモック対応、TypeScript統合</td>
+<td>Mocha, Vitest, Cypress</td>
+<td>テスト機能、開発体験、CI/CD統合</td>
+</tr>
+<tr>
+<td><strong>Prometheus</strong></td>
+<td>時系列データベース、豊富なエコシステム</td>
+<td>InfluxDB, Datadog</td>
+<td>監視機能、コスト、運用性</td>
+</tr>
+</tbody></table>
+<h3>B. 用語集</h3>
+<table>
+<thead>
+<tr>
+<th>用語</th>
+<th>定義</th>
+<th>英語</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Wall-Bounce</strong></td>
+<td>複数LLMプロバイダーによる相互検証技術</td>
+<td>Multi-LLM Cross-validation</td>
+</tr>
+<tr>
+<td><strong>RAG</strong></td>
+<td>検索拡張生成：外部知識を活用したAI生成技術</td>
+<td>Retrieval-Augmented Generation</td>
+</tr>
+<tr>
+<td><strong>Vector Store</strong></td>
+<td>ベクトル化された文書を効率的に保存・検索するシステム</td>
+<td>Vector Database</td>
+</tr>
+<tr>
+<td><strong>SSE</strong></td>
+<td>サーバー主導でクライアントにリアルタイムデータを送信する技術</td>
+<td>Server-Sent Events</td>
+</tr>
+<tr>
+<td><strong>Consensus</strong></td>
+<td>複数のAI応答から合意スコアを算出する品質評価指標</td>
+<td>Consensus Score</td>
+</tr>
+<tr>
+<td><strong>Provider</strong></td>
+<td>OpenAI、Google、Anthropicなどの外部LLMサービス</td>
+<td>LLM Provider</td>
+</tr>
+<tr>
+<td><strong>MCP</strong></td>
+<td>モデル間通信プロトコル：AI サービス間の標準化された通信方式</td>
+<td>Model Context Protocol</td>
+</tr>
+</tbody></table>
+<h3>C. 設定例・サンプルコード</h3>
+<h4>環境変数設定例</h4>
+<pre><code class="language-bash"># Server Configuration
+NODE_ENV=production
+PORT=4000
+LOG_LEVEL=info
+
+# Wall-Bounce Configuration
+WALL_BOUNCE_ENABLE_FALLBACK=true
+WALL_BOUNCE_ENABLE_TIMEOUT=true
+WALL_BOUNCE_TIMEOUT_MS=60000
+WALL_BOUNCE_MIN_PROVIDERS=2
+
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+REDIS_DB=0
+
+# LLM Provider Configuration (if needed)
+OPENAI_API_KEY=your_openai_key
+GOOGLE_CLIENT_ID=your_google_client_id
+ANTHROPIC_API_KEY=your_anthropic_key
+</code></pre>
+<h4>Docker Compose設定例</h4>
+<pre><code class="language-yaml">version: &#39;3.8&#39;
+services:
+  techsapo:
+    build: .
+    ports:
+      - &quot;4000:4000&quot;
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+  
+  redis:
+    image: redis:7-alpine
+    ports:
+      - &quot;6379:6379&quot;
+    volumes:
+      - redis_data:/data
+  
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - &quot;9090:9090&quot;
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+volumes:
+  redis_data:
+</code></pre>
+<hr>
+<p><strong>作成日</strong>: 2025-09-28<br><strong>バージョン</strong>: 2.0<br><strong>承認者</strong>: TechSapo開発チーム<br><strong>次回レビュー</strong>: 2025-12-28</p>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSapo 設計書 PDF生成ツール</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js" integrity="sha512-xeUh9ZDnOQS1+FuJl3+pI7WZJluvwDnWJOYO0dD60L5o84sNjnPJyYNQp1LLZfYUAjkWqxvNaH7WdMXDkpGEOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        /* PDF生成用スタイル */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin: 0;
+        }
+        
+        .controls {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        select, button {
+            padding: 8px 15px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .status.loading {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .document-preview {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .document-preview .toolbar {
+            background-color: #34495e;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+        
+        .document-content {
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        /* PDF専用スタイル */
+        .pdf-content {
+            font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+        }
+        
+        .pdf-content .document-header {
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            page-break-after: avoid;
+        }
+        
+        .pdf-content .document-title {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+        
+        .pdf-content .document-info {
+            font-size: 11pt;
+            color: #7f8c8d;
+            margin-top: 15px;
+        }
+        
+        .pdf-content h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+            margin: 25px 0 15px 0;
+            page-break-after: avoid;
+        }
+        
+        .pdf-content h2 {
+            font-size: 15pt;
+            font-weight: bold;
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 12px;
+            margin: 20px 0 12px 0;
+            page-break-after: avoid;
+        }
+        
+        .pdf-content h3 {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #34495e;
+            margin: 18px 0 10px 0;
+            page-break-after: avoid;
+        }
+        
+        .pdf-content h4 {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #34495e;
+            margin: 15px 0 8px 0;
+            page-break-after: avoid;
+        }
+        
+        .pdf-content p {
+            margin: 8px 0;
+            text-align: justify;
+        }
+        
+        .pdf-content ul, .pdf-content ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .pdf-content li {
+            margin: 3px 0;
+        }
+        
+        .pdf-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10pt;
+            page-break-inside: avoid;
+        }
+        
+        .pdf-content th {
+            background-color: #3498db;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #2980b9;
+        }
+        
+        .pdf-content td {
+            padding: 6px 8px;
+            border: 1px solid #bdc3c7;
+            vertical-align: top;
+        }
+        
+        .pdf-content tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .pdf-content pre {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 15px 0;
+            font-family: "Source Code Pro", "Monaco", "Menlo", monospace;
+            font-size: 9pt;
+            line-height: 1.4;
+            overflow-x: auto;
+            page-break-inside: avoid;
+        }
+        
+        .pdf-content code {
+            font-family: "Source Code Pro", "Monaco", "Menlo", monospace;
+            font-size: 9pt;
+            background-color: #f1f2f6;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        
+        .pdf-content blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            background-color: #f8f9fa;
+            padding: 12px 12px 12px 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .pdf-content .mermaid-placeholder {
+            background-color: #e8f4f8;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            color: #2c3e50;
+            font-weight: bold;
+            page-break-inside: avoid;
+        }
+        
+        @media print {
+            .controls, .status {
+                display: none !important;
+            }
+            
+            .pdf-content {
+                max-width: none;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .pdf-content h1, .pdf-content h2, .pdf-content h3, .pdf-content h4 {
+                page-break-after: avoid;
+            }
+            
+            .pdf-content pre, .pdf-content table, .pdf-content .mermaid-placeholder {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 TechSapo 設計書 PDF生成ツール</h1>
+            <p>Markdownファイルから高品質なPDFドキュメントを生成</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="documentSelect">📋 ドキュメント選択:</label>
+                <select id="documentSelect">
+                    <option value="">-- ドキュメントを選択 --</option>
+                    <option value="docs/BASIC_DESIGN.md">基本設計書</option>
+                    <option value="docs/BACKEND_DETAILED_DESIGN.md">バックエンド詳細設計書</option>
+                    <option value="docs/INTERFACE_SPECIFICATION.md">インターフェース仕様書</option>
+                </select>
+                <button onclick="loadDocument()">📄 読み込み</button>
+            </div>
+            
+            <div class="control-group">
+                <label for="qualitySelect">🎯 PDF品質:</label>
+                <select id="qualitySelect">
+                    <option value="0.95">高品質 (0.95)</option>
+                    <option value="0.80" selected>標準 (0.80)</option>
+                    <option value="0.60">軽量 (0.60)</option>
+                </select>
+                
+                <label for="formatSelect">📏 用紙サイズ:</label>
+                <select id="formatSelect">
+                    <option value="a4" selected>A4</option>
+                    <option value="letter">Letter</option>
+                    <option value="legal">Legal</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <button onclick="generatePDF()" id="generateBtn" disabled>
+                    🔄 PDF生成
+                </button>
+                <button onclick="generateAllPDFs()" id="generateAllBtn">
+                    📚 全ドキュメント生成
+                </button>
+            </div>
+            
+            <div id="status" class="status" style="display: none;"></div>
+        </div>
+        
+        <div class="document-preview" id="preview" style="display: none;">
+            <div class="toolbar">
+                <span id="documentTitle">ドキュメントプレビュー</span>
+            </div>
+            <div class="document-content">
+                <div id="documentContent" class="pdf-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 設計書ファイルの情報
+        const documents = {
+            'docs/BASIC_DESIGN.md': {
+                title: 'TechSapo 基本設計書',
+                filename: 'TechSapo_基本設計書.pdf'
+            },
+            'docs/BACKEND_DETAILED_DESIGN.md': {
+                title: 'TechSapo バックエンド詳細設計書',
+                filename: 'TechSapo_バックエンド詳細設計書.pdf'
+            },
+            'docs/INTERFACE_SPECIFICATION.md': {
+                title: 'TechSapo インターフェース仕様書',
+                filename: 'TechSapo_インターフェース仕様書.pdf'
+            }
+        };
+
+        let currentContent = null;
+        let currentTitle = '';
+
+        // ステータス表示
+        function showStatus(message, type = 'loading') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+        }
+
+        function hideStatus() {
+            document.getElementById('status').style.display = 'none';
+        }
+
+        // マークダウンファイル読み込み
+        async function loadDocument() {
+            const selectEl = document.getElementById('documentSelect');
+            const filePath = selectEl.value;
+            
+            if (!filePath) {
+                alert('ドキュメントを選択してください');
+                return;
+            }
+
+            showStatus('📖 ドキュメント読み込み中...', 'loading');
+
+            try {
+                const response = await fetch(`/${filePath}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const markdownContent = await response.text();
+                const docInfo = documents[filePath];
+                
+                // Markdownを前処理
+                const processedMarkdown = preprocessMarkdown(markdownContent);
+                
+                // HTMLに変換
+                const htmlContent = marked.parse(processedMarkdown);
+                
+                // ドキュメントヘッダーを追加
+                const fullContent = `
+                    <div class="document-header">
+                        <h1 class="document-title">${docInfo.title}</h1>
+                        <div class="document-info">
+                            生成日: ${new Date().toLocaleDateString('ja-JP')}<br>
+                            バージョン: 1.0<br>
+                            TechSapo Development Team
+                        </div>
+                    </div>
+                    ${htmlContent}
+                `;
+                
+                // プレビュー表示
+                document.getElementById('documentContent').innerHTML = fullContent;
+                document.getElementById('documentTitle').textContent = docInfo.title;
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('generateBtn').disabled = false;
+                
+                currentContent = fullContent;
+                currentTitle = docInfo.title;
+                
+                showStatus('✅ ドキュメント読み込み完了', 'success');
+                setTimeout(hideStatus, 2000);
+                
+            } catch (error) {
+                console.error('Document load error:', error);
+                showStatus(`❌ 読み込みエラー: ${error.message}`, 'error');
+                setTimeout(hideStatus, 5000);
+            }
+        }
+
+        // マークダウン前処理
+        function preprocessMarkdown(content) {
+            // Mermaid図表をプレースホルダーに変換
+            content = content.replace(/```mermaid\n([\s\S]*?)\n```/g, (match, diagram) => {
+                const diagramType = diagram.split('\n')[0].trim();
+                return `<div class="mermaid-placeholder">📊 ${diagramType} 図表<br><small>${diagram.substring(0, 100)}...</small></div>`;
+            });
+            
+            return content;
+        }
+
+        // PDF生成
+        function generatePDF() {
+            if (!currentContent) {
+                alert('先にドキュメントを読み込んでください');
+                return;
+            }
+
+            const selectEl = document.getElementById('documentSelect');
+            const filePath = selectEl.value;
+            const docInfo = documents[filePath];
+            const quality = parseFloat(document.getElementById('qualitySelect').value);
+            const format = document.getElementById('formatSelect').value;
+
+            showStatus('🔄 PDF生成中...', 'loading');
+
+            // PDF生成オプション
+            const opt = {
+                margin: [15, 15, 15, 15], // mm
+                filename: docInfo.filename,
+                image: { type: 'jpeg', quality: quality },
+                html2canvas: { 
+                    scale: 2,
+                    logging: false,
+                    letterRendering: true,
+                    allowTaint: true,
+                    useCORS: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: format, 
+                    orientation: 'portrait',
+                    compressPDF: true
+                },
+                pagebreak: { 
+                    mode: ['avoid-all', 'css'], 
+                    before: '.page-break',
+                    after: '.page-break-after',
+                    avoid: ['.no-break', 'pre', 'table', '.mermaid-placeholder']
+                }
+            };
+
+            // PDF生成実行
+            const element = document.getElementById('documentContent');
+            
+            html2pdf()
+                .set(opt)
+                .from(element)
+                .save()
+                .then(() => {
+                    showStatus('✅ PDF生成完了', 'success');
+                    setTimeout(hideStatus, 3000);
+                })
+                .catch((error) => {
+                    console.error('PDF generation error:', error);
+                    showStatus(`❌ PDF生成エラー: ${error.message}`, 'error');
+                    setTimeout(hideStatus, 5000);
+                });
+        }
+
+        // 全ドキュメント生成
+        async function generateAllPDFs() {
+            const totalDocs = Object.keys(documents).length;
+            let completedDocs = 0;
+
+            showStatus('📚 全ドキュメント生成開始...', 'loading');
+
+            for (const [filePath, docInfo] of Object.entries(documents)) {
+                try {
+                    showStatus(`📄 生成中: ${docInfo.title} (${completedDocs + 1}/${totalDocs})`, 'loading');
+                    
+                    // ドキュメント選択
+                    document.getElementById('documentSelect').value = filePath;
+                    
+                    // 読み込み
+                    await loadDocument();
+                    
+                    // 少し待機
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // PDF生成
+                    await new Promise((resolve, reject) => {
+                        const quality = 0.80;
+                        const format = 'a4';
+
+                        const opt = {
+                            margin: [15, 15, 15, 15],
+                            filename: docInfo.filename,
+                            image: { type: 'jpeg', quality: quality },
+                            html2canvas: { 
+                                scale: 2,
+                                logging: false,
+                                letterRendering: true,
+                                allowTaint: true,
+                                useCORS: true
+                            },
+                            jsPDF: { 
+                                unit: 'mm', 
+                                format: format, 
+                                orientation: 'portrait',
+                                compressPDF: true
+                            },
+                            pagebreak: { 
+                                mode: ['avoid-all', 'css'], 
+                                avoid: ['.no-break', 'pre', 'table', '.mermaid-placeholder']
+                            }
+                        };
+
+                        const element = document.getElementById('documentContent');
+                        
+                        html2pdf()
+                            .set(opt)
+                            .from(element)
+                            .save()
+                            .then(resolve)
+                            .catch(reject);
+                    });
+                    
+                    completedDocs++;
+                    
+                    // ドキュメント間の待機
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                } catch (error) {
+                    console.error(`Error generating PDF for ${docInfo.title}:`, error);
+                    showStatus(`❌ エラー: ${docInfo.title} - ${error.message}`, 'error');
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                }
+            }
+
+            showStatus(`✅ 全ドキュメント生成完了 (${completedDocs}/${totalDocs})`, 'success');
+            setTimeout(hideStatus, 5000);
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 TechSapo PDF生成ツール初期化完了');
+        });
+    </script>
+</body>
+</html>

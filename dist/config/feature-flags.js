@@ -4,12 +4,7 @@
  * 本番環境でのSRP移行を安全に制御するためのフィーチャーフラグ
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.featureFlags = void 0;
-exports.validateFeatureFlags = validateFeatureFlags;
-exports.shouldUseSRPArchitecture = shouldUseSRPArchitecture;
-exports.getSRPMigrationPhase = getSRPMigrationPhase;
-exports.logFeatureFlags = logFeatureFlags;
-exports.emergencyDisableSRP = emergencyDisableSRP;
+exports.emergencyDisableSRP = exports.logFeatureFlags = exports.getSRPMigrationPhase = exports.shouldUseSRPArchitecture = exports.validateFeatureFlags = exports.featureFlags = void 0;
 /**
  * デフォルトのフィーチャーフラグ設定
  * 本番環境では慎重にSRP機能を無効化からスタート
@@ -89,6 +84,7 @@ function validateFeatureFlags() {
         warnings
     };
 }
+exports.validateFeatureFlags = validateFeatureFlags;
 /**
  * SRP使用判定関数
  */
@@ -107,12 +103,14 @@ function shouldUseSRPArchitecture() {
     const random = Math.random() * 100;
     return random < exports.featureFlags.srpTrafficPercentage;
 }
+exports.shouldUseSRPArchitecture = shouldUseSRPArchitecture;
 /**
  * SRP移行フェーズの確認
  */
 function getSRPMigrationPhase() {
     return exports.featureFlags.srpMigrationPhase;
 }
+exports.getSRPMigrationPhase = getSRPMigrationPhase;
 /**
  * フィーチャーフラグのログ出力
  */
@@ -130,6 +128,7 @@ function logFeatureFlags(logger) {
         logger.warn('⚠️ Feature Flag Warnings', { warnings: validation.warnings });
     }
 }
+exports.logFeatureFlags = logFeatureFlags;
 /**
  * 緊急時のSRP無効化
  */
@@ -139,4 +138,5 @@ function emergencyDisableSRP() {
     exports.featureFlags.srpTrafficPercentage = 0;
     console.warn('🚨 EMERGENCY: SRP Architecture has been disabled');
 }
+exports.emergencyDisableSRP = emergencyDisableSRP;
 //# sourceMappingURL=feature-flags.js.map

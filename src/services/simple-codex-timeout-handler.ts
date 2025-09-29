@@ -4,6 +4,7 @@
 
 import { spawn } from 'child_process';
 import { logger } from '../utils/logger';
+import { config } from '../config/environment';
 
 export interface SimpleCodexResult {
   response: string;
@@ -28,8 +29,8 @@ export class SimpleCodexTimeoutHandler {
       initialResponse: number;  // 初期レスポンス待ち (デフォルト10分)
       inactivity: number;       // 無反応タイムアウト (デフォルト90秒)
     } = {
-      initialResponse: 600000,  // 10分 - より長い初期レスポンス待ち
-      inactivity: 90000         // 90秒 - より現実的な無反応タイムアウト
+      initialResponse: config.wallBounce.enableTimeout ? (config.wallBounce.timeoutMs || 600000) : Number.MAX_SAFE_INTEGER,
+      inactivity: config.wallBounce.enableTimeout ? (config.wallBounce.timeoutMs || 90000) : Number.MAX_SAFE_INTEGER
     }
   ): Promise<SimpleCodexResult> {
 
@@ -239,6 +240,9 @@ export class SimpleCodexTimeoutHandler {
    */
   isLikelyStuck(output: string, inactivityMs: number): boolean {
     // シンプルな判定条件
+    // タイムアウト無効化時は常にfalse
+    if (!config.wallBounce.enableTimeout) return false;
+    
     return inactivityMs > 30000 || // 30秒以上無出力
            (output.includes('[') && !output.includes('codex') && inactivityMs > 45000); // thinking段階で45秒以上
   }

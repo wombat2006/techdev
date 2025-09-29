@@ -11,8 +11,7 @@
  * WHATWG URL Standard準拠の代替実装を提供
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.legacyPunycodeCompat = exports.PunycodeReplacement = void 0;
-exports.suppressPunycodeWarnings = suppressPunycodeWarnings;
+exports.legacyPunycodeCompat = exports.suppressPunycodeWarnings = exports.PunycodeReplacement = void 0;
 const url_1 = require("url");
 class PunycodeReplacement {
     /**
@@ -143,6 +142,7 @@ function suppressPunycodeWarnings() {
     // 追加でSUPPRESS_NODE_WARNINGSも設定
     process.env.SUPPRESS_NODE_WARNINGS = 'punycode';
 }
+exports.suppressPunycodeWarnings = suppressPunycodeWarnings;
 /**
  * レガシーpunycodeモジュールのモック
  * 既存コードとの互換性維持用

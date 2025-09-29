@@ -11,10 +11,12 @@ export interface ApiError extends Error {
 export class ValidationError extends Error {
   statusCode = 400;
   code = 'VALIDATION_ERROR';
+  public details?: any;
   
-  constructor(message: string, public details?: any) {
+  constructor(message: string, details?: any) {
     super(message);
     this.name = 'ValidationError';
+    this.details = details;
   }
 }
 
@@ -31,10 +33,12 @@ export class RateLimitError extends Error {
 export class ServiceUnavailableError extends Error {
   statusCode = 503;
   code = 'SERVICE_UNAVAILABLE';
+  public service?: string;
   
-  constructor(message: string, public service?: string) {
+  constructor(message: string, service?: string) {
     super(message);
     this.name = 'ServiceUnavailableError';
+    this.service = service;
   }
 }
 
@@ -42,6 +46,7 @@ export const errorHandler = (
   error: Error | ApiError | HuggingFaceError,
   req: Request,
   res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   next: NextFunction
 ): void => {
   logger.error('API Error occurred', {

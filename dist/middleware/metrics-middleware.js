@@ -19,28 +19,15 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WallBounceMetricsCollector = void 0;
-exports.metricsMiddleware = metricsMiddleware;
-exports.metricsErrorHandler = metricsErrorHandler;
-exports.updateHealthMetrics = updateHealthMetrics;
+exports.updateHealthMetrics = exports.WallBounceMetricsCollector = exports.metricsErrorHandler = exports.metricsMiddleware = void 0;
 const prometheus_client_1 = require("../metrics/prometheus-client");
 const logger_1 = require("../utils/logger");
 /**
@@ -48,7 +35,6 @@ const logger_1 = require("../utils/logger");
  */
 function metricsMiddleware(req, res, next) {
     const startTime = Date.now();
-    const startHrTime = process.hrtime();
     // リクエストサイズ計算
     const requestSize = req.get('content-length') ? parseInt(req.get('content-length'), 10) : 0;
     // レスポンス終了時の処理
@@ -84,6 +70,7 @@ function metricsMiddleware(req, res, next) {
     });
     next();
 }
+exports.metricsMiddleware = metricsMiddleware;
 /**
  * パスからルートパターンを抽出
  * 動的パラメータを正規化してカーディナリティを制御
@@ -164,6 +151,7 @@ function metricsErrorHandler(error, req, res, next) {
     });
     next(error);
 }
+exports.metricsErrorHandler = metricsErrorHandler;
 /**
  * Wall-bounce分析用メトリクス収集ヘルパー
  */
@@ -204,7 +192,7 @@ exports.WallBounceMetricsCollector = WallBounceMetricsCollector;
 function updateHealthMetrics() {
     const used = process.memoryUsage();
     // Node.js プロセスメトリクス
-    Promise.resolve().then(() => __importStar(require('../metrics/prometheus-client'))).then(({ memoryUsage, activeConnections }) => {
+    Promise.resolve().then(() => __importStar(require('../metrics/prometheus-client'))).then(({ memoryUsage }) => {
         memoryUsage.set({ component: 'heap_used' }, used.heapUsed);
         memoryUsage.set({ component: 'heap_total' }, used.heapTotal);
         memoryUsage.set({ component: 'external' }, used.external);
@@ -213,6 +201,7 @@ function updateHealthMetrics() {
         logger_1.logger.error('❌ Failed to update health metrics', { error });
     });
 }
+exports.updateHealthMetrics = updateHealthMetrics;
 // 定期的な健康状態メトリクス更新
 setInterval(updateHealthMetrics, 30000); // 30秒間隔
 logger_1.logger.info('🔧 Prometheus metrics middleware initialized', {

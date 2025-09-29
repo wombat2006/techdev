@@ -7,19 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.inputSanitizationTotal = exports.rateLimitHitsTotal = exports.authAttemptsTotal = exports.ragCostUsd = exports.webhookProcessingDuration = exports.webhookNotificationsTotal = exports.ragDocumentProcessingTotal = exports.ragSearchDuration = exports.ragSearchRequests = exports.ragSyncDuration = exports.googledriveApiRequestsTotal = exports.queueSize = exports.activeConnections = exports.memoryUsage = exports.circuitBreakerState = exports.errorsTotal = exports.cacheHitRatio = exports.mysqlQueriesTotal = exports.redisConnectionPoolSize = exports.redisOperationsTotal = exports.httpResponseSize = exports.httpRequestSize = exports.httpRequestDuration = exports.httpRequestsTotal = exports.llmAgreementScore = exports.llmTokenUsage = exports.llmResponseTime = exports.llmRequestsTotal = exports.wallbounceCostUsd = exports.wallbounceProcessingDuration = exports.wallbounceConsensusConfidence = exports.wallbounceRequestsTotal = exports.register = void 0;
-exports.initializeMetrics = initializeMetrics;
-exports.recordWallBounceAnalysis = recordWallBounceAnalysis;
-exports.recordHttpRequest = recordHttpRequest;
-exports.recordError = recordError;
-exports.recordLLMResponse = recordLLMResponse;
-exports.recordRAGSyncEvent = recordRAGSyncEvent;
-exports.recordRAGSearch = recordRAGSearch;
-exports.recordWebhookNotification = recordWebhookNotification;
-exports.recordWebhookProcessingDuration = recordWebhookProcessingDuration;
-exports.recordWebhookError = recordWebhookError;
-exports.recordDriveSyncEvent = recordDriveSyncEvent;
-exports.recordRAGCost = recordRAGCost;
+exports.recordRAGCost = exports.recordDriveSyncEvent = exports.recordWebhookError = exports.recordWebhookProcessingDuration = exports.recordWebhookNotification = exports.recordRAGSearch = exports.recordRAGSyncEvent = exports.recordLLMResponse = exports.recordError = exports.recordHttpRequest = exports.recordWallBounceAnalysis = exports.initializeMetrics = exports.inputSanitizationTotal = exports.rateLimitHitsTotal = exports.authAttemptsTotal = exports.ragCostUsd = exports.webhookProcessingDuration = exports.webhookNotificationsTotal = exports.ragDocumentProcessingTotal = exports.ragSearchDuration = exports.ragSearchRequests = exports.ragSyncDuration = exports.googledriveApiRequestsTotal = exports.queueSize = exports.activeConnections = exports.memoryUsage = exports.circuitBreakerState = exports.errorsTotal = exports.cacheHitRatio = exports.mysqlQueriesTotal = exports.redisConnectionPoolSize = exports.redisOperationsTotal = exports.httpResponseSize = exports.httpRequestSize = exports.httpRequestDuration = exports.httpRequestsTotal = exports.llmAgreementScore = exports.llmTokenUsage = exports.llmResponseTime = exports.llmRequestsTotal = exports.wallbounceCostUsd = exports.wallbounceProcessingDuration = exports.wallbounceConsensusConfidence = exports.wallbounceRequestsTotal = exports.register = void 0;
 const prom_client_1 = __importDefault(require("prom-client"));
 const logger_1 = require("../utils/logger");
 /**
@@ -307,6 +295,7 @@ function initializeMetrics() {
     exports.activeConnections.set({ connection_type: 'websocket' }, 0);
     exports.activeConnections.set({ connection_type: 'database' }, 0);
 }
+exports.initializeMetrics = initializeMetrics;
 /**
  * メトリクス収集ヘルパー関数群
  */
@@ -327,6 +316,7 @@ function recordWallBounceAnalysis(taskType, providers, confidence, processingTim
         });
     });
 }
+exports.recordWallBounceAnalysis = recordWallBounceAnalysis;
 // HTTP リクエストを記録
 function recordHttpRequest(method, route, statusCode, duration, requestSize, responseSize) {
     exports.httpRequestsTotal.inc({ method, route, status_code: statusCode.toString() });
@@ -338,16 +328,21 @@ function recordHttpRequest(method, route, statusCode, duration, requestSize, res
         exports.httpResponseSize.observe(responseSize);
     }
 }
+exports.recordHttpRequest = recordHttpRequest;
 // エラーを記録
 function recordError(errorType, severity, service) {
     exports.errorsTotal.inc({ error_type: errorType, severity, service });
 }
+exports.recordError = recordError;
 // LLM応答を記録
-function recordLLMResponse(provider, model, responseTime, inputTokens, outputTokens, cost, status) {
+function recordLLMResponse(provider, model, responseTime, inputTokens, outputTokens, _cost, _status) {
+    void _cost;
+    void _status;
     exports.llmResponseTime.observe({ provider, model }, responseTime / 1000);
     exports.llmTokenUsage.inc({ provider, type: 'input', model }, inputTokens);
     exports.llmTokenUsage.inc({ provider, type: 'output', model }, outputTokens);
 }
+exports.recordLLMResponse = recordLLMResponse;
 /**
  * RAG & Webhook メトリクス記録関数群
  */
@@ -369,11 +364,13 @@ function recordRAGSyncEvent(eventType, mimeType, status, folderId, duration) {
         }, duration / 1000);
     }
 }
+exports.recordRAGSyncEvent = recordRAGSyncEvent;
 // RAG検索記録
 function recordRAGSearch(vectorStoreId, queryType, duration, resultCount, status) {
     exports.ragSearchRequests.inc({ vector_store_id: vectorStoreId, status });
     exports.ragSearchDuration.observe({ vector_store_id: vectorStoreId, query_type: queryType }, duration / 1000);
 }
+exports.recordRAGSearch = recordRAGSearch;
 // Webhook通知記録
 function recordWebhookNotification(resourceState, status) {
     exports.webhookNotificationsTotal.inc({
@@ -382,10 +379,12 @@ function recordWebhookNotification(resourceState, status) {
         status
     });
 }
+exports.recordWebhookNotification = recordWebhookNotification;
 // Webhook処理時間記録
 function recordWebhookProcessingDuration(duration) {
     exports.webhookProcessingDuration.observe({ webhook_type: 'googledrive' }, duration / 1000);
 }
+exports.recordWebhookProcessingDuration = recordWebhookProcessingDuration;
 // Webhookエラー記録
 function recordWebhookError(errorType) {
     recordError(errorType, 'medium', 'webhook_handler');
@@ -395,6 +394,7 @@ function recordWebhookError(errorType) {
         status: 'failed'
     });
 }
+exports.recordWebhookError = recordWebhookError;
 // Drive同期イベント記録
 function recordDriveSyncEvent(eventType, resourceId) {
     exports.googledriveApiRequestsTotal.inc({
@@ -403,10 +403,12 @@ function recordDriveSyncEvent(eventType, resourceId) {
         folder_id: resourceId
     });
 }
+exports.recordDriveSyncEvent = recordDriveSyncEvent;
 // RAGコスト記録
 function recordRAGCost(operation, provider, cost) {
     exports.ragCostUsd.inc({ operation, provider }, cost);
 }
+exports.recordRAGCost = recordRAGCost;
 // プロバイダー名からモデル名を取得
 function getModelByProvider(provider) {
     const modelMap = {

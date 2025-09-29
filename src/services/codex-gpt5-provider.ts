@@ -3,7 +3,6 @@
  * OpenAI API KEY不要でCodex CLI経由でGPT-5を利用
  */
 
-import { spawn, ChildProcess } from 'child_process';
 import { LLMProvider, LLMResponse } from './wall-bounce-analyzer';
 import { logger } from '../utils/logger';
 import { simpleCodexHandler } from './simple-codex-timeout-handler';
@@ -15,23 +14,23 @@ export class CodexGPT5Provider implements LLMProvider {
   /**
    * Codex MCP経由でGPT-5を実行
    */
-  async invoke(prompt: string, options?: any): Promise<LLMResponse> {
-    const startTime = Date.now();
-
+  async invoke(prompt: string, options?: { initialResponse?: number; inactivity?: number }): Promise<LLMResponse> {
     try {
       logger.info('🤖 Codex GPT-5 Codex実行開始', {
         model: this.model,
         prompt: prompt.substring(0, 100) + '...'
       });
 
-      // シンプルなタイムアウト制御を使用
+      // Wall-Bounce用の高速タイムアウト制御
+      const timeoutOptions = {
+        initialResponse: 30000,
+        inactivity: 20000,
+        ...(options ?? {})
+      };
       const result = await simpleCodexHandler.executeCodexWithSmartTimeout(
         prompt,
         'gpt-5-codex',
-        {
-          initialResponse: 600000, // 10分 - より現実的な初期レスポンス待ち
-          inactivity: 90000        // 90秒 - より長い無反応タイムアウト
-        }
+        timeoutOptions
       );
 
       const actualCost = this.calculateActualCost(result.tokens.total);
@@ -53,9 +52,11 @@ export class CodexGPT5Provider implements LLMProvider {
       // フォールバック応答
       const mockResponse = this.generateMockResponse(prompt);
       return {
-        content: `[Codex MCP Error] ${error instanceof Error ? error.message : '不明なエラー'}`,
-        confidence: 0,
-        reasoning: 'Codex MCP実行時にエラーが発生',
+        content: `${mockResponse}
+
+[Codex MCP Error] ${error instanceof Error ? error.message : '不明なエラー'}`,
+        confidence: 0.25,
+        reasoning: 'Codex MCP実行時にエラーが発生したためモックレスポンスを返却',
         cost: 0.001,
         tokens: { input: 0, output: 0 }
       };
@@ -65,13 +66,16 @@ export class CodexGPT5Provider implements LLMProvider {
   /**
    * Codex MCP経由でのプロンプト実行（シンプル版）
    */
-  private async executeCodexMCP(prompt: string, options?: any): Promise<{
+  private async executeCodexMCP(prompt: string, options?: { timeoutMs?: number }): Promise<{
     response: string;
     success: boolean;
     tokens?: { input: number; output: number };
   }> {
     try {
       logger.info('🔄 Codex MCP実行開始', { promptLength: prompt.length });
+      if (options?.timeoutMs) {
+        logger.debug('Codex MCP custom timeout applied', { timeoutMs: options.timeoutMs });
+      }
 
       // より安全なCodex実行アプローチ
       const { execSync } = require('child_process');

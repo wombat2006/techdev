@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.openaiAuth = openaiAuth;
-exports.enhancedSecurityValidation = enhancedSecurityValidation;
+exports.enhancedSecurityValidation = exports.openaiAuth = void 0;
 function openaiAuth(req, res, next) {
     const apiKey = req.headers['x-openai-api-key'] || process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -16,6 +15,7 @@ function openaiAuth(req, res, next) {
     };
     next();
 }
+exports.openaiAuth = openaiAuth;
 function enhancedSecurityValidation(req, res, next) {
     // Enhanced security validation for IT support endpoints
     const userAgent = req.get('User-Agent');
@@ -30,4 +30,5 @@ function enhancedSecurityValidation(req, res, next) {
     }
     next();
 }
+exports.enhancedSecurityValidation = enhancedSecurityValidation;
 //# sourceMappingURL=openai-auth.js.map

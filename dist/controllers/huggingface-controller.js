@@ -265,7 +265,10 @@ class HuggingFaceController {
                     content: entry.content,
                     timestamp: entry.timestamp
                 })),
-                metadata: history.metadata,
+                metadata: {
+                    ...(history.metadata || {}),
+                    requestedBy: userId
+                },
                 totalMessages: history.history.length
             }
         });
