@@ -1,0 +1,358 @@
+/* TechSapo 設計書 PDF スタイルシート */
+
+/* 基本設定 */
+@page {
+  margin: 2.5cm 2cm;
+  size: A4;
+  
+  @top-center {
+    content: "TechSapo 設計書";
+    font-size: 10pt;
+    color: #666;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5cm;
+  }
+  
+  @bottom-center {
+    content: "ページ " counter(page);
+    font-size: 10pt;
+    color: #666;
+  }
+}
+
+/* フォント設定 */
+body {
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  color: #333;
+  background: white;
+}
+
+/* 見出しスタイル */
+h1 {
+  font-size: 24pt;
+  font-weight: bold;
+  color: #2c3e50;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 0.5em;
+  margin: 2em 0 1em 0;
+  page-break-before: always;
+}
+
+h2 {
+  font-size: 18pt;
+  font-weight: bold;
+  color: #34495e;
+  border-left: 5px solid #3498db;
+  padding-left: 0.5em;
+  margin: 1.5em 0 1em 0;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 14pt;
+  font-weight: bold;
+  color: #34495e;
+  margin: 1.2em 0 0.8em 0;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 12pt;
+  font-weight: bold;
+  color: #34495e;
+  margin: 1em 0 0.5em 0;
+}
+
+h5, h6 {
+  font-size: 11pt;
+  font-weight: bold;
+  color: #34495e;
+  margin: 0.8em 0 0.4em 0;
+}
+
+/* 段落 */
+p {
+  margin: 0.5em 0;
+  text-align: justify;
+}
+
+/* リスト */
+ul, ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+li {
+  margin: 0.2em 0;
+}
+
+/* テーブル */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+table caption {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  color: #2c3e50;
+}
+
+th {
+  background-color: #3498db;
+  color: white;
+  padding: 0.5em;
+  text-align: left;
+  font-weight: bold;
+  border: 1px solid #2980b9;
+}
+
+td {
+  padding: 0.4em 0.5em;
+  border: 1px solid #bdc3c7;
+  vertical-align: top;
+}
+
+tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+/* コードブロック */
+.code-block {
+  margin: 1em 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  page-break-inside: avoid;
+}
+
+.code-header {
+  background-color: #34495e;
+  color: white;
+  padding: 0.3em 0.5em;
+  font-size: 9pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+pre {
+  background-color: #f8f9fa;
+  padding: 0.8em;
+  margin: 0;
+  font-family: "Source Code Pro", "Monaco", "Menlo", monospace;
+  font-size: 9pt;
+  line-height: 1.4;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+code {
+  font-family: "Source Code Pro", "Monaco", "Menlo", monospace;
+  font-size: 9pt;
+  background-color: #f1f2f6;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+}
+
+/* インラインコード */
+p code, li code {
+  background-color: #f1f2f6;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+  font-size: 10pt;
+}
+
+/* Mermaid図表 */
+.mermaid-diagram {
+  margin: 1.5em 0;
+  padding: 1em;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  page-break-inside: avoid;
+}
+
+.mermaid-diagram strong {
+  color: #2c3e50;
+  font-size: 12pt;
+}
+
+.mermaid-code {
+  background-color: #ecf0f1;
+  border: 1px solid #bdc3c7;
+  padding: 0.8em;
+  margin: 0.5em 0 0 0;
+  font-family: monospace;
+  font-size: 9pt;
+  white-space: pre-wrap;
+}
+
+/* 引用 */
+blockquote {
+  border-left: 4px solid #3498db;
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+  background-color: #f8f9fa;
+  padding: 0.8em 0.8em 0.8em 1.5em;
+}
+
+/* 強調 */
+strong, b {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+em, i {
+  font-style: italic;
+}
+
+/* ページ区切り制御 */
+.page-break {
+  page-break-before: always;
+}
+
+.no-break {
+  page-break-inside: avoid;
+}
+
+/* リンク */
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 印刷時のリンクURL表示 */
+@media print {
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #666;
+  }
+  
+  a[href^="http://"],
+  a[href^="https://"] {
+    color: #3498db;
+  }
+}
+
+/* 特別なボックス */
+.info-box {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-left: 5px solid #28a745;
+  padding: 1em;
+  margin: 1em 0;
+  page-break-inside: avoid;
+}
+
+.warning-box {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-left: 5px solid #f39c12;
+  padding: 1em;
+  margin: 1em 0;
+  page-break-inside: avoid;
+}
+
+.error-box {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-left: 5px solid #e74c3c;
+  padding: 1em;
+  margin: 1em 0;
+  page-break-inside: avoid;
+}
+
+/* 目次スタイル */
+.toc {
+  page-break-after: always;
+}
+
+.toc h2 {
+  border: none;
+  color: #2c3e50;
+}
+
+.toc ul {
+  list-style: none;
+  padding: 0;
+}
+
+.toc li {
+  margin: 0.3em 0;
+  border-bottom: 1px dotted #bdc3c7;
+  padding-bottom: 0.2em;
+}
+
+/* ヘッダーとフッター */
+.document-header {
+  text-align: center;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 1em;
+  margin-bottom: 2em;
+}
+
+.document-title {
+  font-size: 28pt;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.document-subtitle {
+  font-size: 16pt;
+  color: #7f8c8d;
+  margin: 0.5em 0 0 0;
+}
+
+.document-info {
+  font-size: 10pt;
+  color: #95a5a6;
+  margin-top: 1em;
+}
+
+/* レスポンシブ調整 */
+@media print {
+  body {
+    font-size: 10pt;
+  }
+  
+  h1 { font-size: 20pt; }
+  h2 { font-size: 16pt; }
+  h3 { font-size: 13pt; }
+  h4 { font-size: 11pt; }
+  
+  .code-block,
+  .mermaid-diagram,
+  table {
+    page-break-inside: avoid;
+  }
+}
+
+/* 特殊文字・絵文字対応 */
+.emoji {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 1.2em;
+}
+
+/* アクセシビリティ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

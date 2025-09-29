@@ -1,0 +1,33 @@
+[Unit]
+Description=TechSapo Production HTTPS Service
+Documentation=https://techsapo.com
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/prod/techsapo
+ExecStart=/data/.nvm/versions/node/v22.9.0/bin/node dist/index.js
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/techsapo/logs/service.log
+StandardError=append:/var/techsapo/logs/error.log
+
+# Environment
+Environment=NODE_ENV=production
+EnvironmentFile=/prod/techsapo/.env
+
+# Security
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/techsapo
+PrivateTmp=true
+
+# Capabilities for port 443
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

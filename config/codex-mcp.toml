@@ -1,0 +1,148 @@
+# Codex MCP Server Configuration
+# Based on OpenAI Codex advanced documentation
+# https://github.com/openai/codex/blob/main/docs/advanced.md
+
+[server]
+name = "codex-mcp-server"
+version = "1.0.0"
+description = "OpenAI Codex integration via Model Context Protocol"
+
+[codex]
+# OpenAI Model Configuration
+model = "gpt-5-codex"              # Default model: gpt-5, gpt-5-codex, o1, o1-mini
+sandbox = "read-only"              # Sandbox level: read-only, isolated, full-access
+base_instructions = """
+You are a helpful coding assistant powered by OpenAI Codex.
+Focus on providing clear, well-documented, and secure code solutions.
+Always explain your reasoning and suggest best practices.
+"""
+
+# Authentication Configuration
+auth_file = "/home/wombat/.codex/auth.json"  # Codex認証ファイルパス
+
+# Working Directory
+working_directory = "."           # Current directory for Codex execution
+
+[mcp]
+# MCP Integration Settings (最適化済み)
+approval_policy = "risk-based"     # auto, manual, risk-based
+max_concurrent_sessions = 15       # 最適化: 並列処理能力向上
+session_timeout_ms = 600000        # 最適化: 10分に延長
+
+# パフォーマンス最適化設定
+enable_response_caching = true
+cache_ttl_ms = 300000              # 5分キャッシュ
+enable_request_batching = true
+batch_size = 5
+batch_timeout_ms = 1000            # 1秒バッチタイムアウト
+enable_connection_pooling = true
+enable_compression = true
+enable_keep_alive = true
+
+# Wall-Bounce Integration for TechSapo
+enable_wall_bounce = true
+min_providers = 2
+quality_threshold = 0.7
+
+[logging]
+# Codex CLI Logging (RUST_LOG integration)
+rust_log_level = "info"           # error, warn, info, debug, trace
+enable_tracing = true
+log_directory = "~/.codex/log"
+
+# パフォーマンス監視ログ
+enable_performance_logging = true
+log_level_performance = "debug"
+metrics_log_interval_ms = 30000    # 30秒間隔でメトリクスログ
+enable_request_timing = true
+
+[security]
+# Security Policies
+risk_assessment = true
+audit_logging = true
+sensitive_data_detection = true
+
+# Risk Level Mapping
+[security.risk_levels]
+"read-only" = "low"
+"isolated" = "medium"
+"full-access" = "high"
+
+[security.approval_workflows]
+# Auto-approval conditions
+auto_approve_read_only = true
+auto_approve_isolated = false
+auto_approve_full_access = false
+require_manual_approval_for_ci = true
+
+[capabilities]
+# MCP Capability Declaration
+tools = true
+prompts = true
+resources = true
+
+[capabilities.prompts]
+list_changed = true
+
+[capabilities.resources]
+subscribe = true
+list_changed = true
+
+[integration]
+# TechSapo Integration Settings
+wall_bounce_adapter = true
+cost_tracking = true
+metrics_collection = true
+session_persistence = true
+
+# Provider Integration (最適化済み)
+[integration.providers]
+redis_sessions = true
+prometheus_metrics = true
+approval_manager = true
+config_manager = true
+performance_monitor = true    # 新規: パフォーマンス監視統合
+wall_bounce_coordinator = true
+cost_tracker = true
+
+# 監視とアラート設定
+[monitoring]
+enable_real_time_monitoring = true
+metrics_collection_interval_ms = 30000
+alert_thresholds_response_time_ms = 5000
+alert_thresholds_error_rate = 0.05
+alert_thresholds_cache_hit_rate = 0.6
+alert_thresholds_queue_size = 10
+alert_thresholds_memory_usage_mb = 512
+
+# ダッシュボード設定
+enable_dashboard = true
+dashboard_update_interval_ms = 10000
+export_prometheus_metrics = true
+
+# コスト最適化設定
+[cost_optimization]
+enable_cost_tracking = true
+cost_budget_usd_per_hour = 2.9         # $70/月 ÷ 24時間 = $2.9/時間
+enable_cost_alerts = true
+cost_alert_threshold = 0.8             # 予算の80%でアラート
+enable_intelligent_model_selection = true
+prefer_cost_efficient_models = true
+
+[performance]
+# Performance Tuning (最適化済み)
+initial_response_timeout = 45000   # 最適化: 45秒に延長
+inactivity_timeout = 30000         # 最適化: 30秒に延長
+max_buffer_size = 4194304          # 最適化: 4MBに増量
+
+# Process Management
+max_processes = 8                  # 最適化: プロセス数増加
+process_cleanup_interval = 30000   # 最適化: 30秒間隔でクリーンアップ
+
+# 新しい最適化設定
+connection_pool_size = 10
+max_retries = 3
+retry_delay_ms = 1000
+enable_circuit_breaker = true
+circuit_breaker_threshold = 5
+circuit_breaker_timeout_ms = 30000
