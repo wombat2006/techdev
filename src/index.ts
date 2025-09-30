@@ -268,6 +268,7 @@ class TechSapoServer {
       'gemini-chat.js',
       'thinking-viz.js',
       'thinking-viz.css',
+      'hero-layout.css',
       'styles.css',
       'app.js'
     ];
