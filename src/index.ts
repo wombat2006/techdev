@@ -261,10 +261,17 @@ class TechSapoServer {
     // Static files for UI - serve from both /public and root for backward compatibility
     this.app.use('/public', express.static(path.join(__dirname, '../public')));
 
-    // Serve specific JavaScript files at root level for transparent access
+    // Serve specific files at root level for transparent access
     // Using whitelist approach for security
-    const allowedJsFiles = ['dashboard-init.js', 'gemini-chat.js'];
-    allowedJsFiles.forEach(filename => {
+    const allowedFiles = [
+      'dashboard-init.js',
+      'gemini-chat.js',
+      'thinking-viz.js',
+      'thinking-viz.css',
+      'styles.css',
+      'app.js'
+    ];
+    allowedFiles.forEach(filename => {
       this.app.get(`/${filename}`, (req, res, next) => {
         const filePath = path.join(__dirname, '../public', filename);
         res.sendFile(filePath, (err) => {
