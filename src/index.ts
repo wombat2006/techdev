@@ -269,6 +269,7 @@ class TechSapoServer {
       'thinking-viz.js',
       'thinking-viz.css',
       'hero-layout.css',
+      'navbar.css',
       'styles.css',
       'app.js'
     ];
