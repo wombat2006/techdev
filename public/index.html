@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSapo - 次世代IT技術サポートプラットフォーム</title>
+    <meta name="description" content="Wall-Bounce分析と高品質なIT技術サポートを提供する次世代プラットフォーム">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="thinking-viz.css">
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-brand">
+                    <img src="logo.svg" alt="TechSapo" class="logo">
+                    <span class="brand-text">TechSapo</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#features">機能</a></li>
+                    <li><a href="#architecture">技術</a></li>
+                    <li><a href="#docs">ドキュメント</a></li>
+                    <li><a href="#contact">お問い合わせ</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    次世代IT技術サポート<br>
+                    <span class="gradient-text">TechSapo</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Wall-Bounce分析技術による複数LLMオーケストレーションで、<br>
+                    高品質で信頼性の高いIT技術サポートを提供
+                </p>
+                <div class="hero-buttons">
+                    <a href="#docs" class="btn btn-primary">
+                        <i class="fas fa-book"></i>
+                        ドキュメントを見る
+                    </a>
+                    <a href="#contact" class="btn btn-secondary">
+                        <i class="fas fa-comments"></i>
+                        お問い合わせ
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">99.9%</span>
+                        <span class="stat-label">信頼度</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">3+</span>
+                        <span class="stat-label">LLM統合</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">サポート</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="thinking-visualization">
+                    <div class="thinking-header">
+                        <div class="thinking-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>Wall-Bounce思考プロセス</h3>
+                        <div class="thinking-status">
+                            <span class="status-dot pulsing"></span>
+                            <span>処理中</span>
+                        </div>
+                    </div>
+
+                    <div class="thinking-stream">
+                        <div class="thinking-step">
+                            <div class="step-indicator">1</div>
+                            <div class="step-content">
+                                <div class="step-header">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span class="step-label">ユーザの要求分析</span>
+                                </div>
+                                <p class="step-text">ユーザは「Prometheusのターゲット数が少ないのでは？」という疑問を持っている</p>
+                            </div>
+                        </div>
+
+                        <div class="thinking-step">
+                            <div class="step-indicator">2</div>
+                            <div class="step-content">
+                                <div class="step-header">
+                                    <i class="fas fa-search"></i>
+                                    <span class="step-label">状況調査</span>
+                                </div>
+                                <p class="step-text">現在のPrometheusターゲットを確認する必要がある。監視対象のサービスリストと比較</p>
+                            </div>
+                        </div>
+
+                        <div class="thinking-step">
+                            <div class="step-indicator">3</div>
+                            <div class="step-content">
+                                <div class="step-header">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span class="step-label">解決策の立案</span>
+                                </div>
+                                <p class="step-text">不足しているターゲット（Grafana、Node Exporter、Redis Exporter）を追加する計画</p>
+                            </div>
+                        </div>
+
+                        <div class="thinking-step active">
+                            <div class="step-indicator">4</div>
+                            <div class="step-content">
+                                <div class="step-header">
+                                    <i class="fas fa-sync-alt spinning"></i>
+                                    <span class="step-label">Wall-Bounce検証</span>
+                                </div>
+                                <p class="step-text">複数LLMによる解決策の妥当性検証中...</p>
+                                <div class="llm-consensus">
+                                    <div class="llm-check">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Gemini 2.5 Pro: 承認</span>
+                                    </div>
+                                    <div class="llm-check">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>GPT-5: 承認</span>
+                                    </div>
+                                    <div class="llm-check pending">
+                                        <i class="fas fa-circle-notch fa-spin"></i>
+                                        <span>Claude Sonnet: 検証中</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="thinking-step future">
+                            <div class="step-indicator">5</div>
+                            <div class="step-content">
+                                <div class="step-header">
+                                    <i class="fas fa-rocket"></i>
+                                    <span class="step-label">実装・検証</span>
+                                </div>
+                                <p class="step-text">合意された解決策を実装し、動作確認を行う</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="consensus-meter">
+                        <div class="meter-label">
+                            <span>コンセンサススコア</span>
+                            <span class="meter-value">94%</span>
+                        </div>
+                        <div class="meter-bar">
+                            <div class="meter-fill" style="width: 94%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">主要機能</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h3>Wall-Bounce分析</h3>
+                    <p>複数のLLMプロバイダーによる相互検証で、高品質で信頼性の高い回答を提供</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>RAG知識ベース</h3>
+                    <p>Google Drive統合によるセマンティック検索で、関連ドキュメントを自動取得</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>ログ分析</h3>
+                    <p>AI駆動による自動問題診断と段階的解決手順の提示</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>高セキュリティ</h3>
+                    <p>API Key管理、レート制限、暗号化通信による企業レベルのセキュリティ</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>リアルタイム監視</h3>
+                    <p>Prometheus/Grafana統合による包括的システム監視</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h3>コスト最適化</h3>
+                    <p>予算管理とリアルタイムコスト追跡で効率的な運用</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="architecture">
+        <div class="container">
+            <h2 class="section-title">技術アーキテクチャ</h2>
+            <div class="arch-content">
+                <div class="arch-diagram">
+                    <div class="layer frontend">
+                        <h4>Frontend Layer</h4>
+                        <div class="tech-stack">
+                            <span class="tech">HTML5</span>
+                            <span class="tech">CSS3</span>
+                            <span class="tech">JavaScript</span>
+                        </div>
+                    </div>
+                    <div class="layer api">
+                        <h4>API Gateway</h4>
+                        <div class="tech-stack">
+                            <span class="tech">Express.js</span>
+                            <span class="tech">Node.js</span>
+                            <span class="tech">TypeScript</span>
+                        </div>
+                    </div>
+                    <div class="layer services">
+                        <h4>Core Services</h4>
+                        <div class="tech-stack">
+                            <span class="tech">Wall-Bounce</span>
+                            <span class="tech">RAG</span>
+                            <span class="tech">Session Mgmt</span>
+                        </div>
+                    </div>
+                    <div class="layer data">
+                        <h4>Data Layer</h4>
+                        <div class="tech-stack">
+                            <span class="tech">Redis</span>
+                            <span class="tech">Vector Store</span>
+                            <span class="tech">Config Store</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="arch-features">
+                    <h3>技術的特徴</h3>
+                    <ul>
+                        <li><strong>マルチLLM統合</strong>: Gemini, OpenAI, Anthropic</li>
+                        <li><strong>高性能キャッシュ</strong>: Redis クラスター対応</li>
+                        <li><strong>スケーラブル設計</strong>: マイクロサービス指向</li>
+                        <li><strong>監視・運用</strong>: Prometheus, Grafana統合</li>
+                        <li><strong>セキュリティ</strong>: JWT認証, レート制限</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="docs" class="documentation">
+        <div class="container">
+            <h2 class="section-title">ドキュメント</h2>
+            <div class="docs-grid">
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>スタートガイド</h3>
+                    <p>TechSapoの導入から基本的な使用方法まで</p>
+                    <a href="/docs/getting-started" class="doc-link">
+                        読む <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>API リファレンス</h3>
+                    <p>REST API の詳細仕様とサンプルコード</p>
+                    <a href="/docs/api-reference" class="doc-link">
+                        読む <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3>システム設計</h3>
+                    <p>アーキテクチャとWall-Bounce技術の詳細</p>
+                    <a href="/docs/architecture" class="doc-link">
+                        読む <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="doc-card">
+                    <div class="doc-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3>デプロイメント</h3>
+                    <p>本番環境への展開とスケーリング</p>
+                    <a href="/docs/deployment" class="doc-link">
+                        読む <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">お問い合わせ</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>メール</h4>
+                            <p>support@techsapo.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-github"></i>
+                        <div>
+                            <h4>GitHub</h4>
+                            <p>github.com/techsapo/platform</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-comments"></i>
+                        <div>
+                            <h4>Discord</h4>
+                            <p>discord.gg/techsapo</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <input type="text" name="name" placeholder="お名前" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" name="email" placeholder="メールアドレス" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea name="message" placeholder="メッセージ" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            送信
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="logo.svg" alt="TechSapo" class="logo">
+                    <span class="brand-text">TechSapo</span>
+                    <p>次世代IT技術サポートプラットフォーム</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>プロダクト</h4>
+                        <ul>
+                            <li><a href="#features">機能</a></li>
+                            <li><a href="#architecture">アーキテクチャ</a></li>
+                            <li><a href="/pricing">価格</a></li>
+                            <li><a href="/enterprise">エンタープライズ</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>開発者</h4>
+                        <ul>
+                            <li><a href="/docs">ドキュメント</a></li>
+                            <li><a href="/api">API</a></li>
+                            <li><a href="/github">GitHub</a></li>
+                            <li><a href="/community">コミュニティ</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>会社</h4>
+                        <ul>
+                            <li><a href="/about">会社概要</a></li>
+                            <li><a href="/blog">ブログ</a></li>
+                            <li><a href="/careers">採用</a></li>
+                            <li><a href="/contact">お問い合わせ</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 TechSapo. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="thinking-viz.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
