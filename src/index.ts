@@ -10,6 +10,8 @@ import huggingfaceRoutes from './routes/huggingface-routes';
 import ragRoutes from './routes/rag-endpoint';
 import webhookRoutes from './routes/webhook-endpoints';
 import webhookSetupRoutes from './routes/webhook-setup';
+import wallBounceRoutes from './routes/wall-bounce-api';
+import testUIRoutes from './routes/test-ui';
 import { register as prometheusRegister, initializeMetrics } from './metrics/prometheus-client';
 
 class TechSapoServer {
@@ -32,11 +34,11 @@ class TechSapoServer {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
           imgSrc: ["'self'", "data:", "https:"],
           connectSrc: ["'self'", "https://api-inference.huggingface.co"],
-          fontSrc: ["'self'"],
+          fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
           objectSrc: ["'none'"],
           mediaSrc: ["'self'"],
           frameSrc: ["'none'"],
@@ -266,15 +268,26 @@ class TechSapoServer {
     const allowedFiles = [
       'dashboard-init.js',
       'gemini-chat.js',
-      'thinking-viz.js',
-      'thinking-viz.css',
+      'thinking-toggle.js',
+      'thinking-toggle.css',
       'hero-layout.css',
       'navbar.css',
       'styles.css',
-      'app.js'
+      'app.js',
+      'test-inquiry.html',
+      'test-wall-bounce.html',
+      'debug-form.html',
+      'test-minimal.html'
     ];
     allowedFiles.forEach(filename => {
       this.app.get(`/${filename}`, (req, res, next) => {
+        // Disable cache for JS and CSS files to ensure updates are loaded
+        if (filename.endsWith('.js') || filename.endsWith('.css')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        }
+
         const filePath = path.join(__dirname, '../public', filename);
         res.sendFile(filePath, (err) => {
           if (err) {
@@ -288,6 +301,12 @@ class TechSapoServer {
     // API routes
     this.app.use('/api/v1/huggingface', huggingfaceRoutes);
     this.app.use('/api/huggingface', huggingfaceRoutes); // Backward compatibility
+
+    // Wall-Bounce Analysis routes
+    this.app.use('/api/v1/wall-bounce', wallBounceRoutes);
+
+    // Test UI route (server-rendered)
+    this.app.use('/test-ui', testUIRoutes);
 
     // RAG System routes
     this.app.use('/api/v1/rag', ragRoutes);
