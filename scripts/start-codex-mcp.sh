@@ -19,21 +19,21 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging functions
+# Logging functions (redirect to stderr for MCP compatibility)
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}[INFO]${NC} $1" >&2
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}[SUCCESS]${NC} $1" >&2
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}[WARNING]${NC} $1" >&2
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[ERROR]${NC} $1" >&2
 }
 
 # Check if Codex CLI is installed
@@ -42,9 +42,9 @@ check_codex_installation() {
 
     if ! command -v codex &> /dev/null; then
         log_error "Codex CLI not found. Please install it first:"
-        echo "  npm install -g @openai/codex"
-        echo "  OR"
-        echo "  brew install codex"
+        echo "  npm install -g @openai/codex" >&2
+        echo "  OR" >&2
+        echo "  brew install codex" >&2
         exit 1
     fi
 
@@ -62,9 +62,9 @@ check_codex_auth() {
         log_success "Codex is authenticated"
     else
         log_warning "Codex not authenticated. Starting authentication..."
-        echo "Please follow the authentication process:"
-        echo "1. Select 'Sign in with ChatGPT' (recommended)"
-        echo "2. Or configure API key if needed"
+        echo "Please follow the authentication process:" >&2
+        echo "1. Select 'Sign in with ChatGPT' (recommended)" >&2
+        echo "2. Or configure API key if needed" >&2
 
         if ! codex auth login; then
             log_error "Codex authentication failed"
@@ -117,9 +117,9 @@ check_redis() {
             log_success "Redis is running and accessible"
         else
             log_warning "Redis is not running. Please start Redis service."
-            echo "  On macOS: brew services start redis"
-            echo "  On Ubuntu: sudo systemctl start redis-server"
-            echo "  Docker: docker run -d -p 6379:6379 redis:alpine"
+            echo "  On macOS: brew services start redis" >&2
+            echo "  On Ubuntu: sudo systemctl start redis-server" >&2
+            echo "  Docker: docker run -d -p 6379:6379 redis:alpine" >&2
         fi
     else
         log_warning "Redis CLI not found. Make sure Redis is installed and running."
@@ -191,18 +191,18 @@ start_mcp_server() {
         log_info "Configuration: $CONFIG_FILE"
 
         # Show connection info
-        echo ""
-        echo "🤖 Codex MCP Server is ready!"
-        echo "   • Interactive mode: Available for TUI integration"
-        echo "   • Non-interactive/CI mode: Available for automated workflows"
-        echo "   • MCP tools: codex, codex-reply, codex-session-info, codex-cleanup"
-        echo "   • Wall-Bounce integration: Enabled for multi-LLM coordination"
-        echo ""
-        echo "📊 Monitor with:"
-        echo "   • Logs: tail -f $LOG_DIR/codex-tui.log"
-        echo "   • Health: curl http://localhost:4000/health"
-        echo "   • Metrics: curl http://localhost:4000/metrics"
-        echo ""
+        echo "" >&2
+        echo "🤖 Codex MCP Server is ready!" >&2
+        echo "   • Interactive mode: Available for TUI integration" >&2
+        echo "   • Non-interactive/CI mode: Available for automated workflows" >&2
+        echo "   • MCP tools: codex, codex-reply, codex-session-info, codex-cleanup" >&2
+        echo "   • Wall-Bounce integration: Enabled for multi-LLM coordination" >&2
+        echo "" >&2
+        echo "📊 Monitor with:" >&2
+        echo "   • Logs: tail -f $LOG_DIR/codex-tui.log" >&2
+        echo "   • Health: curl http://localhost:4000/health" >&2
+        echo "   • Metrics: curl http://localhost:4000/metrics" >&2
+        echo "" >&2
 
     else
         log_error "Codex MCP Server failed to start"
@@ -328,10 +328,10 @@ main() {
     fi
 
     # Show banner
-    echo ""
-    echo "🚀 TechSapo Codex MCP Server Startup"
-    echo "======================================"
-    echo ""
+    echo "" >&2
+    echo "🚀 TechSapo Codex MCP Server Startup" >&2
+    echo "======================================" >&2
+    echo "" >&2
 
     # Run checks
     check_codex_installation
@@ -351,21 +351,21 @@ main() {
     start_mcp_server
     test_mcp_server
 
-    echo ""
+    echo "" >&2
     log_success "Codex MCP Server startup complete!"
-    echo ""
-    echo "🏓 Wall-Bounce Analysis System Integration:"
-    echo "   • Multi-LLM coordination: Enabled"
-    echo "   • Quality thresholds: Confidence ≥ 0.7, Consensus ≥ 0.6"
-    echo "   • Japanese responses: Primary language support"
-    echo "   • Enterprise approval workflows: Risk-based approval"
-    echo ""
-    echo "💡 Next steps:"
-    echo "   • Use 'codex' command for interactive coding"
-    echo "   • Integrate with TechSapo Wall-Bounce for enhanced analysis"
-    echo "   • Monitor logs: tail -f $LOG_DIR/codex-tui.log"
-    echo "   • Stop server: $0 -s"
-    echo ""
+    echo "" >&2
+    echo "🏓 Wall-Bounce Analysis System Integration:" >&2
+    echo "   • Multi-LLM coordination: Enabled" >&2
+    echo "   • Quality thresholds: Confidence ≥ 0.7, Consensus ≥ 0.6" >&2
+    echo "   • Japanese responses: Primary language support" >&2
+    echo "   • Enterprise approval workflows: Risk-based approval" >&2
+    echo "" >&2
+    echo "💡 Next steps:" >&2
+    echo "   • Use 'codex' command for interactive coding" >&2
+    echo "   • Integrate with TechSapo Wall-Bounce for enhanced analysis" >&2
+    echo "   • Monitor logs: tail -f $LOG_DIR/codex-tui.log" >&2
+    echo "   • Stop server: $0 -s" >&2
+    echo "" >&2
 }
 
 # Trap for cleanup

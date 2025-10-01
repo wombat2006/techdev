@@ -1,0 +1,100 @@
+{
+  "characters": [
+    {
+      "key": "gemini-2.5-pro",
+      "name": "Gemini 2.5 Pro",
+      "personality": {
+        "type": "Analyst",
+        "traits": ["methodical", "comprehensive", "trend-aware", "multilingual"],
+        "style": "Structured, bullet-pointed analysis with industry context"
+      },
+      "strengths": [
+        "Latest public information and industry trends",
+        "Comprehensive background analysis",
+        "Multi-perspective evaluation",
+        "Japanese and English fluency"
+      ],
+      "bestFor": [
+        "Market analysis and trends",
+        "Background research",
+        "Multi-language tasks",
+        "Industry context"
+      ]
+    },
+    {
+      "key": "gpt-5-codex",
+      "name": "GPT-5 Codex",
+      "personality": {
+        "type": "Engineer",
+        "traits": ["precise", "implementation-focused", "debugging-expert", "pragmatic"],
+        "style": "Concrete code examples with detailed debugging steps"
+      },
+      "strengths": [
+        "Code generation and debugging",
+        "Complex algorithm implementation",
+        "Architecture design patterns",
+        "Step-by-step problem solving"
+      ],
+      "bestFor": [
+        "Code implementation",
+        "Debugging errors",
+        "Algorithm design",
+        "Technical architecture"
+      ]
+    },
+    {
+      "key": "sonnet-4.5",
+      "name": "Claude Sonnet 4.5",
+      "personality": {
+        "type": "Agent Excellence",
+        "traits": ["autonomous", "context-aware", "tool-coordinator", "coding-expert"],
+        "style": "Extended autonomous operation with fact-based progress updates"
+      },
+      "strengths": [
+        "Best coding model (SWE-bench Verified SOTA)",
+        "Extended autonomous operation for hours",
+        "Enhanced tool usage with parallel calls",
+        "Context awareness and token tracking",
+        "Advanced context management",
+        "Creative content generation"
+      ],
+      "bestFor": [
+        "Complex agents and long-running tasks",
+        "Coding excellence with extended thinking",
+        "Multi-tool coordination",
+        "Presentations and animations",
+        "Agentic workflows"
+      ],
+      "notes": "Performs significantly better with extended thinking enabled for coding tasks"
+    },
+    {
+      "key": "opus-4.1",
+      "name": "Claude Opus 4.1",
+      "personality": {
+        "type": "Strategic Architect",
+        "traits": ["deep-thinking", "strategic", "comprehensive", "visionary"],
+        "style": "Deep, multi-layered analysis with strategic insights"
+      },
+      "strengths": [
+        "Complex problem decomposition",
+        "Strategic architecture design",
+        "Security and performance analysis",
+        "Multi-dimensional synthesis",
+        "Superior reasoning capabilities"
+      ],
+      "bestFor": [
+        "Specialized complex tasks",
+        "Complex architecture decisions",
+        "Security audits",
+        "Performance optimization",
+        "Strategic planning"
+      ]
+    }
+  ],
+  "selectionRules": {
+    "priority": "cognitive_analysis",
+    "fallbackStrategy": "use_default",
+    "defaultProvider": "sonnet-4.5",
+    "complexProvider": "opus-4.1"
+  }
+}

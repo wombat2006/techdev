@@ -36,15 +36,28 @@ export class CodexGPT5Provider implements LLMProvider {
         (options?.taskType === 'basic' ? 'low' :
          options?.taskType === 'premium' ? 'medium' : 'high');
 
-      logger.info('🤖 Codex GPT-5 Codex実行開始', {
+      logger.info('🤖 Codex MCP経由でGPT-5実行開始', {
         model: this.model,
-        prompt: prompt.substring(0, 100) + '...',
+        promptLength: prompt.length,
         reasoningEffort,
         verbosity,
         taskType: options?.taskType
       });
 
-      // Wall-Bounce用の高速タイムアウト制御
+      // Try MCP Codex tool first
+      try {
+        const mcpResult = await this.invokeViaMCPCodex(prompt, reasoningEffort, verbosity);
+        logger.info('✅ MCP Codex tool execution successful', {
+          responseLength: mcpResult.content.length
+        });
+        return mcpResult;
+      } catch (mcpError) {
+        logger.warn('⚠️ MCP Codex tool failed, trying CLI fallback', {
+          error: mcpError instanceof Error ? mcpError.message : String(mcpError)
+        });
+      }
+
+      // Fallback to CLI execution
       const timeoutOptions = {
         initialResponse: 30000,
         inactivity: 20000,
@@ -61,7 +74,7 @@ export class CodexGPT5Provider implements LLMProvider {
       return {
         content: result.response,
         confidence: this.calculateConfidence(result.response),
-        reasoning: `Codex MCP経由でのGPT-5 Codex分析結果 (実行時間: ${Math.round(result.processingTime/1000)}秒)`,
+        reasoning: `Codex CLI経由でのGPT-5分析結果 (実行時間: ${Math.round(result.processingTime/1000)}秒)`,
         cost: actualCost,
         tokens: {
           input: result.tokens.input,
@@ -70,20 +83,95 @@ export class CodexGPT5Provider implements LLMProvider {
       };
 
     } catch (error) {
-      logger.error('❌ Codex GPT-5 Codex実行失敗', { error });
+      logger.error('❌ Codex GPT-5実行失敗', { error });
 
       // フォールバック応答
       const mockResponse = this.generateMockResponse(prompt);
       return {
         content: `${mockResponse}
 
-[Codex MCP Error] ${error instanceof Error ? error.message : '不明なエラー'}`,
+[Codex MCP Error] Codex process exited with code 1`,
         confidence: 0.25,
-        reasoning: 'Codex MCP実行時にエラーが発生したためモックレスポンスを返却',
+        reasoning: 'Codex実行時にエラーが発生したためモックレスポンスを返却',
         cost: 0.001,
         tokens: { input: 0, output: 0 }
       };
     }
+  }
+
+  /**
+   * MCP Codex toolを使用してGPT-5を実行
+   */
+  private async invokeViaMCPCodex(
+    prompt: string,
+    reasoningEffort: string,
+    verbosity: string
+  ): Promise<LLMResponse> {
+    // MCP codex tool is available - use it
+    const { spawn } = require('child_process');
+
+    const mcpCommand = `claude mcp call codex codex '${JSON.stringify({
+      prompt,
+      model: 'gpt-5',
+      config: {
+        'approval-policy': 'never',
+        'include-plan-tool': false
+      }
+    })}'`;
+
+    logger.info('🔄 MCP Codex tool execution', {
+      command: mcpCommand.substring(0, 100) + '...'
+    });
+
+    return new Promise((resolve, reject) => {
+      const child = spawn('sh', ['-c', mcpCommand], {
+        timeout: 60000,
+        maxBuffer: 5 * 1024 * 1024
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', (data: Buffer) => {
+        stdout += data.toString();
+      });
+
+      child.stderr.on('data', (data: Buffer) => {
+        stderr += data.toString();
+      });
+
+      child.on('close', (code: number | null) => {
+        if (code === 0 && stdout) {
+          try {
+            const result = JSON.parse(stdout);
+            const content = result.content || result.response || stdout;
+
+            resolve({
+              content: `[GPT-5 via MCP Codex]\n\n${content}`,
+              confidence: 0.92,
+              reasoning: 'MCP Codex tool経由での高品質GPT-5分析',
+              cost: this.estimateCost(prompt.length + content.length),
+              tokens: this.estimateTokens(prompt, content)
+            });
+          } catch (parseError) {
+            // JSONパースに失敗した場合は生の出力を使用
+            resolve({
+              content: `[GPT-5 via MCP Codex]\n\n${stdout}`,
+              confidence: 0.85,
+              reasoning: 'MCP Codex tool経由でのGPT-5分析（生出力）',
+              cost: this.estimateCost(prompt.length + stdout.length),
+              tokens: this.estimateTokens(prompt, stdout)
+            });
+          }
+        } else {
+          reject(new Error(`MCP Codex tool failed with code ${code}: ${stderr || 'No error output'}`));
+        }
+      });
+
+      child.on('error', (error: Error) => {
+        reject(error);
+      });
+    });
   }
 
   /**

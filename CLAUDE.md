@@ -1,376 +1,372 @@
-# CLAUDE.md
+# TechSapo - Claude Code Navigation Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+**AI Orchestration Platform with Wall-Bounce Multi-LLM Analysis**
 
-## Common Development Commands
+---
 
-### Build and Development
+## 🚀 Quick Navigation
+
+| Task | Primary File | Documentation |
+|------|--------------|---------------|
+| Wall-Bounce Analysis | `src/services/wall-bounce-analyzer.ts` | `docs/WALL_BOUNCE_SYSTEM.md` |
+| MCP Integration | `src/services/mcp-integration-service.ts` | `docs/MCP_SERVICES.md` |
+| API Routes | `src/routes/wall-bounce-api.ts` | `docs/API_REFERENCE.md` |
+| Security & Auth | `src/middleware/` | `docs/SECURITY.md` |
+| System Architecture | `src/index.ts` | `docs/ARCHITECTURE.md` |
+
+---
+
+## 📋 Essential Commands
+
+### Development Workflow
 ```bash
-npm run build        # Build TypeScript to dist/
-npm run dev          # Development with hot reload (ts-node-dev)
-npm start            # Start production server
-npm run lint         # ESLint on src/**/*.ts
-```
-
-### Testing
-```bash
-npm test             # Run all tests (Jest)
-npm run test:coverage   # Run tests with coverage
-npm run test:unit       # Unit tests only
-npm run test:integration # Integration tests only
-npm run test:watch      # Watch mode for development
+npm install          # Install dependencies
+npm run build        # Build TypeScript → dist/
+npm run dev          # Hot reload development
+npm test             # Run all tests
+npm run lint         # Code quality check
 ```
 
 ### MCP Services
 ```bash
-npm run cipher-mcp   # Start Cipher MCP (memory/learning)
-npm run cipher-api   # Start Cipher API mode on port 3002
-npm run codex-mcp    # Start Codex MCP Server (OpenAI Codex integration)
-npm run codex-mcp-stop    # Stop Codex MCP Server
-npm run codex-mcp-restart # Restart Codex MCP Server
-npm run codex-mcp-test    # Test Codex MCP setup without starting
+npm run cipher-mcp   # Long-term memory MCP
+npm run codex-mcp    # GPT-5/Codex MCP integration
 ```
 
-### Monitoring Stack
+### Monitoring & Operations
 ```bash
-./scripts/start-monitoring.sh  # Start full monitoring stack
+./scripts/start-monitoring.sh     # Prometheus + Grafana stack
+sudo systemctl status techsapo    # Production service status
 ```
 
-## Project Architecture
+---
 
-This is TechSapo - an Infrastructure Support Tool with LLM Orchestrator that implements a **Wall-Bounce Analysis System** requiring multiple LLM coordination.
+## ⚠️ MANDATORY: Wall-Bounce Rules
 
-### Core Architecture Components
+**All analysis MUST use Wall-Bounce system - never bypass for direct LLM calls**
 
-**Primary Application** (`src/index.ts`): Main TechSapo server with Express.js, security middleware, and API routing
+### Core Requirements
+1. **Minimum 2 LLM providers** required for any analysis
+2. **Quality Thresholds**: 
+   - Confidence ≥ 0.7
+   - Consensus ≥ 0.6
+3. **Response Language**: Japanese for user-facing content
+4. **Execution**: Via `src/services/wall-bounce-analyzer.ts` only
 
-**Wall-Bounce System**: Multi-LLM orchestration system located in:
-- `src/services/wall-bounce-analyzer.ts` - Core analysis engine
-- `src/services/mcp-*.ts` - MCP protocol services
-- `src/services/codex-mcp-server.ts` - OpenAI Codex MCP integration
-- `src/services/codex-mcp-integration.ts` - Codex Wall-Bounce adapter
+### Provider Architecture
+```
+Tier 1: Gemini 2.5 Pro     → CLI only (gemini command)
+Tier 2: GPT-5 Codex        → MCP/CLI (codex command)
+Tier 3: Claude Sonnet 4    → Internal SDK
+Tier 4: Claude Opus 4.1    → Aggregator (synthesis)
+```
 
-**MCP Integration**: Model Context Protocol services providing standardized framework for LLM context and functionality. The system uses `@modelcontextprotocol/sdk` to create secure, standardized data exposure and tool orchestration with enterprise-grade governance.
+**Implementation**: `WallBounceAnalyzer.executeWallBounce()`
+- `parallel` mode: Concurrent execution (default)
+- `sequential` mode: Chain depth 3-5
 
-**RAG System**: Google Drive integration via `src/services/googledrive-connector.ts` for document search and embedding
+📖 **Complete specification**: `docs/WALL_BOUNCE_SYSTEM.md`
 
-### Directory Structure
+---
+
+## 🔒 Security Requirements
+
+### LLM Provider Access
+- ✅ **Allowed**: CLI spawn (gemini, codex), Internal SDK (Anthropic)
+- ❌ **Forbidden**: Direct API keys in code, environment variables
+
+### Code Security
+- **Input Sanitization**: All user input via `utils/security.ts`
+- **Secure Spawn**: Arguments array, no shell meta-characters
+- **MCP Approval**: Risk-based workflows in `mcp-approval-manager.ts`
+
+### Infrastructure
+- **Redis Required**: Session management, caching
+- **HTTPS Only**: TLS certificates mandatory in production
+- **Environment Isolation**: Systemd service with restricted permissions
+
+📖 **Security guidelines**: `docs/SECURITY.md`
+
+---
+
+## 📁 Project Structure
+
+### Core Source Files
 ```
 src/
-├── config/           # Environment configuration & feature flags
-├── controllers/      # Request handlers (HuggingFace, etc.)
-├── middleware/       # Express middleware (auth, validation, error handling)
-├── metrics/         # Prometheus metrics collection
-├── routes/          # API route definitions
-├── services/        # Core business logic
-│   ├── wall-bounce-*.ts           # Multi-LLM orchestration system
-│   ├── mcp-*.ts                   # MCP protocol services
-│   ├── codex-*.ts                 # Codex integration services
-│   ├── googledrive-connector.ts   # RAG system (if present)
-│   └── __mocks__/                 # Test mocks
-├── types/           # TypeScript type definitions
-├── utils/           # Utility functions and logger
-└── data/            # Static data and configuration
-scripts/             # Build and deployment scripts
-tests/               # Test suites (unit, integration)
-docs/                # Project documentation
+├── index.ts                              # Main Express server
+├── config/
+│   ├── environment.ts                    # Environment config
+│   └── feature-flags.ts                  # Feature toggles
+├── routes/
+│   ├── wall-bounce-api.ts               # Wall-Bounce SSE endpoint ⭐
+│   ├── rag-endpoint.ts                  # RAG queries
+│   └── webhook-endpoints.ts             # Google Drive webhooks
+├── services/
+│   ├── wall-bounce-analyzer.ts          # Wall-Bounce core ⭐⭐⭐
+│   ├── mcp-integration-service.ts       # MCP orchestrator ⭐
+│   ├── mcp-approval-manager.ts          # Approval workflows
+│   ├── codex-mcp-server.ts              # GPT-5 Codex integration
+│   ├── googledrive-connector.ts         # RAG system
+│   └── __mocks__/                       # Test mocks
+├── middleware/
+│   ├── auth.ts                          # Authentication
+│   ├── validation.ts                    # Input validation
+│   └── error-handler.ts                 # Error handling
+├── metrics/
+│   └── prometheus-client.ts             # Metrics collection
+└── utils/
+    ├── logger.ts                        # Winston logging
+    └── security.ts                      # Security utilities
 ```
 
-## Critical Project Rules
+### Key Directories
+- `scripts/` - Build, deployment, monitoring scripts
+- `tests/` - Jest test suites (unit + integration)
+- `docs/` - Comprehensive documentation
+- `public/` - Frontend assets (thinking-toggle UI)
 
-### Wall-Bounce Analysis Requirements
-- **MANDATORY**: All analysis tasks MUST use 2+ LLM providers via Wall-Bounce system
-- **Quality Thresholds**: Confidence ≥ 0.7, Consensus ≥ 0.6 or auto-escalation
-- **Japanese Responses**: Primary language for user-facing content
-- **Provider Architecture**:
-  - **Tier 1**: Gemini 2.5 Pro (CLI required, no API key)
-  - **Tier 2**: OpenAI Codex via MCP Server (`codex-mcp-server.ts`) - GPT-5/GPT-5-Codex access
-  - **Tier 3**: Anthropic Sonnet 4 (internal calls only, no API)
-  - **Tier 4**: Anthropic Opus 4.1 (internal calls only, aggregator role)
-- **Execution Modes**:
-  - `parallel`: Concurrent provider execution (default)
-  - `sequential`: Wall-bounce chain with depth 3-5
+📖 **Architecture details**: `docs/ARCHITECTURE.md`
 
-### Task Types and MCP Integration
-- **basic**: 2 providers minimum, auto-approval for low-risk operations
-- **premium**: 4 providers with approval workflow integration
-- **critical**: All available providers with manual approval requirements
+---
 
-### MCP Service Architecture
-- **Approval Manager** (`mcp-approval-manager.ts`): Enterprise approval workflow with auto/manual approval logic
-- **Config Manager** (`mcp-config-manager.ts`): Tool optimization and cost estimation
-- **Integration Service** (`mcp-integration-service.ts`): Central orchestration with security governance
-- **Wall-Bounce Adapter** (`wall-bounce-adapter.ts`): Integration between MCP and Wall-Bounce systems
+## 🔌 API Endpoints
 
-### Environment & Configuration
-- Node.js ≥18.0.0 required
-- TypeScript configuration: ES2022 target, CommonJS modules
-- Redis required for caching and session management
-- CLI Requirements: `gemini` CLI must be installed for Gemini 2.5 Pro access
-- MCP Dependencies: `@modelcontextprotocol/sdk` for protocol integration
-- Security: All provider communications use secure spawn/CLI patterns
-- Test environment: Jest with 5-minute timeout for integration tests
+### Wall-Bounce Analysis
+```
+POST /api/v1/wall-bounce/analyze        # SSE streaming (real-time)
+POST /api/v1/wall-bounce/analyze-simple # JSON response (legacy)
+```
 
-### Provider Security Restrictions
-- **OpenAI/Google**: CLI access only (no direct API keys in environment)
-- **Anthropic**: Internal SDK calls only (cost management via Claude Code)
-- **Shell Security**: Sanitized input with secure spawn patterns to prevent injection
-- **MCP Protocol**: Approval workflows prevent unauthorized tool execution
+### RAG System
+```
+POST /api/v1/rag/query                  # Document search
+POST /api/v1/rag/embed                  # Generate embeddings
+```
 
-### API Endpoints Structure
-- Main application runs on configured port (from environment, default 4000)
-- HuggingFace endpoints: `/api/v1/huggingface/*`, `/api/huggingface/*`, and root level routes
-- RAG endpoints: `/api/v1/rag/*`
-- Webhook endpoints: `/api/v1/webhooks/*`, `/api/v1/webhook-setup/*`
-- Health checks: `/ping`, `/health`, `/api/v1/health`
-- Documentation: `/api/docs`
-- Metrics: `/metrics` (Prometheus)
+### Health & Monitoring
+```
+GET /health                             # Health check
+GET /ping                               # Liveness probe
+GET /metrics                            # Prometheus metrics
+```
 
-### Security & Dependencies
-- Express.js with Helmet security middleware
-- CORS configured for development and production
-- Input validation and authentication middleware
-- Comprehensive error handling with structured logging
-- OpenAI API for GPT-5, Google APIs for Gemini and Drive, Anthropic SDK
+📖 **API reference**: `docs/API_REFERENCE.md`
+
+---
+
+## 🧪 Testing Strategy
+
+### Test Organization
+```bash
+npm test                  # All tests
+npm run test:unit         # Unit tests only
+npm run test:integration  # Integration tests
+npm run test:coverage     # Coverage report (target: 100%)
+npm run test:watch        # Watch mode
+```
 
 ### Testing Requirements
-- 100% test coverage target
-- Property-based testing with fast-check
-- Comprehensive integration tests
-- Mock services in `src/services/__mocks__/`
+- **Property-based**: Use `fast-check` for edge cases
+- **Wall-Bounce**: 100% coverage mandatory for new components
+- **Integration**: 5-minute timeout (long-running LLM calls)
+- **Mocks**: Located in `src/services/__mocks__/`
 
-This codebase implements a production-ready AI orchestration platform with enterprise-grade monitoring, security, and multi-LLM coordination capabilities.
+📖 **Testing guide**: `docs/TESTING_GUIDE.md`
 
-## GPT-5 Optimization Features
+---
 
-### Advanced GPT-5 Integration
-- **Reasoning Effort Control**: Adaptive reasoning levels (minimal/medium/high) based on task complexity
-- **Verbosity Management**: Dynamic output control for consistent response length
-- **Meta-Prompting**: Self-optimizing prompt system using Claude Opus 4.1 for continuous improvement
-- **Responses API**: Persistent reasoning across tool calls for enhanced coordination
-- **Constraint-Driven Prompts**: Precise, unambiguous instructions following OpenAI cookbook best practices
+## 📚 Documentation Structure
 
-### GPT-5 Parameter Mapping
-- **Basic Tasks**: minimal reasoning, low verbosity for fast responses
-- **Premium Tasks**: medium reasoning, medium verbosity for balanced analysis
-- **Critical Tasks**: high reasoning, high verbosity for comprehensive evaluation
+### Essential Reading (Start Here)
+1. **ARCHITECTURE.md** - System design and components
+2. **WALL_BOUNCE_SYSTEM.md** - Wall-Bounce implementation
+3. **SECURITY.md** - Security patterns and requirements
+4. **DEVELOPMENT_GUIDE.md** - Development workflows
 
-## Development Scripts & Utilities
+### Integration Guides
+- `codex-mcp-implementation.md` - Codex MCP server setup
+- `mcp-integration-guide.md` - MCP protocol patterns  
+- `gemini-api-migration-guide.md` - Gemini CLI usage
+- `MCP_SERVICES.md` - MCP service architecture
 
-### Key Scripts in `/scripts/`
-```bash
-./scripts/start-monitoring.sh              # Complete monitoring stack startup
-./scripts/comprehensive-rag-test.sh        # Full RAG system testing
-./scripts/production-monitoring.js         # Production health monitoring
-./scripts/resync-drive-docs.ts            # Google Drive document synchronization
-./scripts/validate-srp-integration.js     # SRP (Self-Reflection Prompting) validation
-```
-
-### PDF Generation
-```bash
-node scripts/generate-pdf.js              # Basic PDF generation
-node scripts/generate-pdf-puppeteer.js    # Advanced PDF with Puppeteer
-node scripts/modern-pdf-generator.js      # Modern PDF with styling
-```
-
-### Emergency & Monitoring Scripts
-```bash
-./scripts/emergency-rollback-phase3.sh    # Emergency system rollback
-./scripts/monitor-srp-phase3.js          # SRP monitoring in Phase 3
-./scripts/gradual-phase3-controller.js   # Gradual Phase 3 deployment
-```
-
-## Special TypeScript Configuration
-
-### TypeScript Settings
-- **Target**: ES2022 with CommonJS modules for Node.js compatibility
-- **Strict Mode**: Disabled (`strict: false`) for flexible development
-- **Source Maps**: Enabled for debugging
-- **Experimental Decorators**: Enabled for advanced metadata features
-- **5-minute Jest timeout**: Configured for long-running integration tests
-
-### Key File Extensions & Patterns
-- All source files in `src/` with `.ts` extension
-- Test files: `**/*.test.ts` and `**/*.spec.ts`
-- Mock services: `src/services/__mocks__/`
-- Type definitions: `src/types/`
-
-## Critical Development Notes
-
-### Testing Strategy
-- **Property-based testing** with `fast-check` for comprehensive coverage
-- **100% coverage target** with exclusions for entry points and type definitions
-- **Integration tests** require full Redis and external service mocking
-- **Jest custom transformer** (jest.transformer.cjs) for TypeScript compilation
-
-### Security & Environment
-- **No direct API keys in code**: All provider access via CLI or internal SDK calls
-- **Secure spawn patterns**: Shell injection prevention in all provider communications
-- **Redis caching**: Required for session management and performance
-- **MCP protocol**: All tool execution goes through approval workflows
-
-### Wall-Bounce Analysis Requirements
-When implementing or modifying Wall-Bounce features:
-1. **Minimum 2 LLM providers** required for any analysis
-2. **Quality thresholds**: Confidence ≥ 0.7, Consensus ≥ 0.6
-3. **Japanese primary language** for user-facing responses
-4. **Provider-specific guidance** defined in `wall-bounce-analyzer.ts:12-41`
-5. **Aggregator instructions** for result synthesis in `wall-bounce-analyzer.ts:43-47`
-
-## Codex MCP Integration
-
-### OpenAI Codex MCP Server
-The project includes a comprehensive MCP (Model Context Protocol) server for OpenAI Codex integration:
-
-**Core Components**:
-- `src/services/codex-mcp-server.ts` - Full MCP server implementation
-- `src/services/codex-mcp-integration.ts` - Wall-Bounce integration adapter
-- `config/codex-mcp.toml` - TOML configuration file
-- `scripts/start-codex-mcp.sh` - Startup and management script
-
-**MCP Tools Available**:
-- `codex` - Start new conversation with GPT-5/GPT-5-Codex
-- `codex-reply` - Continue existing conversation
-- `codex-session-info` - Get session information and statistics
-- `codex-cleanup` - Cleanup expired sessions
-
-**Execution Modes**:
-- **Interactive**: Full TUI integration with session management
-- **Non-interactive/CI**: Headless execution for automation (`--full-auto`)
-- **MCP Protocol**: Standardized tool and resource access
-
-**Configuration Requirements**:
-- Codex CLI must be installed: `npm install -g @openai/codex` or `brew install codex`
-- Authentication via ChatGPT account (recommended) or API key
-- Redis required for session persistence and management
-- Configuration file: `config/codex-mcp.toml`
-
-**Wall-Bounce Integration**:
-- Automatic integration with TechSapo Wall-Bounce Analysis System
-- Multi-LLM coordination with quality thresholds
-- Enterprise approval workflows with risk-based policies
-- Cost tracking and performance metrics
-- Session management with Redis persistence
-
-**Security Features**:
-- Risk-based approval workflows (low/medium/high/critical)
-- Sandbox execution levels (read-only/isolated/full-access)
-- Audit logging and compliance tracking
-- Secure process management with timeout controls
-
-## Context7 MCP Integration
-
-### Library Documentation Services
-The project integrates Context7 MCP for real-time library documentation access:
-
-**Context7 Tools**:
-- `resolve-library-id` - Convert package names to Context7-compatible library IDs
-- `get-library-docs` - Fetch up-to-date documentation for libraries
-
-**Usage Pattern**:
-```typescript
-// Always resolve library ID first unless user provides exact ID
-const libraryId = await context7.resolveLibraryId('express');
-const docs = await context7.getLibraryDocs(libraryId, { topic: 'middleware' });
-```
-
-**Integration Strategy**: Context7 provides the foundational documentation layer for Wall-Bounce analysis, ensuring responses are grounded in current, accurate library documentation.
-
-## Comprehensive Documentation Library
-
-The project maintains extensive documentation in `/docs/` including:
-
-### Core Integration Guides
-- `openai-agents-js-analysis.md` - OpenAI Agents framework integration patterns
-- `openai-agents-js-streaming-mcp-analysis.md` - Streaming and MCP capabilities
-- `gemini-api-migration-guide.md` - Gemini API modernization strategy
-- `gemini-api-models-troubleshooting.md` - Model selection and error handling
-- `claude-opus-sonnet-analysis.md` - Anthropic model optimization strategies
-- `codex-mcp-implementation.md` - Complete Codex MCP server documentation
-
-### MCP Protocol Documentation
-- `mcp-prompts-specification.md` - MCP Prompts primitive specification
-- `mcp-resources-specification.md` - MCP Resources primitive specification
-- `mcp-integration-guide.md` - Comprehensive MCP integration patterns
-
-### Architecture and Operations
-- `WALL_BOUNCE_SYSTEM.md` - Wall-Bounce Analysis System design
-- `MONITORING_OPERATIONS.md` - Production monitoring and alerting
+### Operations & Deployment
+- `DEPLOYMENT_GUIDE.md` - Production deployment steps
+- `MONITORING_OPERATIONS.md` - Prometheus/Grafana monitoring
 - `TESTING_GUIDE.md` - Comprehensive testing strategy
-- `DEPLOYMENT_GUIDE.md` - Production deployment procedures
 
-## Enhanced Wall-Bounce Analysis Requirements
+📖 **Full index**: `docs/DOCUMENTATION_INDEX.md`
 
-### Multi-Vendor LLM Routing Strategy
-Based on `/ai/prj/CLAUDE.md` absolute principles:
+---
 
-1. **Mandatory Wall-Bounce**: Minimum 2+ LLM models required for any user query resolution
-2. **Claude Code as Orchestrator**: Primary coordination responsibility with other LLMs as execution agents
-3. **Minimum 3 Wall-Bounce Rounds**: Progressive analysis with vendor diversity requirements
-4. **Vendor Rotation Requirement**: Second round must use different vendor from initial query
-5. **Maximum 5 Wall-Bounce Rounds**: Upper limit to prevent excessive processing
+## 🛠️ Technology Stack
 
-### Provider Selection Strategy
-For coding tasks, prioritize this routing hierarchy:
-1. **GPT-5** (via Codex MCP) - Primary for technical analysis
-2. **Qwen3 Coder** (if available) - Equal weight with GPT-5 for coding tasks
-3. **Claude Sonnet 4** - Secondary analysis and synthesis
-4. **Gemini 2.5 Pro** - Tertiary verification and consensus building
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Runtime** | Node.js ≥18.0.0 | JavaScript execution |
+| **Language** | TypeScript (ES2022) | Type-safe development |
+| **Framework** | Express.js | HTTP server |
+| **Database** | Redis | Session & cache |
+| **Testing** | Jest + fast-check | Unit & property tests |
+| **Monitoring** | Prometheus + Grafana | Metrics & dashboards |
+| **Security** | Helmet + CORS | HTTP security |
+| **Logging** | Winston | Structured logs |
 
-### Implementation Requirements
-- All Wall-Bounce coordination must route through `wall-bounce-analyzer.ts`
-- Provider responses require synthesis by Claude Code for final user presentation
-- Insufficient user context triggers clarification requests before Wall-Bounce execution
-- Integration with MCP approval workflows for risk-based execution control
+---
 
-## Recent Architectural Enhancements
+## 🎯 MCP Services
 
-### Advanced MCP Services Architecture
-The system now includes sophisticated MCP service orchestration:
+### Integrated MCP Servers
+1. **Serena MCP** - Semantic code navigation and symbol-based editing (ALWAYS USE)
+2. **Cipher MCP** - Long-term memory and knowledge management
+3. **Codex MCP** - GPT-5/GPT-5-Codex with approval workflows  
+4. **Context7 MCP** - Real-time library documentation
 
-**Core MCP Services**:
-- `codex-mcp-server.ts` - OpenAI Codex/GPT-5 integration with enterprise approval workflows
-- `mcp-approval-manager.ts` - Risk-based approval system with automated policy enforcement
-- `mcp-config-manager.ts` - Dynamic configuration and cost optimization
-- `mcp-integration-service.ts` - Central MCP orchestration with security governance
+### ⚡ MANDATORY: MCP Usage Rules
 
-**Enhanced Session Management**:
-- Redis-based session persistence for MCP operations
-- Session timeout controls and cleanup automation
-- Multi-LLM session coordination with state management
-- Audit logging for compliance and security tracking
+**Claude Code MUST follow these rules when working on this project:**
 
-### Production-Ready Monitoring Stack
-- **Prometheus Integration**: Custom metrics for Wall-Bounce analysis quality
-- **Grafana Dashboards**: Real-time monitoring of consensus scores and provider performance
-- **AlertManager**: Automated alerts for quality threshold violations
-- **Cost Tracking**: Real-time cost monitoring with $70/month budget management
+#### 0. 🔍 Code Navigation (Serena MCP) - PRIMARY TOOL
+```
+✅ ALWAYS use Serena MCP for all code operations
+✅ Use Serena for:
+   - Reading files (NOT Read tool)
+   - Finding symbols/classes/methods
+   - Searching code patterns
+   - Symbol-based editing
+   - Understanding code structure
 
-## Critical Development Practices
+Example:
+# Find symbol
+mcp__serena__find_symbol(name_path="WallBounceAnalyzer")
 
-### Test Coverage and Quality Assurance
-- **Property-Based Testing**: Extensive use of `fast-check` for comprehensive edge case coverage
-- **100% Coverage Target**: All new Wall-Bounce components require complete test coverage
-- **Integration Testing**: Full MCP service stack testing with 5-minute Jest timeout
-- **Security Testing**: ReDOS, injection prevention, and authorization testing
+# Search pattern
+mcp__serena__search_for_pattern(substring_pattern="executeWallBounce")
 
-### Code Quality Standards
-- **TypeScript Strict Mode Disabled**: Allows flexible development while maintaining type safety where needed
-- **ES2022 Target**: Modern JavaScript features with Node.js 18+ compatibility
-- **CommonJS Modules**: Ensures compatibility with existing Node.js ecosystem
-- **Experimental Decorators**: Enabled for advanced metadata and dependency injection patterns
+# Read file
+mcp__serena__read_file(relative_path="src/services/wall-bounce-analyzer.ts")
+```
 
-## Emergency Procedures and Rollback
+#### 1. 🧠 Memory Management (Cipher MCP)
+```
+✅ ALWAYS use Cipher MCP to store new information
+✅ Call ask_cipher after:
+   - Learning new patterns or solutions
+   - Discovering codebase insights
+   - Completing major tasks
+   - Encountering errors and fixes
 
-### Emergency Scripts
-- `./scripts/emergency-rollback-phase3.sh` - Emergency system rollback procedures
-- `./scripts/monitor-srp-phase3.js` - Self-Reflection Prompting monitoring
-- `./scripts/gradual-phase3-controller.js` - Controlled deployment management
+Example:
+"Store this Wall-Bounce optimization pattern in memory:
+ When consensus < 0.6, automatically trigger provider escalation"
+```
 
-### Monitoring and Health Checks
-- Health endpoints at `/ping`, `/health`, `/api/v1/health`
-- Prometheus metrics at `/metrics`
-- Real-time Wall-Bounce quality monitoring
-- Automated provider failover and escalation procedures
+#### 2. 💻 Coding Consultation (Codex MCP)
+```
+✅ ALWAYS consult Codex before:
+   - Writing new features
+   - Refactoring existing code
+   - Debugging complex issues
+   - Architecture decisions
 
-This codebase represents a production-ready, enterprise-grade AI orchestration platform with comprehensive Wall-Bounce analysis capabilities, advanced MCP integration, and robust monitoring infrastructure.
+Example:
+"Codex: Design a streaming SSE implementation for Wall-Bounce 
+ that shows real-time LLM output to users"
+```
+
+#### 3. 📚 SDK/Library Reference (Context7 MCP)
+```
+✅ ALWAYS check Context7 before:
+   - Using new libraries or SDKs
+   - Implementing API integrations
+   - Following framework best practices
+   - Verifying syntax and patterns
+
+Example:
+"Context7: Get latest Express.js middleware patterns for SSE streaming"
+```
+
+### MCP Workflow Example
+
+```typescript
+// Step 1: Check documentation (Context7)
+const expressDoc = await context7.getLibraryDocs('/expressjs/express', {
+  topic: 'server-sent-events'
+});
+
+// Step 2: Consult Codex for implementation
+const implementation = await codex({
+  prompt: `Based on this Express SSE documentation: ${expressDoc}
+           Implement real-time streaming for Wall-Bounce analysis`,
+  model: 'gpt-5-codex'
+});
+
+// Step 3: Store solution (Cipher)
+await cipher.askCipher({
+  message: `Remember: SSE streaming for Wall-Bounce requires:
+            1. Content-Type: text/event-stream
+            2. res.flushHeaders() before streaming
+            3. EventEmitter pattern for real-time events`
+});
+```
+
+### MCP Protocol Files
+- `src/services/mcp-integration-service.ts` - Central orchestrator
+- `src/services/mcp-approval-manager.ts` - Risk-based approvals
+- `src/services/mcp-config-manager.ts` - Tool optimization
+- `src/services/codex-mcp-server.ts` - Codex integration
+
+📖 **MCP details**: `docs/MCP_SERVICES.md`
+
+---
+
+## ⚡ Critical Development Notes
+
+### Coding Practices
+- **Never bypass Wall-Bounce** - All LLM calls via `wall-bounce-analyzer.ts`
+- **No API keys** - CLI/SDK only (gemini, codex, Anthropic SDK)
+- **Japanese responses** - Primary language for user-facing content
+- **Test coverage** - 100% for Wall-Bounce components
+
+### Common Tasks
+| Task | File Location | Line Reference |
+|------|---------------|----------------|
+| Add new LLM provider | `src/services/wall-bounce-analyzer.ts` | `initializeProviders()` |
+| Modify quality threshold | `src/services/wall-bounce-analyzer.ts` | `executeWallBounce()` |
+| Add API endpoint | `src/routes/` | Create new route file |
+| Update MCP approval | `src/services/mcp-approval-manager.ts` | `assessRisk()` |
+
+### Environment Setup
+```bash
+# Required CLI tools
+which gemini          # Gemini CLI (required)
+which codex           # Codex CLI (required for GPT-5)
+
+# Required services  
+redis-cli ping        # Redis must be running
+
+# Production service
+sudo systemctl status techsapo
+```
+
+---
+
+## 🚨 Emergency Procedures
+
+### Rollback Scripts
+```bash
+./scripts/emergency-rollback-phase3.sh    # Emergency rollback
+./scripts/monitor-srp-phase3.js          # SRP monitoring
+```
+
+### Health Checks
+```bash
+curl https://localhost:8443/health       # Application health
+curl https://localhost:8443/metrics      # Prometheus metrics
+```
+
+📖 **Emergency procedures**: `docs/EMERGENCY_PROCEDURES.md`
+
+---
+
+**Production-ready AI orchestration platform with enterprise-grade monitoring, security, and multi-LLM coordination.**

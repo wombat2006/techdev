@@ -1,0 +1,59 @@
+{
+  "providers": [
+    {
+      "key": "gemini-2.5-pro",
+      "name": "Gemini2.5Pro",
+      "model": "gemini-2.5-pro",
+      "modelArgs": {
+        "version": "2.5-pro"
+      },
+      "tier": 1,
+      "capabilities": ["analysis", "reasoning", "multilingual"],
+      "invocationType": "gemini"
+    },
+    {
+      "key": "gpt-5-codex",
+      "name": "GPT5Codex",
+      "model": "gpt-5-codex",
+      "modelArgs": {
+        "model": "gpt-5-codex",
+        "specialization": "coding"
+      },
+      "tier": 2,
+      "capabilities": ["coding", "debugging", "architecture"],
+      "invocationType": "gpt5"
+    },
+{
+      "key": "sonnet-4.5",
+      "name": "Sonnet4.5",
+      "model": "claude-sonnet-4-5-20250929",
+      "modelArgs": {
+        "version": "sonnet-4.5"
+      },
+      "tier": 3.5,
+      "capabilities": ["agent-excellence", "extended-thinking", "coding", "tool-coordination", "context-awareness"],
+      "invocationType": "claude",
+      "role": "default-aggregator",
+      "notes": "Best for complex agents, coding excellence, extended autonomous operation"
+    },
+    {
+      "key": "opus-4.1",
+      "name": "Opus4.1",
+      "model": "claude-opus-4.1",
+      "modelArgs": {
+        "version": "opus-4.1"
+      },
+      "tier": 4,
+      "capabilities": ["complex-analysis", "architecture", "synthesis"],
+      "invocationType": "claude",
+      "role": "complex-aggregator"
+    }
+  ],
+  "aggregatorSelection": {
+    "defaultAggregator": "sonnet-4.5",
+    "complexAggregator": "opus-4.1"
+  },
+  "taskTypeMapping": {
+    "critical": "opus-4.1"
+  }
+}

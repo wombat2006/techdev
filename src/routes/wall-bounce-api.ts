@@ -9,6 +9,18 @@ import { logger } from '../utils/logger';
 
 const router = express.Router();
 
+logger.info('🟢 Wall-Bounce router initialized');
+
+// Debug: Log all route registrations
+router.use((req, res, next) => {
+  logger.info('🟡 Wall-Bounce router middleware hit', {
+    method: req.method,
+    path: req.path,
+    originalUrl: req.originalUrl
+  });
+  next();
+});
+
 interface AnalyzeRequest {
   question: string;
   taskType?: 'basic' | 'premium' | 'critical';
@@ -52,14 +64,23 @@ router.post('/analyze-simple', async (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/v1/wall-bounce/analyze
- * Streaming SSE endpoint for Wall-Bounce analysis
+ * GET /api/v1/wall-bounce/analyze
+ * Streaming SSE endpoint for Wall-Bounce analysis (query parameters)
  */
-router.post('/analyze', async (req: Request, res: Response) => {
+router.get('/analyze', async (req: Request, res: Response) => {
+  logger.info('🔵 Wall-Bounce /analyze endpoint hit', { query: req.query });
+
   try {
-    const { question, taskType = 'basic', executionMode = 'parallel', depth = 3 } = req.body as AnalyzeRequest;
+    const { query, mode = 'parallel', session_id } = req.query;
+    const question = query as string;
+    const executionMode = mode as 'parallel' | 'sequential';
+    const taskType: 'basic' | 'premium' | 'critical' = 'basic';
+    const depth = 3;
+
+    logger.info('🔵 Parsed params', { question, executionMode, session_id });
 
     if (!question || typeof question !== 'string' || question.trim().length === 0) {
+      logger.warn('🔴 Invalid question parameter');
       res.status(400).json({ error: 'Question is required and must be a non-empty string' });
       return;
     }
@@ -68,64 +89,81 @@ router.post('/analyze', async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
     res.flushHeaders();
 
     const analyzer = new WallBounceAnalyzer();
 
-    // Send initial step
-    res.write(`data: ${JSON.stringify({
-      type: 'step',
+    // Send initial thinking event
+    res.write(`event: thinking\ndata: ${JSON.stringify({
       provider: 'Claude Code (Orchestrator)',
-      label: 'Analyzing User Request',
-      text: `User inquiry: "${question}". Parsing intent and extracting key technical requirements.`,
-      timestamp: Date.now()
+      step: 'Analyzing User Request',
+      content: `User inquiry: "${question}". Parsing intent and extracting key technical requirements.`,
+      timestamp: new Date().toISOString()
     })}\n\n`);
 
-    // Execute Wall-Bounce analysis
-    const result = await analyzer.executeWallBounce(question, {
+    // Helper function to send SSE events
+    const sendSSEEvent = (eventName: string, data: any) => {
+      res.write(`event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    // Execute Wall-Bounce analysis with callbacks
+    const executeOptions = {
       taskType,
       mode: executionMode,
-      depth
+      depth,
+      onThinking: (provider: string, step: string, content: string) => {
+        sendSSEEvent('thinking', {
+          provider,
+          step,
+          content,
+          timestamp: new Date().toISOString()
+        });
+      },
+      onProviderResponse: (provider: string, response: string) => {
+        sendSSEEvent('provider_response', {
+          provider,
+          response: response.substring(0, 500),
+          timestamp: new Date().toISOString()
+        });
+      },
+      onConsensusUpdate: (score: number) => {
+        sendSSEEvent('consensus', {
+          score,
+          timestamp: new Date().toISOString()
+        });
+      }
+    };
+
+    // Execute Wall-Bounce analysis (events will stream in real-time)
+    const result = await analyzer.executeWallBounce(question, executeOptions);
+
+    // Send final thinking step
+    sendSSEEvent('thinking', {
+      provider: 'Claude Code (Orchestrator)',
+      step: 'Final Response Generation',
+      content: 'Synthesizing multi-LLM analysis into coherent, actionable response for user.',
+      timestamp: new Date().toISOString()
     });
 
-    // Send provider responses as steps
-    for (const vote of result.llm_votes) {
-      res.write(`data: ${JSON.stringify({
-        type: 'step',
-        provider: vote.provider,
-        label: `${vote.provider} Analysis`,
-        text: vote.response.content.substring(0, 500) + (vote.response.content.length > 500 ? '...' : ''),
-        timestamp: Date.now()
-      })}\n\n`);
+    // Send final consensus
+    sendSSEEvent('consensus', {
+      score: result.consensus?.confidence || 0,
+      timestamp: new Date().toISOString()
+    });
 
-      // Simulate progressive consensus building
-      res.write(`data: ${JSON.stringify({
-        type: 'consensus',
-        score: vote.agreement_score
-      })}\n\n`);
-    }
-
-    // Send final aggregated result
-    res.write(`data: ${JSON.stringify({
-      type: 'step',
-      provider: 'Claude Code (Orchestrator)',
-      label: 'Final Response Generation',
-      text: 'Synthesizing multi-LLM analysis into coherent, actionable response for user.',
-      timestamp: Date.now()
-    })}\n\n`);
-
-    // Send completion with final consensus
-    res.write(`data: ${JSON.stringify({
-      type: 'consensus',
-      score: result.consensus.confidence
-    })}\n\n`);
-
-    res.write(`data: ${JSON.stringify({
-      type: 'complete',
-      result: result.consensus.content,
-      consensus: result.consensus.confidence,
-      confidence: result.consensus.confidence
-    })}\n\n`);
+    // Send final answer
+    sendSSEEvent('final_answer', {
+      answer: result.consensus?.content || 'Analysis complete',
+      metadata: {
+        mode: executionMode,
+        session_id,
+        processing_time_ms: result.processing_time_ms,
+        consensus_score: result.consensus?.confidence || 0,
+        providers_used: result.llm_votes?.map(v => v.provider) || [],
+        timestamp: new Date().toISOString()
+      }
+    });
 
     res.end();
 
@@ -143,9 +181,9 @@ router.post('/analyze', async (req: Request, res: Response) => {
     logger.error('Wall-Bounce API error', { error });
 
     // Send error via SSE
-    res.write(`data: ${JSON.stringify({
-      type: 'error',
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
+    res.write(`event: error\ndata: ${JSON.stringify({
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      timestamp: new Date().toISOString()
     })}\n\n`);
 
     res.end();

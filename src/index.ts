@@ -274,6 +274,7 @@ class TechSapoServer {
       'navbar.css',
       'styles.css',
       'app.js',
+      'script.js',
       'test-inquiry.html',
       'test-wall-bounce.html',
       'debug-form.html',
@@ -298,12 +299,12 @@ class TechSapoServer {
       });
     });
 
+    // Wall-Bounce Analysis routes (MUST BE FIRST - specific routes before generic ones)
+    this.app.use('/api/v1/wall-bounce', wallBounceRoutes);
+
     // API routes
     this.app.use('/api/v1/huggingface', huggingfaceRoutes);
     this.app.use('/api/huggingface', huggingfaceRoutes); // Backward compatibility
-
-    // Wall-Bounce Analysis routes
-    this.app.use('/api/v1/wall-bounce', wallBounceRoutes);
 
     // Test UI route (server-rendered)
     this.app.use('/test-ui', testUIRoutes);

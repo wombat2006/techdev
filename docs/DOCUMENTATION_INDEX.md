@@ -1,13 +1,59 @@
-# TechSapo ドキュメント索引
-## 完全なドキュメント体系・ナビゲーションガイド
+# TechSapo Documentation Index
 
-**最終更新**: 2025-09-27
-**バージョン**: 1.0
-**ステータス**: Phase 3F (50% SRP) Complete
+**Complete navigation guide for all project documentation**
 
 ---
 
-## 📚 ドキュメント体系概要
+## 📖 Quick Start by Role
+
+### 👩‍💻 Developer
+1. **CLAUDE.md** - Navigation guide
+2. **docs/ARCHITECTURE.md** - System design
+3. **docs/WALL_BOUNCE_SYSTEM.md** - Core implementation
+4. **docs/DEVELOPMENT_GUIDE.md** - Development workflows
+
+### 🔧 Operations
+1. **docs/DEPLOYMENT_GUIDE.md** - Production deployment
+2. **docs/MONITORING_OPERATIONS.md** - Monitoring & alerts
+3. **docs/SECURITY.md** - Security best practices
+
+### 🎯 Integration Engineer
+1. **docs/MCP_SERVICES.md** - MCP architecture
+2. **docs/codex-mcp-implementation.md** - Codex MCP setup
+3. **docs/API_REFERENCE.md** - API specifications
+
+---
+
+## 📁 Essential Documentation
+
+### Core Architecture
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **ARCHITECTURE.md** | System design & components | All developers |
+| **WALL_BOUNCE_SYSTEM.md** | Multi-LLM orchestration | Core developers |
+| **MCP_SERVICES.md** | MCP service architecture | Integration engineers |
+| **SECURITY.md** | Security patterns & requirements | All team members |
+
+### Development & Operations
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **DEVELOPMENT_GUIDE.md** | Development workflows | Developers |
+| **TESTING_GUIDE.md** | Testing strategy | QA & developers |
+| **DEPLOYMENT_GUIDE.md** | Production deployment | DevOps |
+| **MONITORING_OPERATIONS.md** | Monitoring & metrics | Operations |
+| **API_REFERENCE.md** | API specifications | API consumers |
+
+### Integration Guides
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **codex-mcp-implementation.md** | Codex MCP integration | Developers |
+| **mcp-integration-guide.md** | MCP protocol patterns | Integration engineers |
+| **gemini-api-migration-guide.md** | Gemini CLI usage | Developers |
+| **openai-agents-js-analysis.md** | OpenAI Agents framework | AI developers |
+
+---
+
+## 📚 Documentation Structure
 
 TechSapo プロジェクトの全ドキュメントを目的別・対象者別に整理した包括的な索引です。Single Responsibility Principle (SRP) アーキテクチャ移行の完全な記録と運用ノウハウを体系化しています。
 
