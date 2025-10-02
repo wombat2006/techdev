@@ -1,0 +1,85 @@
+{
+  "providers": [
+    {
+      "key": "gemini-2.5-pro",
+      "name": "Gemini2.5Pro",
+      "model": "gemini-2.5-pro",
+      "modelArgs": {
+        "version": "2.5-pro"
+      },
+      "tier": 1,
+      "capabilities": ["analysis", "reasoning", "multilingual"],
+      "invocationType": "gemini"
+    },
+    {
+      "key": "gpt-5-codex",
+      "name": "GPT5Codex",
+      "model": "gpt-5-codex",
+      "modelArgs": {
+        "model": "gpt-5-codex",
+        "specialization": "coding"
+      },
+      "tier": 2,
+      "capabilities": ["coding", "debugging", "architecture"],
+      "invocationType": "gpt5"
+    },
+    {
+      "key": "sonnet-4",
+      "name": "Sonnet4",
+      "model": "claude-sonnet-4-20250514",
+      "modelArgs": {
+        "version": "sonnet-4"
+      },
+      "tier": 3,
+      "capabilities": ["analysis", "coding", "reasoning"],
+      "invocationType": "claude"
+    },
+    {
+      "key": "sonnet-4.5",
+      "name": "Sonnet4.5",
+      "model": "claude-sonnet-4-5-20250929",
+      "modelArgs": {
+        "version": "sonnet-4.5"
+      },
+      "tier": 3.5,
+      "capabilities": ["aggregation", "synthesis", "fast-reasoning"],
+      "invocationType": "claude",
+      "role": "default-aggregator"
+    },
+    {
+      "key": "opus-4.1",
+      "name": "Opus4.1",
+      "model": "claude-opus-4.1",
+      "modelArgs": {
+        "version": "opus-4.1"
+      },
+      "tier": 4,
+      "capabilities": ["complex-analysis", "architecture", "synthesis"],
+      "invocationType": "claude",
+      "role": "complex-aggregator"
+    }
+  ],
+  "aggregatorSelection": {
+    "defaultAggregator": "sonnet-4.5",
+    "complexAggregator": "opus-4.1",
+    "complexityThreshold": 2,
+    "complexityIndicators": {
+      "keywords": [
+        "architect",
+        "design pattern",
+        "security (audit|review|analysis)",
+        "performance optimization"
+      ],
+      "japaneseKeywords": [
+        "複雑な",
+        "高度な",
+        "詳細な"
+      ],
+      "promptLengthThreshold": 500,
+      "questionMarkThreshold": 3
+    }
+  },
+  "taskTypeMapping": {
+    "critical": "opus-4.1"
+  }
+}

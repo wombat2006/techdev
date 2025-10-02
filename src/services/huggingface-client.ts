@@ -282,15 +282,38 @@ export class HuggingFaceClient {
   }
 }
 
-// Factory function to create HuggingFace client instance
+/**
+ * Factory function to create HuggingFace client instance
+ *
+ * Production: Uses real HuggingFace API with actual API key
+ * Development: Can optionally use mock client (USE_HF_MOCK=true)
+ *
+ * @returns HuggingFaceClient instance (real or mock based on environment)
+ */
 export const createHuggingFaceClient = (): HuggingFaceClient => {
-  // For testing, check if we should use mock
-  if (process.env.NODE_ENV === 'development' && process.env.USE_HF_MOCK === 'true') {
+  // Only use mock in development with explicit flag
+  const useMock = process.env.NODE_ENV === 'development' && process.env.USE_HF_MOCK === 'true';
+
+  if (useMock) {
     const { HuggingFaceMockClient } = require('./huggingface-mock');
-    logger.info('Using Hugging Face Mock Client for development');
+    logger.info('🧪 Using HuggingFace Mock Client (development only)', {
+      environment: process.env.NODE_ENV,
+      mockFlag: process.env.USE_HF_MOCK
+    });
     return new HuggingFaceMockClient(config.huggingface) as any;
   }
-  
+
+  // Production: Use real HuggingFace API
+  logger.info('🚀 Using Real HuggingFace API Client', {
+    environment: process.env.NODE_ENV,
+    baseUrl: config.huggingface.baseUrl,
+    hasApiKey: !!config.huggingface.apiKey
+  });
+
+  if (!config.huggingface.apiKey) {
+    throw new Error('HuggingFace API key is required for production use. Set HUGGINGFACE_API_KEY environment variable.');
+  }
+
   return new HuggingFaceClient(config.huggingface);
 };
 

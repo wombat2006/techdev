@@ -80,8 +80,15 @@ export function createServer() {
   // PDF API routes
   app.use('/api/v1/pdf', pdfRoutes);
 
-  // Real-time metrics endpoint (Server-Sent Events)
+  // Real-time metrics endpoint (Server-Sent Events) - 開発環境のみ
   app.get('/api/v1/metrics/stream', (req, res) => {
+    // 本番環境では無効化
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(404).json({
+        error: 'Metrics endpoint is only available in development mode'
+      });
+    }
+
     // Set SSE headers
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -95,7 +102,7 @@ export function createServer() {
     res.write(`data: ${JSON.stringify({
       type: 'connected',
       timestamp: new Date().toISOString(),
-      message: 'メトリクスストリーム接続完了'
+      message: 'メトリクスストリーム接続完了（開発環境）'
     })}\n\n`);
 
     // Send metrics every 5 seconds
