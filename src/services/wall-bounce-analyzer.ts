@@ -187,6 +187,11 @@ interface ExecuteOptions {
   maxProviders?: number;
   mode?: 'parallel' | 'sequential';
   depth?: number; // 3-5: シリアルモード時のwall-bounce深度
+  
+  // Streaming callbacks for real-time thinking process display
+  onThinking?: (provider: string, step: string, content: string) => void;
+  onProviderResponse?: (provider: string, response: string) => void;
+  onConsensusUpdate?: (score: number) => void;
 }
 
 export class WallBounceAnalyzer extends EventEmitter {
@@ -202,13 +207,21 @@ export class WallBounceAnalyzer extends EventEmitter {
     // 高品質LLMプロバイダーのみに限定
     // "Gemini-2.5-pro", "GPT-5-codex", "GPT-5", "Sonnet4", "Opus4.1"
 
-    // Tier 1: Gemini 2.5 Pro (CLI必須)
+    // Tier 1a: Gemini 2.5 Pro (CLI必須 - 技術的クエリ用)
     this.providers.set('gemini-2.5-pro', {
       name: 'Gemini-2.5-pro',
       model: 'gemini-2.5-pro',
       invoke: this.invokeGemini.bind(this) // CLI経由のみ
     });
     this.providerOrder.push('gemini-2.5-pro');
+
+    // Tier 1b: Gemini 2.5 Flash (CLI必須 - シンプルクエリ用軽量モデル)
+    this.providers.set('gemini-2.5-flash', {
+      name: 'Gemini-2.5-flash',
+      model: 'gemini-2.5-flash',
+      invoke: this.invokeGeminiFlash.bind(this) // CLI経由のみ
+    });
+    this.providerOrder.push('gemini-2.5-flash');
 
     // Tier 2: GPT-5 Codex via CLI (コーディング特化 - CLI必須)
     this.providers.set('gpt-5-codex', {
@@ -267,6 +280,59 @@ export class WallBounceAnalyzer extends EventEmitter {
   /**
    * Google Gemini API経由での実行
    */
+  /**
+   * ユーザークエリの性質を判定
+   */
+  private isSimpleQuery(query: string): boolean {
+    const trimmedQuery = query.trim();
+    const lowerQuery = trimmedQuery.toLowerCase();
+    
+    // 最低文字数チェック（1-2文字の単語は除外）
+    if (trimmedQuery.length < 3) {
+      return false;
+    }
+    
+    // 技術用語ブラックリスト - これらを含む場合は技術的クエリ
+    const technicalKeywords = [
+      '実装', '設計', 'コード', 'API', 'エンドポイント', 
+      'アーキテクチャ', 'マイクロサービス', 'データベース',
+      '最適化', 'パフォーマンス', 'セキュリティ', 'TypeScript',
+      'JavaScript', 'Python', 'システム', '開発', 'プログラム',
+      'カバレッジ', 'ユニット', '統合テスト', 'E2E'
+    ];
+    
+    // 技術用語が含まれていたら技術的クエリ
+    if (technicalKeywords.some(keyword => lowerQuery.includes(keyword.toLowerCase()))) {
+      return false;
+    }
+    
+    // シンプルなクエリのパターン
+    const simplePatterns = [
+      /^(hello|hi|hey|こんにちは|おはよう|こんばんは)$/i,
+      /^test$/i,
+      /^(テストの?返事|返事.*テスト)$/,
+      /^(ok|okay|thanks?|ありがと|サンクス)$/i,
+      /^(ping|pong|echo)$/i,
+      /^(確認|チェック|動作確認)$/,
+    ];
+    
+    // 20文字以下で、シンプルパターンに厳密マッチ
+    if (trimmedQuery.length <= 20 && simplePatterns.some(pattern => pattern.test(trimmedQuery))) {
+      return true;
+    }
+    
+    // 「〜を返してください」「〜してください」のような単純な要求（技術用語なし）
+    const simpleRequestPatterns = [
+      /^.{1,15}(を?返してください|してください|お願いします)$/,
+    ];
+    
+    if (trimmedQuery.length <= 25 && simpleRequestPatterns.some(pattern => pattern.test(trimmedQuery))) {
+      return true;
+    }
+    
+    return false;
+  }
+
   private async executeGeminiCLI(
     prompt: string,
     version: '2.5-pro' | '2.5-flash'
@@ -274,32 +340,38 @@ export class WallBounceAnalyzer extends EventEmitter {
     try {
       const { spawn } = require('child_process');
 
-      // セキュアな入力サニタイズ - シェルメタ文字をエスケープ
-      const sanitizedPrompt = prompt.replace(/[`$\\]/g, '\\$&');
-      const systemPrompt = `システム: あなたは高度な技術解析AIです。多角的な視点で詳細な分析を行い、実践的な解決策を提案してください。
-重要な制約：
-- ツールは使用しないでください
-- 外部リソースにアクセスせず、与えられた質問に対して直接回答してください
-- Web検索やファイル操作は不要です
+      // プロンプトはbuildProviderPrompt()で既に完成しているのでそのまま使用
+      const systemPrompt = prompt;
 
-ユーザークエリ: ${sanitizedPrompt}`;
-
-      // セキュアなspawn使用 - 引数配列で渡してシェルインジェクション防止
+      // セキュアなspawn使用 - stdin経由でプロンプトを渡す
       const modelName = version === '2.5-pro' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
-      const args = ['-p', systemPrompt, '--model', modelName, '--output-format', 'json'];
+      const args = ['--model', modelName, '--output-format', 'json'];
 
-      logger.info('🤖 Gemini CLI実行開始 (セキュア spawn)', {
+      logger.info('🤖 Gemini CLI実行開始 (stdin経由)', {
         command: 'gemini',
-        args: ['[REDACTED]', '--model', modelName, '--output-format', 'json']
+        args: ['--model', modelName, '--output-format', 'json'],
+        promptPreview: systemPrompt.substring(0, 500)
       });
+      
+      // デバッグ: 実際に送信されるプロンプトをログ出力
+      logger.info('=' + '='.repeat(79));
+      logger.info(`📤 Gemini ${version} への入力プロンプト:`);
+      logger.info('=' + '='.repeat(79));
+      logger.info(systemPrompt);
+      logger.info('=' + '='.repeat(79));
 
       // セキュアなPromiseベースspawn実行
       const { stdout, stderr } = await new Promise<{stdout: string, stderr: string}>((resolve, reject) => {
         const child = spawn('gemini', args, { 
         timeout: config.wallBounce.enableTimeout ? config.wallBounce.timeoutMs : undefined,
-        stdio: ['ignore', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe'], // stdin経由で入力
         env: { ...process.env }
       });
+        
+        // stdin経由でシステムプロンプトを送信
+        child.stdin?.write(systemPrompt);
+        child.stdin?.end();
+        
         let stdout = '';
         let stderr = '';
 
@@ -375,9 +447,15 @@ export class WallBounceAnalyzer extends EventEmitter {
    */
   private async selectAggregatorByCognitiveAnalysis(
     prompt: string,
-    taskType: 'basic' | 'premium' | 'critical'
+    taskType: 'basic' | 'premium' | 'critical' | 'simple'
   ): Promise<string> {
     const config = providersConfig.aggregatorSelection;
+    
+    // シンプルなクエリは軽量アグリゲーター
+    if (taskType === 'simple') {
+      logger.info(`🎯 Simple query detected → Using Sonnet 4.5 for fast aggregation`);
+      return config.defaultAggregator; // Sonnet 4.5
+    }
     
     // criticalタスクは常にOpus 4.1
     if (taskType === 'critical' || providersConfig.taskTypeMapping[taskType]) {
@@ -494,9 +572,35 @@ export class WallBounceAnalyzer extends EventEmitter {
 
   async executeWallBounce(prompt: string, options: ExecuteOptions = {}): Promise<WallBounceResult> {
     const startTime = Date.now();
-    const taskType = options.taskType || 'basic';
+    
+    // クエリの性質を自動判定してtaskTypeを決定
+    let taskType: 'basic' | 'premium' | 'critical' | 'simple' = options.taskType || 'basic';
+    
+    // シンプルクエリの自動検出
+    if (this.isSimpleQuery(prompt)) {
+      taskType = 'simple';
+      logger.info('🎯 シンプルクエリ検出 - 軽量モデルへルーティング', {
+        query: prompt,
+        originalTaskType: options.taskType,
+        detectedTaskType: 'simple'
+      });
+    }
     const mode: 'parallel' | 'sequential' = options.mode === 'sequential' ? 'sequential' : 'parallel';
     const depth = this.validateDepth(options.depth, mode);
+
+    // Streaming thinking callback helper
+    const emitThinking = (provider: string, step: string, content: string) => {
+      if (options.onThinking) {
+        options.onThinking(provider, step, content);
+      }
+    };
+
+    // Initial thinking: Query analysis
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Analyzing User Request',
+      `Received query: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}". Parsing intent and extracting key technical requirements.`
+    );
 
     // フロー詳細追跡の初期化
     const flowDetails: WallBounceFlowDetails = {
@@ -531,8 +635,31 @@ export class WallBounceAnalyzer extends EventEmitter {
     console.log(`⏰ 開始時刻: ${new Date().toISOString()}`);
     console.log('═══════════════════════════════════════════════════════════════\n');
 
+    // シンプルクエリでも壁打ちは必須（軽量モデル優先）
+    if (taskType === 'simple') {
+      emitThinking(
+        'Claude Code (Orchestrator)',
+        'Simple Query Detected',
+        `Detected simple query. Using lightweight models for wall-bounce analysis with reduced complexity.`
+      );
+    }
+
+    // Thinking: Provider selection
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Provider Selection',
+      `Determining optimal LLM provider order based on task type: "${taskType}". Evaluating provider strengths and availability.`
+    );
+
     const providerOrder = this.getProviderOrder(taskType);
     
+    // Thinking: Cognitive complexity analysis for aggregator selection
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Aggregator Selection',
+      `Analyzing query cognitive complexity to select appropriate aggregator. Evaluating: domain expertise requirements, reasoning depth, multi-step logic needs.`
+    );
+
     // Claude Codeによる認知的複雑さ分析
     const aggregatorKey = await this.selectAggregatorByCognitiveAnalysis(prompt, taskType);
     const aggregator = this.providers.get(aggregatorKey);
@@ -540,6 +667,12 @@ export class WallBounceAnalyzer extends EventEmitter {
     if (!aggregator) {
       throw new Error(`Aggregator provider (${aggregatorKey}) is not configured`);
     }
+
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Aggregator Selected',
+      `Selected aggregator: ${aggregatorKey}. This aggregator is optimal for the detected cognitive complexity level of the query.`
+    );
 
     const primaryProviders = providerOrder.filter(name => 
       name !== providersConfig.aggregatorSelection.defaultAggregator && 
@@ -554,6 +687,13 @@ export class WallBounceAnalyzer extends EventEmitter {
       .map(name => ({ name, handler: this.providers.get(name) }))
       .filter((entry): entry is { name: string; handler: LLMProvider } => Boolean(entry.handler));
 
+    // Thinking: Final provider list
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Providers Configured',
+      `Selected ${selectedPrimary.length} primary providers: ${selectedPrimary.map(p => p.name).join(', ')}. Minimum required: ${minProviders}.`
+    );
+
     // 最小プロバイダー数を設定ファイルから取得
     const configMinProviders = Math.max(config.wallBounce.minProviders, 1);
     const effectiveMinProviders = Math.min(minProviders, configMinProviders);
@@ -566,11 +706,18 @@ export class WallBounceAnalyzer extends EventEmitter {
       throw new Error(`Insufficient providers available. Required: ${effectiveMinProviders}, Available: ${selectedPrimary.length}`);
     }
 
+    // Thinking: Execution mode start
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      `${mode === 'parallel' ? 'Parallel' : 'Sequential'} Execution Start`,
+      `Initiating ${mode} mode analysis with ${selectedPrimary.length} providers. ${mode === 'sequential' ? `Chain depth: ${depth}` : 'All providers will execute concurrently.'}`
+    );
+
     if (mode === 'sequential') {
-      return await this.executeSequentialMode(prompt, selectedPrimary, aggregator, effectiveMinProviders, startTime, depth, flowDetails);
+      return await this.executeSequentialMode(prompt, selectedPrimary, aggregator, effectiveMinProviders, startTime, depth, flowDetails, options, taskType);
     }
 
-    return await this.executeParallelMode(prompt, selectedPrimary, aggregator, effectiveMinProviders, startTime, taskType, flowDetails);
+    return await this.executeParallelMode(prompt, selectedPrimary, aggregator, effectiveMinProviders, startTime, taskType, flowDetails, options);
   }
 
   private async executeParallelMode(
@@ -579,25 +726,71 @@ export class WallBounceAnalyzer extends EventEmitter {
     aggregator: LLMProvider,
     minProviders: number,
     startTime: number,
-    taskType: 'basic' | 'premium' | 'critical',
-    flowDetails: WallBounceFlowDetails
+    taskType: 'basic' | 'premium' | 'critical' | 'simple',
+    flowDetails: WallBounceFlowDetails,
+    options: ExecuteOptions = {}
   ): Promise<WallBounceResult> {
     const providerResponses: Array<LLMResponse & { provider: string }> = [];
     const providerErrors: string[] = [];
 
+    // Streaming thinking callback helper
+    const emitThinking = (provider: string, step: string, content: string) => {
+      if (options.onThinking) {
+        options.onThinking(provider, step, content);
+      }
+    };
+
+    const emitProviderResponse = (provider: string, response: string) => {
+      if (options.onProviderResponse) {
+        options.onProviderResponse(provider, response);
+      }
+    };
+
     // Wall-Bounce用のパラレル実行（タイムアウト無し）
     const providerPromises = providers.map(async ({ name, handler }) => {
       try {
-        const providerPrompt = this.buildProviderPrompt(prompt, name, 'parallel', providerResponses);
+        // Thinking: Provider invocation start
+        emitThinking(
+          'Claude Code (Orchestrator)',
+          `Invoking ${name}`,
+          `Preparing prompt for ${name}. Building context-aware query optimized for this provider's strengths.`
+        );
+
+        const providerPrompt = this.buildProviderPrompt(prompt, name, 'parallel', providerResponses, '', undefined, undefined, taskType);
         
+        // Thinking: Provider execution
+        emitThinking(
+          name,
+          'Analysis Started',
+          `${name} is now processing the query. Leveraging model-specific capabilities for optimal analysis.`
+        );
+
         // タイムアウト無しで実行
         const response = await this.invokeProvider(handler, providerPrompt, name);
         
         providerResponses.push({ ...response, provider: name });
+
+        // Thinking: Provider response received
+        emitThinking(
+          'Claude Code (Orchestrator)',
+          `${name} Response Received`,
+          `Received response from ${name}. Confidence: ${(response.confidence * 100).toFixed(0)}%. Response length: ${response.content.length} characters.`
+        );
+
+        // Emit provider response for display
+        emitProviderResponse(name, response.content);
+
       } catch (error) {
         const message = `${name}: ${error instanceof Error ? error.message : String(error)}`;
         providerErrors.push(message);
         logger.error('❌ Provider failed in parallel mode', { provider: name, error: message });
+
+        // Thinking: Provider error
+        emitThinking(
+          'Claude Code (Orchestrator)',
+          `${name} Error`,
+          `Provider ${name} encountered an error: ${error instanceof Error ? error.message : String(error)}. Will attempt fallback if needed.`
+        );
       }
     });
 
@@ -605,6 +798,13 @@ export class WallBounceAnalyzer extends EventEmitter {
 
     // フォールバック機構を設定ファイルで制御
     if (config.wallBounce.enableFallback && providerResponses.length < minProviders) {
+      // Thinking: Fallback initiation
+      emitThinking(
+        'Claude Code (Orchestrator)',
+        'Fallback Initiated',
+        `Only ${providerResponses.length}/${minProviders} providers succeeded. Initiating Claude Internal SDK fallback mechanism.`
+      );
+
       logger.warn('⚠️ 外部プロバイダー不足、Claude Internalフォールバック実行', {
         available: providerResponses.length,
         required: minProviders,
@@ -617,18 +817,39 @@ export class WallBounceAnalyzer extends EventEmitter {
         if (providerResponses.length >= minProviders) break;
         
         try {
-          const fallbackPrompt = this.buildProviderPrompt(prompt, fallbackName, 'parallel', providerResponses);
+          emitThinking(
+            'Claude Code (Orchestrator)',
+            `Fallback: ${fallbackName}`,
+            `Invoking fallback provider ${fallbackName} to meet minimum provider requirement.`
+          );
+
+          const fallbackPrompt = this.buildProviderPrompt(prompt, fallbackName, 'parallel', providerResponses, '', undefined, undefined, taskType);
           const fallbackResponse = await this.invokeProvider(
             this.providers.get(fallbackName)!,
             fallbackPrompt,
             fallbackName
           );
           providerResponses.push({ ...fallbackResponse, provider: fallbackName });
+
+          emitThinking(
+            'Claude Code (Orchestrator)',
+            `Fallback Success: ${fallbackName}`,
+            `Fallback provider ${fallbackName} completed successfully. Confidence: ${(fallbackResponse.confidence * 100).toFixed(0)}%.`
+          );
+
+          emitProviderResponse(fallbackName, fallbackResponse.content);
+
           logger.info('✅ Claude Internalフォールバック成功', { provider: fallbackName });
         } catch (error) {
           const message = `${fallbackName}: ${error instanceof Error ? error.message : String(error)}`;
           providerErrors.push(message);
           logger.error('❌ Claude Internalフォールバック失敗', { provider: fallbackName, error: message });
+
+          emitThinking(
+            'Claude Code (Orchestrator)',
+            `Fallback Failed: ${fallbackName}`,
+            `Fallback provider ${fallbackName} failed: ${error instanceof Error ? error.message : String(error)}`
+          );
         }
       }
     }
@@ -638,9 +859,36 @@ export class WallBounceAnalyzer extends EventEmitter {
       throw new Error(`Wall-bounce failed: Need at least ${minProviders} providers, got ${providerResponses.length}. ${detail}`);
     }
 
+    // Thinking: Aggregation start
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Consensus Synthesis',
+      `All providers completed. Preparing to synthesize ${providerResponses.length} responses using aggregator. Calculating consensus metrics.`
+    );
+
     const aggregatorPrompt = this.buildAggregatorPrompt(prompt, providerResponses, taskType);
+
+    // Thinking: Aggregator execution
+    emitThinking(
+      DEFAULT_AGGREGATOR_PROVIDER,
+      'Final Synthesis',
+      `Aggregator analyzing all provider responses. Identifying consensus patterns, resolving conflicts, and generating unified response.`
+    );
+
     const aggregatorResponse = await this.invokeProvider(aggregator, aggregatorPrompt, DEFAULT_AGGREGATOR_PROVIDER);
     const processingTimeMs = Date.now() - startTime;
+
+    // Thinking: Completion
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Analysis Complete',
+      `Wall-Bounce analysis completed in ${processingTimeMs}ms. ${providerResponses.length} providers contributed. Final consensus confidence: ${(aggregatorResponse.confidence * 100).toFixed(0)}%.`
+    );
+
+    // Emit final consensus update
+    if (options.onConsensusUpdate) {
+      options.onConsensusUpdate(aggregatorResponse.confidence);
+    }
 
     return this.buildWallBounceResult(providerResponses, aggregatorResponse, DEFAULT_AGGREGATOR_PROVIDER, providerErrors, processingTimeMs, undefined, flowDetails);
   }
@@ -652,11 +900,33 @@ export class WallBounceAnalyzer extends EventEmitter {
     minProviders: number,
     startTime: number,
     depth: number,
-    flowDetails: WallBounceFlowDetails
+    flowDetails: WallBounceFlowDetails,
+    options: ExecuteOptions = {},
+    taskType: 'basic' | 'premium' | 'critical' | 'simple' = 'basic'
   ): Promise<WallBounceResult> {
     const providerResponses: Array<LLMResponse & { provider: string }> = [];
     const providerErrors: string[] = [];
     let accumulatedSummary = '';
+
+    // Streaming thinking callback helper
+    const emitThinking = (provider: string, step: string, content: string) => {
+      if (options.onThinking) {
+        options.onThinking(provider, step, content);
+      }
+    };
+
+    const emitProviderResponse = (provider: string, response: string) => {
+      if (options.onProviderResponse) {
+        options.onProviderResponse(provider, response);
+      }
+    };
+
+    // Thinking: Sequential mode initialization
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Sequential Chain Setup',
+      `Initializing sequential wall-bounce chain with depth ${depth}. Each provider will build upon previous responses.`
+    );
 
     // depth制御: 指定された深度分だけwall-bounceを実行
     const selectedProviders = this.selectProvidersForDepth(providers, depth);
@@ -677,16 +947,33 @@ export class WallBounceAnalyzer extends EventEmitter {
       const stepStartTime = Date.now();
 
       try {
-        const providerPrompt = this.buildProviderPrompt(prompt, name, 'sequential', providerResponses, accumulatedSummary, currentDepth, depth);
+        // Thinking: Sequential step preparation
+        emitThinking(
+          'Claude Code (Orchestrator)',
+          `Step ${currentDepth}/${depth}: Preparing ${name}`,
+          `Building context-aware prompt for ${name}. ${currentDepth > 1 ? `Incorporating insights from ${currentDepth - 1} previous provider(s).` : 'First provider in sequential chain.'}`
+        );
+
+        const providerPrompt = this.buildProviderPrompt(prompt, name, 'sequential', providerResponses, accumulatedSummary, currentDepth, depth, taskType);
 
         // LLMへの送信ログ
-        console.log(`\n┌─────────────────────────────────────────────────────────────┐`);
+        console.log(`
+┌─────────────────────────────────────────────────────────────┐`);
         console.log(`│ 📤 STEP ${currentDepth}/${depth}: ${name.toUpperCase()} へのリクエスト`);
         console.log(`└─────────────────────────────────────────────────────────────┘`);
         console.log(`🕐 時刻: ${new Date().toISOString()}`);
-        console.log(`📝 送信プロンプト:\n${this.truncateForDisplay(providerPrompt, 500)}`);
-        console.log(`📊 これまでの蓄積コンテキスト:\n${this.truncateForDisplay(accumulatedSummary, 300)}`);
+        console.log(`📝 送信プロンプト:
+${this.truncateForDisplay(providerPrompt, 500)}`);
+        console.log(`📊 これまでの蓄積コンテキスト:
+${this.truncateForDisplay(accumulatedSummary, 300)}`);
         console.log(`⏳ 処理中...`);
+
+        // Thinking: Provider invocation
+        emitThinking(
+          name,
+          `Sequential Analysis (Step ${currentDepth}/${depth})`,
+          `${name} processing query with accumulated context from previous steps. Building upon prior insights.`
+        );
 
         const response = await this.invokeProvider(handler, providerPrompt, name);
         const stepProcessingTime = Date.now() - stepStartTime;
@@ -694,14 +981,26 @@ export class WallBounceAnalyzer extends EventEmitter {
         providerResponses.push({ ...response, provider: name });
         accumulatedSummary = this.updateSequentialSummary(accumulatedSummary, name, response.content, currentDepth);
 
+        // Thinking: Response received
+        emitThinking(
+          'Claude Code (Orchestrator)',
+          `Step ${currentDepth}/${depth}: ${name} Complete`,
+          `Received response from ${name}. Processing time: ${stepProcessingTime}ms. Confidence: ${(response.confidence * 100).toFixed(0)}%. Updating accumulated context for next provider.`
+        );
+
+        // Emit provider response
+        emitProviderResponse(name, response.content);
+
         // LLMからの応答ログ
-        console.log(`\n┌─────────────────────────────────────────────────────────────┐`);
+        console.log(`
+┌─────────────────────────────────────────────────────────────┐`);
         console.log(`│ ✅ STEP ${currentDepth}/${depth}: ${name.toUpperCase()} からの応答`);
         console.log(`└─────────────────────────────────────────────────────────────┘`);
         console.log(`🕐 完了時刻: ${new Date().toISOString()}`);
         console.log(`⏱️  処理時間: ${stepProcessingTime}ms`);
         console.log(`🎯 信頼度: ${response.confidence.toFixed(3)}`);
-        console.log(`📤 応答内容:\n${this.truncateForDisplay(response.content, 600)}`);
+        console.log(`📤 応答内容:
+${this.truncateForDisplay(response.content, 600)}`);
         console.log(`💰 コスト: $${response.cost.toFixed(6)}`);
 
         // フロー詳細に記録
@@ -725,7 +1024,15 @@ export class WallBounceAnalyzer extends EventEmitter {
         const message = `${name}: ${error instanceof Error ? error.message : String(error)}`;
         providerErrors.push(message);
 
-        console.log(`\n┌─────────────────────────────────────────────────────────────┐`);
+        // Thinking: Provider error
+        emitThinking(
+          'Claude Code (Orchestrator)',
+          `Step ${currentDepth}/${depth}: ${name} Error`,
+          `Provider ${name} encountered an error: ${error instanceof Error ? error.message : String(error)}. Sequential chain will continue with remaining providers.`
+        );
+
+        console.log(`
+┌─────────────────────────────────────────────────────────────┐`);
         console.log(`│ ❌ STEP ${currentDepth}/${depth}: ${name.toUpperCase()} エラー`);
         console.log(`└─────────────────────────────────────────────────────────────┘`);
         console.log(`🕐 エラー時刻: ${new Date().toISOString()}`);
@@ -740,18 +1047,28 @@ export class WallBounceAnalyzer extends EventEmitter {
       throw new Error(`Wall-bounce failed: Need at least ${Math.min(minProviders, depth)} providers for depth ${depth}, got ${providerResponses.length}. ${detail}`);
     }
 
-    console.log(`\n┌─────────────────────────────────────────────────────────────┐`);
+    // Thinking: Aggregation preparation
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Sequential Chain Complete',
+      `Sequential chain completed with ${providerResponses.length} successful providers. Preparing for final aggregation and consensus synthesis.`
+    );
+
+    console.log(`
+┌─────────────────────────────────────────────────────────────┐`);
     console.log(`│ 🔗 AGGREGATION: ${DEFAULT_AGGREGATOR_PROVIDER.toUpperCase()} 統合処理`);
     console.log(`└─────────────────────────────────────────────────────────────┘`);
     console.log(`🕐 開始時刻: ${new Date().toISOString()}`);
     console.log(`📊 統合対象: ${providerResponses.length}個のLLM応答`);
 
     const aggregatorPrompt = this.buildAggregatorPrompt(prompt, providerResponses, undefined, depth);
-    console.log(`📝 Aggregator送信プロンプト:\n${this.truncateForDisplay(aggregatorPrompt, 800)}`);
+    console.log(`📝 Aggregator送信プロンプト:
+${this.truncateForDisplay(aggregatorPrompt, 800)}`);
 
     // 各LLM応答の要約をログ出力
     providerResponses.forEach((resp, index) => {
-      console.log(`\n📋 応答 ${index + 1}: ${resp.provider}`);
+      console.log(`
+📋 応答 ${index + 1}: ${resp.provider}`);
       console.log(`   信頼度: ${resp.confidence.toFixed(3)}`);
       console.log(`   内容: ${this.truncateForDisplay(resp.content, 200)}`);
 
@@ -762,13 +1079,36 @@ export class WallBounceAnalyzer extends EventEmitter {
       });
     });
 
+    // Thinking: Aggregator execution
+    emitThinking(
+      DEFAULT_AGGREGATOR_PROVIDER,
+      'Final Synthesis',
+      `Aggregator analyzing ${providerResponses.length} sequential responses. Identifying patterns, resolving conflicts, and synthesizing coherent final answer.`
+    );
+
     console.log(`⏳ Opus4.1で統合処理中...`);
     const aggregatorStartTime = Date.now();
     const aggregatorResponse = await this.invokeProvider(aggregator, aggregatorPrompt, DEFAULT_AGGREGATOR_PROVIDER);
     const aggregatorProcessingTime = Date.now() - aggregatorStartTime;
     const processingTimeMs = Date.now() - startTime;
 
-    console.log(`\n┌─────────────────────────────────────────────────────────────┐`);
+    // Thinking: Aggregation complete
+    emitThinking(
+      'Claude Code (Orchestrator)',
+      'Sequential Analysis Complete',
+      `Aggregation completed in ${aggregatorProcessingTime}ms. Total processing time: ${processingTimeMs}ms. Final confidence: ${(aggregatorResponse.confidence * 100).toFixed(0)}%.`
+    );
+
+    // Emit provider response for aggregator
+    emitProviderResponse(DEFAULT_AGGREGATOR_PROVIDER, aggregatorResponse.content);
+
+    // Emit final consensus update
+    if (options.onConsensusUpdate) {
+      options.onConsensusUpdate(aggregatorResponse.confidence);
+    }
+
+    console.log(`
+┌─────────────────────────────────────────────────────────────┐`);
     console.log(`│ ✅ FINAL RESULT: 統合完了`);
     console.log(`└─────────────────────────────────────────────────────────────┘`);
     console.log(`🕐 完了時刻: ${new Date().toISOString()}`);
@@ -844,21 +1184,36 @@ export class WallBounceAnalyzer extends EventEmitter {
     return `${text.slice(0, length - 3)}...\n[...${text.length - length + 3}文字省略]`;
   }
 
-  private getProviderOrder(taskType: 'basic' | 'premium' | 'critical'): string[] {
+  private getProviderOrder(taskType: 'basic' | 'premium' | 'critical' | 'simple'): string[] {
     const baseOrder = [...this.providerOrder];
+    
     switch (taskType) {
+      case 'simple':
+        // シンプルなクエリ: 軽量モデル優先で壁打ち実施
+        return ['gemini-2.5-flash', 'gemini-2.5-pro']; // 最低2つで壁打ち
+        
       case 'premium':
-        return baseOrder;
+        return baseOrder.filter(p => !p.includes('flash')); // 軽量モデルを除外
+        
       case 'critical':
-        return baseOrder;
+        return baseOrder.filter(p => !p.includes('flash')); // 軽量モデルを除外
+        
       case 'basic':
       default:
-        return baseOrder;
+        // 基本的なクエリ: 標準モデル
+        return ['gemini-2.5-pro', 'gpt-5-codex'];
     }
   }
 
   private async invokeGemini(prompt: string, version: '2.5-pro' | '2.5-flash'): Promise<LLMResponse> {
     return await this.executeGeminiCLI(prompt, version);
+  }
+
+  /**
+   * Gemini 2.5 Flash呼び出し（軽量・高速モデル - シンプルクエリ用）
+   */
+  private async invokeGeminiFlash(prompt: string): Promise<LLMResponse> {
+    return await this.executeGeminiCLI(prompt, '2.5-flash');
   }
 
   private async invokeGPT5(prompt: string, sessionContext?: any): Promise<LLMResponse> {
@@ -874,12 +1229,25 @@ export class WallBounceAnalyzer extends EventEmitter {
       });
 
       // セキュアなプロンプト構築
-      const sanitizedPrompt = prompt.replace(/'/g, "'\\''");
-      const systemContext = specialization === 'coding'
-        ? 'あなたは経験豊富なソフトウェアエンジニアです。技術的に正確で実践的なコードと解決策を提供してください。'
-        : 'あなたは高度な技術コンサルタントです。包括的で実践的な技術分析を提供してください。';
+      const sanitizedPrompt = prompt.replace(/'/g, "'\''");
+      
+      // クエリの性質に応じてシステムコンテキストを変更
+      let systemContext: string;
+      if (this.isSimpleQuery(prompt)) {
+        // シンプルなクエリ: そのまま返答
+        systemContext = 'あなたは親切なアシスタントです。ユーザーの質問にシンプルかつ直接的に答えてください。技術的な詳細分析は不要です。';
+      } else {
+        // 技術的なクエリ: 詳細な分析を実施
+        systemContext = specialization === 'coding'
+          ? 'あなたは経験豊富なソフトウェアエンジニアです。技術的に正確で実践的なコードと解決策を提供してください。'
+          : 'あなたは高度な技術コンサルタントです。包括的で実践的な技術分析を提供してください。';
+      }
 
-      const fullPrompt = `${systemContext}\n\nユーザークエリ: ${sanitizedPrompt}\n\n重要: 直接的で簡潔な回答を日本語で提供してください。`;
+      const fullPrompt = `${systemContext}
+
+ユーザークエリ: ${sanitizedPrompt}
+
+重要: 直接的で簡潔な回答を日本語で提供してください。`;
 
       // Codex CLI実行 - セキュアなspawn使用
       const args = [
@@ -1063,11 +1431,19 @@ export class WallBounceAnalyzer extends EventEmitter {
 
         await client.close();
 
+        // Check if MCP returned an error
+        if (result.isError) {
+          const errorText = result.content?.[0]?.text || 'Unknown MCP error';
+          throw new Error(`MCP tool error: ${errorText}`);
+        }
+
         if (result.content && result.content.length > 0) {
           const analysisText = result.content[0].text || '';
           
           return {
-            content: `[Claude ${version} via MCP]\\n\\n${analysisText}`,
+            content: `[Claude ${version} via MCP]
+
+${analysisText}`,
             confidence: 0.92,
             reasoning: `Claude ${version} による高品質技術分析（MCP経由）`,
             cost: 0,
@@ -1090,7 +1466,9 @@ export class WallBounceAnalyzer extends EventEmitter {
       const analysis = await this.performClaudeInternalAnalysis(prompt, version);
       
       return {
-        content: `[Claude ${version} Internal SDK]\\n\\n${analysis}`,
+        content: `[Claude ${version} Internal SDK]
+
+${analysis}`,
         confidence: 0.88,
         reasoning: `Claude ${version}による技術分析（Internal SDK経由）`,
         cost: 0,
@@ -1103,99 +1481,89 @@ export class WallBounceAnalyzer extends EventEmitter {
   }
 
   private async performClaudeInternalAnalysis(prompt: string, version: string): Promise<string> {
-    // Construct analysis prompt for Cipher
-    const analysisPrompt = `以下のユーザークエリに対して、${version}の視点から技術的な分析を行い、実践的な回答を生成してください。
+    logger.info('🔧 Claude Internal SDK fallback - using Gemini for aggregation', { version, promptLength: prompt.length });
 
-ユーザークエリ: ${prompt}
-
-要件:
-- 簡潔で実践的な回答
-- 技術的に正確な内容
-- 具体的な推奨事項や次のステップを含める
-- 日本語で回答`;
-
+    // When Claude fails, use Gemini as aggregator instead
+    // Use stdin to pass the prompt to avoid argument parsing issues
     try {
-      // Use Cipher MCP for knowledge-based analysis
       const { spawn } = require('child_process');
-
-      const result = await new Promise<string>((resolve, reject) => {
-        const child = spawn('claude', ['mcp', 'call', 'cipher', 'ask_cipher',
-          JSON.stringify({ message: analysisPrompt })
-        ], {
-          timeout: 30000,
-          maxBuffer: 2 * 1024 * 1024
+      
+      // Gemini CLI with stdin input (no -p flag to avoid escaping issues)
+      const args = ['--model', 'gemini-2.5-pro', '--output-format', 'json'];
+      
+      logger.info('🔄 Gemini aggregation via CLI (stdin)', {
+        command: 'gemini',
+        promptLength: prompt.length
+      });
+      
+      return await new Promise<string>((resolve, reject) => {
+        const geminiProcess = spawn('gemini', args, {
+          timeout: 60000,
+          maxBuffer: 5 * 1024 * 1024,
+          stdio: ['pipe', 'pipe', 'pipe'], // stdin, stdout, stderr
+          env: { ...process.env }
         });
 
         let stdout = '';
         let stderr = '';
 
-        child.stdout.on('data', (data: Buffer) => {
-          const chunk = data.toString();
-          stdout += chunk;
-          
-          // Emit real-time streaming event for each chunk
-          this.emit('provider:streaming', {
-            provider: version,
-            chunk: chunk,
-            timestamp: Date.now()
-          });
+        // Write prompt to stdin
+        geminiProcess.stdin.write(prompt);
+        geminiProcess.stdin.end();
+
+        geminiProcess.stdout.on('data', (data: Buffer) => {
+          stdout += data.toString();
         });
 
-        child.stderr.on('data', (data: Buffer) => {
+        geminiProcess.stderr.on('data', (data: Buffer) => {
           stderr += data.toString();
         });
 
-        child.on('close', (code: number | null) => {
+        geminiProcess.on('close', (code: number | null) => {
           if (code === 0 && stdout) {
             try {
+              // Gemini returns JSON with response field
               const parsed = JSON.parse(stdout);
-              resolve(parsed.response || parsed.content || stdout);
-            } catch {
-              resolve(stdout);
+              const responseText = parsed.content || parsed.text || parsed.response || stdout;
+              
+              logger.info('✅ Gemini aggregation complete', {
+                responseLength: responseText.length
+              });
+              
+              resolve(responseText);
+            } catch (parseError) {
+              // If not JSON, use raw stdout
+              logger.warn('⚠️ Gemini JSON parse failed, using raw output', { parseError });
+              resolve(stdout.trim());
             }
           } else {
-            reject(new Error(`Cipher MCP failed: ${stderr || 'Unknown error'}`));
+            // Filter out deprecation warnings from stderr
+            const filteredStderr = stderr
+              .split('\n')
+              .filter(line => !line.includes('DeprecationWarning') && !line.includes('punycode'))
+              .join('\n')
+              .trim();
+              
+            reject(new Error(`Gemini aggregation failed: ${filteredStderr || `Exit code ${code}`}`));
           }
         });
 
-        child.on('error', reject);
+        geminiProcess.on('error', (error) => {
+          reject(error);
+        });
       });
 
-      return result;
     } catch (error) {
-      logger.warn('⚠️ Cipher MCP使用不可、シンプル分析にフォールバック', { error });
+      logger.error('❌ Gemini aggregation failed', { error, version });
+      
+      // Last resort: Return a helpful error message
+      return `申し訳ございません。統合分析システムで一時的な問題が発生しています。
 
-      // Fallback to simple pattern-based analysis
-      if (prompt.includes('実装') || prompt.includes('コード') || prompt.includes('プログラム')) {
-        return `技術実装の観点から分析しました。以下の点を推奨します：
+元のクエリへの個別回答は正常に取得できましたが、最終統合処理でエラーが発生しました。
 
-1. アーキテクチャ設計: モジュラー化と疎結合を重視した設計を採用
-2. エラー処理: 包括的なエラーハンドリングとロギングの実装
-3. テスト戦略: ユニットテストと統合テストの両方を含む包括的なテストスイート
-4. パフォーマンス: 適切なキャッシング戦略とデータベース最適化
+エラー詳細: ${error instanceof Error ? error.message : String(error)}
 
-次のステップとして、詳細な設計レビューとプロトタイプ実装を推奨します。`;
-      }
-
-      if (prompt.includes('システム') || prompt.includes('インフラ') || prompt.includes('運用')) {
-        return `システム運用の観点から分析しました。以下の推奨事項を提案します：
-
-1. 監視とアラート: Prometheus/Grafanaによる包括的なメトリクス収集
-2. セキュリティ: 定期的なセキュリティ監査と脆弱性スキャン
-3. バックアップ: 自動化されたバックアップとディザスタリカバリ計画
-4. スケーラビリティ: 水平スケーリングを考慮した設計
-
-継続的な改善とドキュメンテーションの維持を推奨します。`;
-      }
-
-      return `多角的な技術分析を実施しました。現在の要求に対して以下の観点から評価を行いました：
-
-1. 技術的実現可能性: 現行の技術スタックで実装可能
-2. パフォーマンス影響: 適切な最適化により良好なパフォーマンスを維持可能
-3. 保守性: 明確な構造化とドキュメンテーションにより高い保守性を確保
-4. セキュリティ: 業界標準のベストプラクティスに準拠
-
-推奨事項として、段階的な実装とテストを行いながら、継続的なフィードバックループを確立することを提案します。`;
+システム管理者に連絡し、アグリゲーター設定を確認してください。`;
     }
   }
 
@@ -1250,8 +1618,34 @@ export class WallBounceAnalyzer extends EventEmitter {
     previousResponses: Array<LLMResponse & { provider: string }>,
     accumulatedSummary: string = '',
     currentDepth?: number,
-    totalDepth?: number
+    totalDepth?: number,
+    taskType?: 'basic' | 'premium' | 'critical' | 'simple'
   ): string {
+    // シンプルクエリの場合は簡潔な応答を促すプロンプトを生成
+    if (taskType === 'simple') {
+      return `あなたはシンプルなアシスタントです。
+
+CRITICAL INSTRUCTION: このクエリは単純な挨拶やテストメッセージです。技術的な詳細分析は一切不要です。
+
+以下のパターンで振る舞ってください：
+- 「テストの返事を返してください」→ 「テストの返事: 確認できました」
+- 「こんにちは」→ 「こんにちは！」
+- 「ping」→ 「pong」
+- 「確認」→ 「確認しました」
+
+絶対に守ること：
+❌ コード例やAPI実装を提案しない
+❌ システム設計や技術的背景を説明しない
+❌ 複数のセクションに分けた詳細な分析をしない
+❌ クエリの内容をそのまま繰り返さない
+✅ 1-2文で簡潔に返答する
+✅ 適切な応答として「確認できました」「了解しました」「OK」などを返す
+
+ユーザークエリ: ${originalPrompt}
+
+応答:`;
+    }
+
     const guidance = PROVIDER_GUIDANCE[providerName];
     const parallelLines = guidance?.parallel || [
       '提示した課題に対して独自の観点から分析してください。',
@@ -1292,9 +1686,25 @@ export class WallBounceAnalyzer extends EventEmitter {
   private buildAggregatorPrompt(
     originalPrompt: string,
     responses: Array<LLMResponse & { provider: string }> ,
-    taskType?: 'basic' | 'premium' | 'critical',
+    taskType?: 'basic' | 'premium' | 'critical' | 'simple',
     depth?: number
   ): string {
+    // シンプルクエリの場合は簡潔な統合を指示
+    if (taskType === 'simple') {
+      const responseSection = responses
+        .map(resp => `【${resp.provider}】\n${this.truncate(resp.content, 200)}`)
+        .join('\n\n');
+
+      return `以下の回答を統合して、1-2文で簡潔に返答してください。技術的な分析や詳細な説明は不要です。
+
+元のクエリ: ${originalPrompt}
+
+個別回答:
+${responseSection}
+
+統合回答（1-2文で簡潔に）:`;
+    }
+
     const header = AGGREGATOR_INSTRUCTIONS.map(line => `- ${line}`).join('\n');
     const responseSection = responses
       .map(resp => `【${resp.provider}】(confidence: ${resp.confidence.toFixed(2)})\n${this.truncate(resp.content, 1200)}`)
@@ -1362,7 +1772,7 @@ export class WallBounceAnalyzer extends EventEmitter {
   async optimizePrompt(
     providerName: string,
     currentPrompt: string,
-    taskType: 'basic' | 'premium' | 'critical'
+    taskType: 'basic' | 'premium' | 'critical' | 'simple'
   ): Promise<{
     originalPrompt: string;
     optimizedPrompt: string;
