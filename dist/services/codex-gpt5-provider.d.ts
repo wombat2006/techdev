@@ -38,10 +38,6 @@ export declare class CodexGPT5Provider implements LLMProvider {
      */
     private estimateTokens;
     /**
-     * モックレスポンス生成（フォールバック用）
-     */
-    private generateMockResponse;
-    /**
      * プロバイダー情報
      */
     toString(): string;

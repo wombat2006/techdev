@@ -9,6 +9,10 @@ export declare const config: {
         timeout: number;
         retryAttempts: number;
     };
+    openrouter: {
+        apiKey: string;
+        baseUrl: string;
+    };
     redis: {
         url: string;
         token: string;
@@ -36,7 +40,6 @@ export declare const config: {
         model5: string;
     };
     wallBounce: {
-        enableFallback: boolean;
         enableTimeout: boolean;
         timeoutMs: number;
         minProviders: number;

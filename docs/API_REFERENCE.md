@@ -28,6 +28,7 @@ Content-Type: application/json
 export OPENAI_API_KEY="sk-..."
 export GOOGLE_CLIENT_ID="your_client_id"
 export GOOGLE_CLIENT_SECRET="your_client_secret"
+export OPENROUTER_API_KEY="sk-or-v1-..."  # Qwen3-Coder用
 ```
 
 ## ❌ エラーハンドリング {#error-handling}

@@ -29,6 +29,7 @@ class CodexGPT5Provider {
             const actualCost = this.calculateActualCost(result.tokens.total);
             return {
                 content: result.response,
+                text: result.response, // Alias for compatibility
                 confidence: this.calculateConfidence(result.response),
                 reasoning: `Codex MCP経由でのGPT-5 Codex分析結果 (実行時間: ${Math.round(result.processingTime / 1000)}秒)`,
                 cost: actualCost,
@@ -40,17 +41,9 @@ class CodexGPT5Provider {
         }
         catch (error) {
             logger_1.logger.error('❌ Codex GPT-5 Codex実行失敗', { error });
-            // フォールバック応答
-            const mockResponse = this.generateMockResponse(prompt);
-            return {
-                content: `${mockResponse}
-
-[Codex MCP Error] ${error instanceof Error ? error.message : '不明なエラー'}`,
-                confidence: 0.25,
-                reasoning: 'Codex MCP実行時にエラーが発生したためモックレスポンスを返却',
-                cost: 0.001,
-                tokens: { input: 0, output: 0 }
-            };
+            // 本番環境では明示的エラーを投げる（モック応答なし）
+            const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+            throw new Error(`Codex MCP実行失敗: ${errorMessage}`);
         }
     }
     /**
@@ -98,16 +91,12 @@ class CodexGPT5Provider {
             };
         }
         catch (error) {
-            logger_1.logger.warn('⚠️ Codex実行失敗、フォールバックに切り替え', {
+            logger_1.logger.error('❌ Codex実行失敗', {
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
-            // フォールバック: 高品質なモックレスポンス生成
-            const mockResponse = this.generateMockResponse(prompt);
-            return {
-                response: mockResponse,
-                success: false,
-                tokens: this.estimateTokens(prompt, mockResponse)
-            };
+            // 本番環境では明示的エラーを投げる（モック応答なし）
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            throw new Error(`Codex MCP実行失敗: ${errorMessage}`);
         }
     }
     /**
@@ -177,58 +166,6 @@ class CodexGPT5Provider {
         const input = Math.ceil(prompt.length / 4);
         const output = Math.ceil(response.length / 4);
         return { input, output };
-    }
-    /**
-     * モックレスポンス生成（フォールバック用）
-     */
-    generateMockResponse(prompt) {
-        if (prompt.includes('memoization') || prompt.includes('最適化') || prompt.includes('optimize')) {
-            return `
-以下はmemoization（メモ化）を使った最適化版です：
-
-\`\`\`python
-from functools import lru_cache
-
-@lru_cache(maxsize=128)
-def factorial_memoized(n: int) -> int:
-    """Memoized factorial function for better performance."""
-    if n < 0:
-        raise ValueError("factorial is undefined for negative integers")
-    if n in (0, 1):
-        return 1
-    return n * factorial_memoized(n - 1)
-\`\`\`
-
-\`lru_cache\`デコレータにより、一度計算した結果がキャッシュされ、同じ値での再計算が高速化されます。
-      `.trim();
-        }
-        if (prompt.includes('recursive') || prompt.includes('再帰')) {
-            return `
-再帰関数の実装例：
-
-\`\`\`python
-def recursive_function(n: int) -> int:
-    if n <= 1:
-        return n
-    return n + recursive_function(n - 1)
-\`\`\`
-
-基本的な再帰パターンです。
-      `.trim();
-        }
-        return `
-[Codex GPT-5 Simulated Response]
-
-この要求に対する実装を提供します：
-
-\`\`\`python
-# Implementation based on your request
-def solution():
-    pass
-\`\`\`
-
-実際のCodex実行時により詳細な回答が生成されます。
-    `.trim();
     }
     /**
      * プロバイダー情報

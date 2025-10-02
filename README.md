@@ -19,6 +19,7 @@ Model Context Protocol基盤の協調分析システム
 - **Tier 0**: Stash/Context7 - リファレンス・ドキュメント参照層（非LLM）
 - **Tier 1**: Claude Code - ルーティング・統合責任者
 - **Tier 2**: Gemini 2.5 Flash + Claude Haiku 3.5 + cursor-mcp - 基本処理
+- **Tier 2.5**: Qwen3-Coder (480B A35B) - コーディング・デバッグ特化
 - **Tier 3**: Claude Sonnet4 + OpenRouter - 複雑分析
 - **Tier 4**: GPT-5 - 最高品質
 - **Tier 5**: Claude Opus4.1 + Cipher - 緊急時・セキュリティ専用
@@ -27,7 +28,7 @@ Model Context Protocol基盤の協調分析システム
 - **Wall-Bounce MCP**: 複数LLM協調処理オーケストレーター
 - **Vault MCP**: AES-256-GCM暗号化環境変数管理
 - **Stash MCP**: セマンティックコード検索・コンテキスト管理
-- **OpenRouter MCP**: 200+モデルAPIゲートウェイ
+- **OpenRouter MCP**: 200+モデルAPIゲートウェイ（Qwen3-Coder統合）
 - **Context7 MCP**: リアルタイムライブラリドキュメント統合
 - **Cipher MCP**: 高度暗号化・セキュリティサービス
 - **Monitoring MCP**: システム監視・メトリクス収集
@@ -82,6 +83,22 @@ Model Context Protocol基盤の協調分析システム
 - Docker & Docker Compose（またはPodman）
 - APIキー: OpenAI、Google（Gemini）、Claude、OpenRouter
 - （オプション）本番環境用Redis、MySQL
+
+### 必須APIキー
+```bash
+# .envファイルに設定が必要
+OPENAI_API_KEY=sk-xxx           # GPT-5 (Codex経由)
+GOOGLE_API_KEY=xxx              # Gemini 2.5 Flash/Pro
+ANTHROPIC_API_KEY=sk-ant-xxx    # Claude Sonnet4/Opus4.1
+OPENROUTER_API_KEY=sk-or-xxx    # Qwen3-Coder + 200+モデル
+```
+
+### OpenRouter経由モデル
+- **Qwen3-Coder (qwen/qwen3-coder)**: 480B MoE (35B active) - コーディング特化
+  - Context: 262,144 tokens
+  - Cost: $0.22/M入力, $0.95/M出力
+  - 用途: コード生成、デバッグ、マルチファイル推論
+  - Tier: 2.5（GPT-5とSonnet4の中間）
 
 ## 🛠 クイックスタート
 

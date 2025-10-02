@@ -13,6 +13,10 @@ export const config = {
     timeout: 300000, // 5 minutes for complete testing
     retryAttempts: 3,
   },
+  openrouter: {
+    apiKey: process.env.OPENROUTER_API_KEY || '',
+    baseUrl: 'https://openrouter.ai/api/v1',
+  },
   redis: {
     url: process.env.UPSTASH_REDIS_URL || '',
     token: process.env.UPSTASH_REDIS_TOKEN || '',
@@ -49,6 +53,7 @@ export const config = {
 export const validateEnvironment = (): void => {
   const required = [
     'HUGGINGFACE_API_KEY',
+    'OPENROUTER_API_KEY',
   ];
 
   const missing = required.filter(key => !process.env[key]);

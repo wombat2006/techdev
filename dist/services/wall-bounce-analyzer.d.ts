@@ -5,10 +5,16 @@
 export interface LLMProvider {
     name: string;
     model: string;
+    modelArgs?: {
+        version?: string;
+        specialization?: string;
+        [key: string]: any;
+    };
     invoke: (prompt: string, options?: any) => Promise<LLMResponse>;
 }
 export interface LLMResponse {
     content: string;
+    text: string;
     confidence: number;
     reasoning: string;
     cost: number;
@@ -20,6 +26,15 @@ export interface LLMResponse {
     provider?: string;
 }
 export interface WallBounceResult {
+    final_answer: string;
+    consensus_score: number;
+    quality_score: number;
+    providers_used: string[];
+    responses: Array<{
+        provider: string;
+        content: string;
+        confidence: number;
+    }>;
     consensus: {
         content: string;
         confidence: number;
@@ -42,15 +57,26 @@ export interface WallBounceResult {
 }
 interface ExecuteOptions {
     taskType?: 'basic' | 'premium' | 'critical';
+    domain?: 'coding' | 'analysis' | 'creative' | 'general';
     minProviders?: number;
     maxProviders?: number;
     mode?: 'parallel' | 'sequential';
+    depth?: number;
+    onThinking?: (provider: string, step: string, content: string) => void;
+    onProviderResponse?: (provider: string, response: string) => void;
+    onConsensusUpdate?: (score: number) => void;
 }
 export declare class WallBounceAnalyzer {
     private providers;
     private providerOrder;
     constructor();
     private initializeProviders;
+    private createOpenRouterProvider;
+    /**
+     * Determine query complexity and select appropriate aggregator
+     * Uses Sonnet 4.5 for most queries, escalates to Opus 4.1 for complex cases
+     */
+    private selectAggregator;
     /**
      * Google Gemini API経由での実行
      */
@@ -67,7 +93,9 @@ export declare class WallBounceAnalyzer {
     private buildWallBounceResult;
     private invokeProvider;
     private truncate;
+    private calculateConsensusScore;
     private getProviderOrder;
+    private isCodingTask;
     private invokeGemini;
     private invokeGPT5;
     private invokeClaude;

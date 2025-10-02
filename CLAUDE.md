@@ -18,7 +18,7 @@ npm run build           # Build TypeScript to dist/
 npm start               # Production server (requires build first)
 
 # Testing
-npm test                # All tests (Jest, 120s timeout)
+npm test                # All tests (Jest, 300s timeout)
 npm run test:watch      # Watch mode testing
 npm run test:coverage   # Coverage report with lcov/html
 npm run test:unit       # Unit tests only
@@ -50,6 +50,7 @@ npm run cipher-api      # Cipher API mode on port 3002
 - **OpenAI**: 必ずcodex経由で呼び出し（直接API使用禁止）
 - **Anthropic**: Claude Code直接呼び出しのみ（API使用絶対禁止）
 - **Google**: Gemini 2.5 Flash/Pro via official SDK
+- **OpenRouter**: Qwen3-Coder (qwen/qwen3-coder) - コーディング特化モデル
 - **Wall-Bounce**: Minimum 2 providers, consensus required
 
 ### MCP Integration
@@ -76,10 +77,11 @@ See detailed documentation in:
 
 ## 🔒 Security & Environment
 
-- Environment config: `src/config/environment.ts`
-- TypeScript: ES2022, strict mode, CommonJS
-- Testing: Jest, 30s timeout, Node environment
-- Redis required for caching and sessions
+- **Environment Config**: `src/config/environment.ts`
+- **TypeScript**: ES2022 target, CommonJS modules, strict mode disabled
+- **Testing**: Jest with 300s (5 minute) timeout for integration tests
+- **Redis**: Required for caching and session management
+- **Node.js**: ≥18.0.0 required
 
 ## 🚨 Review Feedback (Codex)
 

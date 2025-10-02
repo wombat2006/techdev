@@ -6,6 +6,7 @@
 import { logger } from '../utils/logger';
 import { config } from '../config/environment';
 import { createCodexGPT5Provider } from './codex-gpt5-provider';
+import { createOpenRouterQwen3Provider } from './openrouter-qwen3-provider';
 
 // Deprecated: Use selectAggregator() to choose between DEFAULT_AGGREGATOR_PROVIDER and COMPLEX_AGGREGATOR_PROVIDER
 const AGGREGATOR_PROVIDER_LEGACY = 'opus-4.1';
@@ -21,7 +22,7 @@ interface ProviderConfig {
   modelArgs?: Record<string, any>;
   tier: number;
   capabilities: string[];
-  invocationType: 'gemini' | 'gpt5' | 'claude';
+  invocationType: 'gemini' | 'gpt5' | 'claude' | 'openrouter';
   role?: 'default-aggregator' | 'complex-aggregator';
 }
 
@@ -74,6 +75,13 @@ const PROVIDER_GUIDANCE: Record<string, { parallel?: string[]; sequential?: stri
       '必要に応じてコードスニペットやコマンド例を提示してください。'
     ],
     sequential: '既出の洞察を踏まえ、実装・設定面の具体的な手順と注意点を補足してください。'
+  },
+  'openrouter-qwen3-coder': {
+    parallel: [
+      'TypeScriptのベストプラクティスに沿って具体的なコード例を示してください。',
+      '差分形式や検証ステップがある場合は明記し、潜在的な副作用も指摘してください。'
+    ],
+    sequential: '既出のコード提案を精査し、品質向上やバグ防止の観点から追加の改善策を示してください。'
   },
   'gpt-5-general': {
     parallel: [
@@ -155,6 +163,7 @@ export interface WallBounceResult {
 
 interface ExecuteOptions {
   taskType?: 'basic' | 'premium' | 'critical';
+  domain?: 'coding' | 'analysis' | 'creative' | 'general';
   minProviders?: number;
   maxProviders?: number;
   mode?: 'parallel' | 'sequential';
@@ -176,7 +185,8 @@ export class WallBounceAnalyzer {
   private initializeProviders() {
     // Load providers from external configuration
     for (const providerConfig of providersConfig.providers) {
-      let invokeHandler: (prompt: string) => Promise<LLMResponse>;
+      let providerInstance: LLMProvider | null = null;
+      let invokeHandler: ((prompt: string) => Promise<LLMResponse>) | null = null;
 
       // Create appropriate invoke handler based on invocation type
       switch (providerConfig.invocationType) {
@@ -192,18 +202,28 @@ export class WallBounceAnalyzer {
         case 'claude':
           invokeHandler = (prompt: string) => this.invokeClaude(prompt, providerConfig.modelArgs?.version || providerConfig.key);
           break;
+        case 'openrouter':
+          providerInstance = this.createOpenRouterProvider(providerConfig.key);
+          break;
         default:
           logger.warn('Unknown invocation type for provider', { key: providerConfig.key, type: providerConfig.invocationType });
           continue;
       }
 
-      // Register provider
-      this.providers.set(providerConfig.key, {
-        name: providerConfig.name,
-        model: providerConfig.model,
-        modelArgs: providerConfig.modelArgs,
-        invoke: invokeHandler
-      });
+      if (providerInstance) {
+        this.providers.set(providerConfig.key, providerInstance);
+      } else if (invokeHandler) {
+        this.providers.set(providerConfig.key, {
+          name: providerConfig.name,
+          model: providerConfig.model,
+          modelArgs: providerConfig.modelArgs,
+          invoke: invokeHandler
+        });
+      } else {
+        logger.error('Provider registration failed - no handler created', { key: providerConfig.key });
+        continue;
+      }
+
       this.providerOrder.push(providerConfig.key);
     }
 
@@ -211,21 +231,41 @@ export class WallBounceAnalyzer {
     const geminiCount = providersConfig.providers.filter(p => p.invocationType === 'gemini').length;
     const gpt5Count = providersConfig.providers.filter(p => p.invocationType === 'gpt5').length;
     const anthropicCount = providersConfig.providers.filter(p => p.invocationType === 'claude').length;
+    const openRouterCount = providersConfig.providers.filter(p => p.invocationType === 'openrouter').length;
 
     logger.info('🚀 Wall-Bounce Providers初期化完了（外部設定ファイルから読み込み）', {
       total_providers: this.providers.size,
       gemini_providers: geminiCount,
       gpt5_providers: gpt5Count,
       anthropic_providers: anthropicCount,
+      openrouter_providers: openRouterCount,
       default_aggregator: DEFAULT_AGGREGATOR_PROVIDER,
       complex_aggregator: COMPLEX_AGGREGATOR_PROVIDER,
       config_source: 'src/config/llm-providers.json',
       enforced_restrictions: {
         openai_gemini: 'CLI_ONLY',
         anthropic: 'INTERNAL_ONLY',
+        openrouter: 'API_WITH_KEY',
         quality_tier: 'HIGH_ONLY'
       }
     });
+  }
+
+  private createOpenRouterProvider(key: string): LLMProvider {
+    switch (key) {
+      case 'openrouter-qwen3-coder': {
+        const provider = createOpenRouterQwen3Provider();
+        logger.info('🔌 OpenRouter provider登録完了', {
+          key,
+          model: provider.model,
+          base_url: config.openrouter.baseUrl
+        });
+        return provider;
+      }
+      default:
+        logger.error('Unknown OpenRouter provider key', { key });
+        throw new Error(`Unsupported OpenRouter provider: ${key}`);
+    }
   }
 
   /**
@@ -380,7 +420,7 @@ export class WallBounceAnalyzer {
       promptPreview: prompt.substring(0, 120)
     });
 
-    const providerOrder = this.getProviderOrder(taskType);
+    const providerOrder = this.getProviderOrder(taskType, prompt, options);
     const aggregatorKey = this.selectAggregator(prompt, taskType);
     const aggregator = this.providers.get(aggregatorKey);
 
@@ -677,8 +717,23 @@ export class WallBounceAnalyzer {
     return baseScore + Math.random() * 0.3; // Simulated variance
   }
 
-  private getProviderOrder(taskType: 'basic' | 'premium' | 'critical'): string[] {
+  private getProviderOrder(taskType: 'basic' | 'premium' | 'critical', prompt?: string, options: ExecuteOptions = {}): string[] {
     const baseOrder = [...this.providerOrder];
+    const prioritizedCodingProviders = ['openrouter-qwen3-coder', 'gpt-5-codex'];
+
+    if (this.isCodingTask(prompt, options)) {
+      const codingPreferred = baseOrder.filter(name => prioritizedCodingProviders.includes(name));
+      const remaining = baseOrder.filter(name => !prioritizedCodingProviders.includes(name));
+      const reordered = [...codingPreferred, ...remaining];
+
+      logger.debug('🧠 Coding task detected, prioritizing coding providers', {
+        providers: reordered,
+        prioritized: codingPreferred
+      });
+
+      return reordered;
+    }
+
     switch (taskType) {
       case 'premium':
         return baseOrder;
@@ -688,6 +743,25 @@ export class WallBounceAnalyzer {
       default:
         return baseOrder;
     }
+  }
+
+  private isCodingTask(prompt?: string, options?: ExecuteOptions): boolean {
+    if (options?.domain === 'coding') {
+      return true;
+    }
+
+    const codingIndicators: RegExp[] = [
+      /```/m,
+      /(import|export|class|interface|function|const|let|=>)/,
+      /TypeScript|JavaScript|Node\.js|React|Next\.js/i,
+      /npm install|package\.json|tsconfig\.json/i
+    ];
+
+    if (prompt && codingIndicators.some(pattern => pattern.test(prompt))) {
+      return true;
+    }
+
+    return false;
   }
 
   private async invokeGemini(prompt: string, version: '2.5-pro' | '2.5-flash'): Promise<LLMResponse> {

@@ -42,7 +42,7 @@ npm run cipher-api   # Start Cipher API mode
 #### Wall-Bounce Analyzer (`src/services/wall-bounce-analyzer.ts`)
 - **Multi-LLM Orchestration**: Coordinates multiple AI providers for consensus
 - **Quality Assurance**: Confidence scoring and consensus validation
-- **Provider Support**: OpenAI GPT-5, Google Gemini, OpenRouter (NO Anthropic API_KEY)
+- **Provider Support**: OpenAI GPT-5, Google Gemini, OpenRouter Qwen3-Coder (NO Anthropic API_KEY)
 - **Task Types**: basic, premium, critical with different provider configurations
 - **Agent Framework**: Optional integration with `@openai/agents` for multi-agent workflows
 
@@ -76,8 +76,25 @@ Key variables defined in `src/config/environment.ts`:
 - **OpenAI**: API key for GPT-5 ONLY (GPT-4/GPT-4o prohibited per project rules)
 - **Google**: Gemini API and Google Drive OAuth credentials
 - **Anthropic**: Use SDK only, NO API_KEY for MAX x5 Plan cost avoidance
+- **OpenRouter**: API key for Qwen3-Coder and 200+ models access
 - **Redis**: Connection settings for caching
 - **MCP Settings**: Budget tiers, security levels, tool configurations
+
+#### OpenRouter Configuration
+```typescript
+// src/config/environment.ts
+openrouter: {
+  apiKey: process.env.OPENROUTER_API_KEY || '',
+  baseUrl: 'https://openrouter.ai/api/v1',
+}
+```
+
+#### Qwen3-Coder Provider
+- **Model**: `qwen/qwen3-coder` (480B MoE, 35B active parameters)
+- **Context**: 262,144 tokens
+- **Pricing**: $0.22/M input tokens, $0.95/M output tokens
+- **Use Cases**: Code generation, debugging, multi-file reasoning
+- **Implementation**: `src/services/openrouter-qwen3-provider.ts`
 
 ### TypeScript Configuration
 - **Target**: ES2022 with CommonJS modules

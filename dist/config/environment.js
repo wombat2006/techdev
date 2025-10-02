@@ -17,6 +17,10 @@ exports.config = {
         timeout: 300000, // 5 minutes for complete testing
         retryAttempts: 3,
     },
+    openrouter: {
+        apiKey: process.env.OPENROUTER_API_KEY || '',
+        baseUrl: 'https://openrouter.ai/api/v1',
+    },
     redis: {
         url: process.env.UPSTASH_REDIS_URL || '',
         token: process.env.UPSTASH_REDIS_TOKEN || '',
@@ -44,7 +48,6 @@ exports.config = {
         model5: process.env.EMBEDDING_MODEL_5 || 'tohoku-nlp/bert-base-japanese-v2',
     },
     wallBounce: {
-        enableFallback: process.env.ENABLE_WALL_BOUNCE_FALLBACK === 'true',
         enableTimeout: process.env.ENABLE_WALL_BOUNCE_TIMEOUT === 'true',
         timeoutMs: parseInt(process.env.WALL_BOUNCE_TIMEOUT_MS || '0', 10),
         minProviders: parseInt(process.env.WALL_BOUNCE_MIN_PROVIDERS || '1', 10),
@@ -53,6 +56,7 @@ exports.config = {
 const validateEnvironment = () => {
     const required = [
         'HUGGINGFACE_API_KEY',
+        'OPENROUTER_API_KEY',
     ];
     const missing = required.filter(key => !process.env[key]);
     if (missing.length > 0) {

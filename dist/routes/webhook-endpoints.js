@@ -212,11 +212,17 @@ router.get('/googledrive/webhook-stats', async (req, res) => {
     }
 });
 /**
- * 🔧 Webhook設定テスト
+ * 🔧 Webhook設定テスト（開発環境のみ）
  */
 router.post('/googledrive/test-webhook', async (req, res) => {
+    // 本番環境では無効化
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(404).json({
+            error: 'Test webhook endpoint is only available in development mode'
+        });
+    }
     try {
-        logger_1.logger.info('🧪 Webhookテスト実行開始');
+        logger_1.logger.info('🧪 Webhookテスト実行開始（開発環境）');
         const handler = initializeWebhookHandler();
         if (!handler) {
             return res.status(500).json({

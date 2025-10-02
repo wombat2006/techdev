@@ -24,6 +24,22 @@
       "invocationType": "gpt5"
     },
     {
+      "key": "openrouter-qwen3-coder",
+      "name": "Qwen3Coder",
+      "model": "qwen/qwen3-coder",
+      "modelArgs": {
+        "temperature": 0.7,
+        "maxTokens": 4096
+      },
+      "tier": 2,
+      "capabilities": ["coding", "refactoring", "analysis"],
+      "invocationType": "openrouter"
+    },
+      "tier": 2,
+      "capabilities": ["coding", "debugging", "architecture"],
+      "invocationType": "gpt5"
+    },
+    {
       "key": "sonnet-4",
       "name": "Sonnet4",
       "model": "claude-sonnet-4-20250514",
@@ -57,6 +73,19 @@
       "capabilities": ["complex-analysis", "architecture", "synthesis"],
       "invocationType": "claude",
       "role": "complex-aggregator"
+    },
+    {
+      "key": "qwen3-coder",
+      "name": "Qwen3Coder",
+      "model": "qwen/qwen3-coder",
+      "modelArgs": {
+        "temperature": 0.7,
+        "maxTokens": 4096
+      },
+      "tier": 2.5,
+      "capabilities": ["coding", "debugging", "code-generation", "multi-file-reasoning"],
+      "invocationType": "openrouter-qwen3",
+      "description": "Qwen3 Coder 480B MoE (35B active) - Advanced agentic coding model"
     }
   ],
   "aggregatorSelection": {
