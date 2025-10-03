@@ -8,6 +8,11 @@ import huggingfaceRoutes from './routes/huggingface-routes';
 import ragRoutes from './routes/rag-endpoint';
 import webhookRoutes from './routes/webhook-endpoints';
 import webhookSetupRoutes from './routes/webhook-setup';
+import wallBounceRoutes from './routes/wall-bounce-api';
+import codexRoutes from './routes/codex-session';
+import itSupportRoutes from './routes/it-support';
+import itUnifiedRoutes from './routes/it-unified';
+import pdfRoutes from './routes/pdf-routes';
 
 class TechSapoServer {
   private app: express.Application;
@@ -85,13 +90,26 @@ class TechSapoServer {
     this.app.use('/api/v1/huggingface', huggingfaceRoutes);
     this.app.use('/api/huggingface', huggingfaceRoutes); // Backward compatibility
     this.app.use('/', huggingfaceRoutes); // Root level for direct access
-    
+
     // RAG System routes
     this.app.use('/api/v1/rag', ragRoutes);
-    
+
     // Webhook routes
     this.app.use('/api/v1/webhooks', webhookRoutes);
     this.app.use('/api/v1/webhook-setup', webhookSetupRoutes);
+
+    // Wall-Bounce Multi-LLM routes
+    this.app.use('/api/v1/wall-bounce', wallBounceRoutes);
+
+    // Codex session routes
+    this.app.use('/api/v1/codex', codexRoutes);
+
+    // IT Support routes
+    this.app.use('/api/v1/it-support', itSupportRoutes);
+    this.app.use('/api/v1/it-unified', itUnifiedRoutes);
+
+    // PDF processing routes
+    this.app.use('/api/v1/pdf', pdfRoutes);
 
     // API documentation endpoint
     this.app.get('/api/docs', (req, res) => {

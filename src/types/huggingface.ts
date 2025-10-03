@@ -89,19 +89,19 @@ export interface JapaneseEmbeddingModel {
   modelPath: string;
   maxLength: number;
   dimensions: number;
-  language: 'japanese';
+  language: 'japanese' | 'multilingual';
   useCase: 'sentence' | 'document' | 'general';
 }
 
 export const JAPANESE_EMBEDDING_MODELS: JapaneseEmbeddingModel[] = [
   {
-    id: 'tohoku-bert-v3',
-    name: 'cl-tohoku/bert-base-japanese-v3',
-    description: 'BERT base model for Japanese (v3) - 東北大学',
-    modelPath: 'cl-tohoku/bert-base-japanese-v3',
+    id: 'multilingual-e5-large',
+    name: 'intfloat/multilingual-e5-large',
+    description: 'Multilingual E5 Large - High-quality multilingual embeddings (supports Japanese)',
+    modelPath: 'intfloat/multilingual-e5-large',
     maxLength: 512,
-    dimensions: 768,
-    language: 'japanese',
+    dimensions: 1024,
+    language: 'multilingual',
     useCase: 'general'
   },
   {

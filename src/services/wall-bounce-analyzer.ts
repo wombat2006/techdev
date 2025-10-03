@@ -253,7 +253,8 @@ export class WallBounceAnalyzer {
 
   private createOpenRouterProvider(key: string): LLMProvider {
     switch (key) {
-      case 'openrouter-qwen3-coder': {
+      case 'openrouter-qwen3-coder':
+      case 'qwen3-coder': {
         const provider = createOpenRouterQwen3Provider();
         logger.info('🔌 OpenRouter provider登録完了', {
           key,
