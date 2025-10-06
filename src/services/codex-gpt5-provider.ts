@@ -3,22 +3,35 @@
  * OpenAI API KEY不要でCodex CLI経由でGPT-5を利用
  */
 
+import { spawn, spawnSync } from 'child_process';
 import { LLMProvider, LLMResponse } from './wall-bounce-analyzer';
 import { logger } from '../utils/logger';
-import { simpleCodexHandler } from './simple-codex-timeout-handler';
+import { simpleCodexHandler, SimpleCodexResult } from './simple-codex-timeout-handler';
 
 export class CodexGPT5Provider implements LLMProvider {
   name = 'codex-gpt5';
   model = 'gpt-5-codex';
+
+  private static codexCliValidated = false;
+  private static codexCliValidationError: Error | null = null;
+
+  private readonly maxHandlerAttempts = 2;
+  private readonly retryBackoffMs = [250, 750];
 
   /**
    * Codex MCP経由でGPT-5を実行
    */
   async invoke(prompt: string, options?: { initialResponse?: number; inactivity?: number }): Promise<LLMResponse> {
     try {
+      if (!prompt || !prompt.trim()) {
+        throw new Error('Codex MCP実行失敗: Prompt is empty');
+      }
+
+      const promptPreview = prompt.length > 100 ? `${prompt.substring(0, 100)}...` : prompt;
+
       logger.info('🤖 Codex GPT-5 Codex実行開始', {
         model: this.model,
-        prompt: prompt.substring(0, 100) + '...'
+        prompt: promptPreview
       });
 
       // Wall-Bounce用の高速タイムアウト制御
@@ -27,11 +40,47 @@ export class CodexGPT5Provider implements LLMProvider {
         inactivity: 20000,
         ...(options ?? {})
       };
-      const result = await simpleCodexHandler.executeCodexWithSmartTimeout(
-        prompt,
-        'gpt-5-codex',
-        timeoutOptions
-      );
+      const attempts = Math.max(1, this.maxHandlerAttempts);
+      const handlerErrors: Error[] = [];
+
+      let result: SimpleCodexResult | undefined;
+
+      for (let attempt = 1; attempt <= attempts; attempt += 1) {
+        try {
+          if (attempt > 1) {
+            logger.warn('🔁 Retrying Codex handler execution', { attempt });
+          }
+          result = await simpleCodexHandler.executeCodexWithSmartTimeout(
+            prompt,
+            'gpt-5-codex',
+            timeoutOptions
+          );
+          break;
+        } catch (handlerError) {
+          const normalized = handlerError instanceof Error
+            ? handlerError
+            : new Error(String(handlerError));
+          handlerErrors.push(normalized);
+          logger.warn('⚠️ Codex handler attempt failed', {
+            attempt,
+            error: normalized.message
+          });
+
+          const backoff = this.retryBackoffMs[Math.min(attempt - 1, this.retryBackoffMs.length - 1)] ?? 0;
+          if (attempt < attempts && backoff > 0) {
+            await this.delay(backoff);
+          }
+        }
+      }
+
+      if (!result) {
+        logger.info('🛟 Falling back to direct Codex MCP execution');
+        result = await this.executeCodexMCP(prompt, {
+          timeoutMs: timeoutOptions.initialResponse,
+          retries: 2,
+          previousErrors: handlerErrors
+        });
+      }
 
       const actualCost = this.calculateActualCost(result.tokens.total);
 
@@ -48,80 +97,181 @@ export class CodexGPT5Provider implements LLMProvider {
       };
 
     } catch (error) {
-      logger.error('❌ Codex GPT-5 Codex実行失敗', { error });
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
 
-      // 本番環境では明示的エラーを投げる（モック応答なし）
-      const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-      throw new Error(`Codex MCP実行失敗: ${errorMessage}`);
+      logger.error('❌ Codex GPT-5 Codex実行失敗', {
+        error: normalizedError.message,
+        stack: normalizedError.stack
+      });
+
+      throw new Error(`Codex MCP実行失敗: ${normalizedError.message}`);
     }
   }
 
   /**
    * Codex MCP経由でのプロンプト実行（シンプル版）
    */
-  private async executeCodexMCP(prompt: string, options?: { timeoutMs?: number }): Promise<{
-    response: string;
-    success: boolean;
-    tokens?: { input: number; output: number };
-  }> {
-    try {
-      logger.info('🔄 Codex MCP実行開始', { promptLength: prompt.length });
-      if (options?.timeoutMs) {
-        logger.debug('Codex MCP custom timeout applied', { timeoutMs: options.timeoutMs });
-      }
+  private async executeCodexMCP(prompt: string, options?: { timeoutMs?: number; retries?: number; previousErrors?: Error[] }): Promise<SimpleCodexResult> {
+    const timeoutMs = options?.timeoutMs ?? 30000;
+    const retries = Math.max(1, options?.retries ?? 1);
 
-      // より安全なCodex実行アプローチ
-      const { execSync } = require('child_process');
-      
-      // プロンプトをファイルに書き込んで安全に実行
-      const fs = require('fs');
-      const path = require('path');
-      const tempFile = path.join('/tmp', `codex-prompt-${Date.now()}.txt`);
-      
-      // 一時ファイルにプロンプトを書き込み
-      fs.writeFileSync(tempFile, prompt, 'utf8');
-      
-      // より安全なコマンド実行
-      const command = `cat ${tempFile} | timeout 25s codex exec --model gpt-5-codex --sandbox read-only --approval-policy never`;
-      
-      logger.info('📤 Codex実行中...', { command: command.substring(0, 100) + '...' });
+    this.ensureCodexCliIsAvailable();
 
-      const stdout = execSync(command, {
-        timeout: 30000,
-        encoding: 'utf8',
-        maxBuffer: 2 * 1024 * 1024, // 2MB buffer
-        stdio: ['inherit', 'pipe', 'pipe']
-      });
+    logger.info('🔄 Codex MCP実行開始', {
+      promptLength: prompt.length,
+      timeoutMs,
+      retries
+    });
 
-      // 一時ファイル削除
+    const aggregatedErrors = options?.previousErrors ? [...options.previousErrors] : [];
+
+    for (let attempt = 1; attempt <= retries; attempt += 1) {
       try {
-        fs.unlinkSync(tempFile);
-      } catch (e) {
-        // 削除失敗は無視
-      }
+        const result = await this.runCodexProcess(prompt, timeoutMs);
+        logger.info('✅ Codex MCP実行成功', {
+          attempt,
+          responseLength: result.response.length
+        });
+        return result;
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        aggregatedErrors.push(normalizedError);
+        logger.warn('⚠️ Codex MCP execution attempt failed', {
+          attempt,
+          message: normalizedError.message
+        });
 
-      const response = this.parseCodexResponse(stdout);
-      
-      logger.info('✅ Codex MCP実行成功', { 
-        responseLength: response.length,
-        success: true 
+        if (attempt < retries) {
+          const backoff = this.retryBackoffMs[Math.min(attempt - 1, this.retryBackoffMs.length - 1)] ?? 500;
+          await this.delay(backoff > 0 ? backoff : 500);
+        }
+      }
+    }
+
+    const errorMessages = aggregatedErrors.map((err, index) => `attempt ${index + 1}: ${err.message}`);
+    throw new Error(`Codex MCP実行失敗: ${errorMessages.join('; ')}`);
+  }
+
+  private ensureCodexCliIsAvailable(): void {
+    if (CodexGPT5Provider.codexCliValidated) return;
+
+    if (CodexGPT5Provider.codexCliValidationError) {
+      throw CodexGPT5Provider.codexCliValidationError;
+    }
+
+    const check = spawnSync('codex', ['--version'], {
+      encoding: 'utf8',
+      timeout: 2000
+    });
+
+    if (check.error) {
+      const error = new Error(`codex CLI not available: ${check.error.message}`);
+      CodexGPT5Provider.codexCliValidationError = error;
+      throw error;
+    }
+
+    if (typeof check.status === 'number' && check.status !== 0) {
+      const stderr = (check.stderr || '').toString().trim();
+      const stdout = (check.stdout || '').toString().trim();
+      const detail = stderr || stdout || 'no diagnostic output';
+      const error = new Error(`codex CLI validation failed with exit code ${check.status}: ${detail}`);
+      CodexGPT5Provider.codexCliValidationError = error;
+      throw error;
+    }
+
+    CodexGPT5Provider.codexCliValidated = true;
+    logger.debug('codex CLI validation succeeded');
+  }
+
+  private runCodexProcess(prompt: string, timeoutMs: number): Promise<SimpleCodexResult> {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now();
+
+      const codexProcess = spawn('codex', [
+        'exec',
+        '--model', this.model,
+        '--sandbox', 'read-only',
+        '--approval-policy', 'never'
+      ], {
+        stdio: ['pipe', 'pipe', 'pipe']
       });
 
-      return {
-        response,
-        success: true,
-        tokens: this.estimateTokens(prompt, response)
+      let stdout = '';
+      let stderr = '';
+      let completed = false;
+
+      const timeoutHandle = setTimeout(() => {
+        if (completed) {
+          return;
+        }
+        completed = true;
+        codexProcess.kill('SIGKILL');
+        const timeoutError = new Error(`Codex CLI timed out after ${timeoutMs}ms`);
+        timeoutError.name = 'CodexTimeoutError';
+        clearTimeout(timeoutHandle);
+        reject(timeoutError);
+      }, timeoutMs);
+
+      const concludeSuccess = (result: SimpleCodexResult) => {
+        if (completed) {
+          return;
+        }
+        completed = true;
+        clearTimeout(timeoutHandle);
+        resolve(result);
       };
 
-    } catch (error) {
-      logger.error('❌ Codex実行失敗', {
-        error: error instanceof Error ? error.message : 'Unknown error'
+      const concludeFailure = (error: Error) => {
+        if (completed) {
+          return;
+        }
+        completed = true;
+        clearTimeout(timeoutHandle);
+        reject(error);
+      };
+
+      codexProcess.stdout.on('data', (chunk: Buffer) => {
+        stdout += chunk.toString('utf8');
       });
 
-      // 本番環境では明示的エラーを投げる（モック応答なし）
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(`Codex MCP実行失敗: ${errorMessage}`);
-    }
+      codexProcess.stderr.on('data', (chunk: Buffer) => {
+        stderr += chunk.toString('utf8');
+      });
+
+      codexProcess.on('error', (processError: Error) => {
+        concludeFailure(processError);
+      });
+
+      codexProcess.on('close', (code: number | null, signal: NodeJS.Signals | null) => {
+        if (code === 0) {
+          const response = this.parseCodexResponse(stdout);
+          const tokens = this.estimateTokens(prompt, response);
+          const totalTokens = tokens.input + tokens.output;
+
+          concludeSuccess({
+            response,
+            success: true,
+            tokens: {
+              input: tokens.input,
+              output: tokens.output,
+              total: totalTokens
+            },
+            processingTime: Date.now() - startTime
+          });
+        } else {
+          const snippet = (stderr || stdout).toString().trim().slice(0, 500);
+          const error = new Error(`Codex CLI exited abnormally (code=${code}, signal=${signal}): ${snippet || 'no output captured'}`);
+          concludeFailure(error);
+        }
+      });
+
+      codexProcess.stdin.write(prompt);
+      codexProcess.stdin.end();
+    });
+  }
+
+  private delay(durationMs: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, durationMs));
   }
 
   /**

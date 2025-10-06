@@ -66,11 +66,37 @@ export class WallBounceTaskAnalyzer implements IWallBounceTaskAnalyzer {
    */
   isCodingTask(prompt: string): boolean {
     const codingIndicators: RegExp[] = [
+      // Code blocks
       /```/m,
-      /\b(import|export|class|interface|function|const|let|=>)\b/,
-      /TypeScript|JavaScript|Node\.js|React|Next\.js/i,
-      /npm install|package\.json|tsconfig\.json/i,
-      /\b(refactor|implement|debug|fix|code)\b/i
+      
+      // Programming keywords (expanded)
+      /\b(import|export|class|interface|function|const|let|var|async|await|return|=>)\b/,
+      /\b(def|lambda|yield|with|try|except|catch|finally)\b/,
+      /\b(public|private|protected|static|abstract|extends|implements)\b/,
+      
+      // Languages and frameworks
+      /TypeScript|JavaScript|Python|Go|Rust|Java|C\+\+|Node\.js|Deno|Bun/i,
+      /React|Next\.js|Vue|Angular|Svelte|Express|FastAPI|Django/i,
+      
+      // Configuration files
+      /package\.json|tsconfig\.json|pyproject\.toml|Cargo\.toml|go\.mod/i,
+      /\.env|Dockerfile|docker-compose|webpack|vite|rollup/i,
+      
+      // Development actions (expanded)
+      /\b(refactor|implement|debug|fix|code|write|create|build|develop)\b/i,
+      /\b(optimize|test|deploy|setup|configure|install|compile)\b/i,
+      
+      // Code-related terms
+      /\b(API|endpoint|route|handler|middleware|component|hook)\b/i,
+      /\b(bug|error|exception|crash|issue|problem)\b/i,
+      /\b(algorithm|logic|performance|memory|async|concurrent)\b/i,
+      
+      // File extensions
+      /\.(ts|tsx|js|jsx|py|go|rs|java|cpp|c|h|vue|svelte)(\s|$)/,
+      
+      // Common commands
+      /npm (install|run|test|build)|yarn|pnpm|pip install|cargo/i,
+      /git (commit|push|pull|merge|clone)|github|gitlab/i
     ];
 
     const isCoding = codingIndicators.some(pattern => pattern.test(prompt));

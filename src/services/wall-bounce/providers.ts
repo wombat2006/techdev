@@ -168,15 +168,15 @@ export class WallBounceProviderManager implements IWallBounceProviderManager {
       return options.providerOrder;
     }
 
-    // Coding task detection
-    const prioritizedCodingProviders = ['qwen3-coder', 'gpt-5-codex'];
+    // Coding task detection - GPT-5 Codex を最優先
+    const prioritizedCodingProviders = ['gpt-5-codex', 'gpt-5', 'qwen3-coder'];
 
     if (this.isCodingTask(options)) {
       const codingPreferred = baseOrder.filter(name => prioritizedCodingProviders.includes(name));
       const remaining = baseOrder.filter(name => !prioritizedCodingProviders.includes(name));
       const reordered = [...codingPreferred, ...remaining];
 
-      logger.debug('🧠 Coding task detected, prioritizing coding providers', {
+      logger.debug('🧠 Coding task detected, prioritizing GPT-5 Codex', {
         providers: reordered,
         prioritized: codingPreferred
       });
@@ -194,10 +194,10 @@ export class WallBounceProviderManager implements IWallBounceProviderManager {
     // Task type別のprovider推奨
     const taskProviderMap: Record<TaskType, string[]> = {
       'architecture': ['opus-4.1', 'sonnet-4.5', 'gpt-5'],
-      'code-review': ['qwen3-coder', 'gpt-5-codex', 'sonnet-4.5'],
-      'implementation': ['qwen3-coder', 'gpt-5-codex', 'gemini-2.5-flash'],
+      'code-review': ['gpt-5-codex', 'gpt-5', 'qwen3-coder', 'sonnet-4.5'],
+      'implementation': ['gpt-5-codex', 'gpt-5', 'qwen3-coder', 'gemini-2.5-flash'],
       'security': ['opus-4.1', 'sonnet-4.5', 'gpt-5'],
-      'optimization': ['qwen3-coder', 'gemini-2.5-pro', 'sonnet-4.5'],
+      'optimization': ['gpt-5-codex', 'qwen3-coder', 'gemini-2.5-pro', 'sonnet-4.5'],
       'integration': ['gpt-5', 'gemini-2.5-pro', 'sonnet-4.5'],
       'general': ['gemini-2.5-flash', 'gpt-5', 'sonnet-4.5']
     };
