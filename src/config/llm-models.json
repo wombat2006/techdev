@@ -1,0 +1,405 @@
+{
+  "$schema": "llm-models-schema-v1",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-15",
+  "models": [
+    {
+      "id": "gemini-2.5-deepthinking",
+      "name": "Gemini 2.5 Pro (Deep Think)",
+      "provider": "google",
+      "tier": 1,
+      "invocationType": "gemini",
+      "modelArgs": {
+        "version": "2.5-pro",
+        "thinkingMode": "deep-think"
+      },
+      "capabilities": [
+        "advanced-reasoning",
+        "mathematics",
+        "scientific-discovery",
+        "complex-problem-solving",
+        "parallel-thinking"
+      ],
+      "pricing": {
+        "inputPrice": 1.25,
+        "outputPrice": 10.00,
+        "currency": "USD",
+        "unit": "per_million_tokens"
+      },
+      "limits": {
+        "contextWindow": 1000000,
+        "maxOutputTokens": 192000
+      },
+      "status": "active",
+      "description": "Enhanced reasoning model with parallel thinking (192K output, 3x Pro)",
+      "specialFeatures": [
+        "Parallel hypothesis testing",
+        "Novel RL for multi-step reasoning",
+        "CBRN alert threshold (precautionary mitigations)"
+      ],
+      "contextOptimization": {
+        "maxRecommendedTokens": 100000,
+        "warningThreshold": 80000,
+        "costMultiplierLarge": 2.0,
+        "latencyPenaltyLarge": 5000,
+        "recommendedStrategy": "hybrid"
+      }
+    },
+    {
+      "id": "gemini-2.5-pro",
+      "name": "Gemini 2.5 Pro",
+      "provider": "google",
+      "tier": 1,
+      "invocationType": "gemini",
+      "modelArgs": {
+        "version": "2.5-pro"
+      },
+      "capabilities": [
+        "analysis",
+        "reasoning",
+        "multilingual",
+        "general-purpose"
+      ],
+      "pricing": {
+        "inputPrice": 1.25,
+        "outputPrice": 5.00,
+        "inputPriceHighVolume": 2.50,
+        "outputPriceHighVolume": 10.00,
+        "volumeThreshold": 128000,
+        "currency": "USD",
+        "unit": "per_million_tokens"
+      },
+      "limits": {
+        "contextWindow": 2000000,
+        "maxOutputTokens": 8192
+      },
+      "status": "active",
+      "description": "Balanced general-purpose reasoning model",
+      "contextOptimization": {
+        "maxRecommendedTokens": 150000,
+        "warningThreshold": 120000,
+        "costMultiplierLarge": 2.5,
+        "latencyPenaltyLarge": 8000,
+        "recommendedStrategy": "rag"
+      }
+    },
+    {
+      "id": "gemini-2.5-flash",
+      "name": "Gemini 2.5 Flash",
+      "provider": "google",
+      "tier": 1,
+      "invocationType": "gemini",
+      "modelArgs": {
+        "version": "2.5-flash"
+      },
+      "capabilities": [
+        "fast-analysis",
+        "cost-efficient",
+        "high-volume",
+        "low-latency"
+      ],
+      "pricing": {
+        "inputPrice": 0.30,
+        "outputPrice": 2.50,
+        "inputPriceAudio": 1.00,
+        "currency": "USD",
+        "unit": "per_million_tokens"
+      },
+      "limits": {
+        "contextWindow": 1000000,
+        "maxOutputTokens": 8192
+      },
+      "status": "active",
+      "description": "Fast, cost-efficient model for high-volume tasks",
+      "contextOptimization": {
+        "maxRecommendedTokens": 80000,
+        "warningThreshold": 60000,
+        "costMultiplierLarge": 1.6,
+        "latencyPenaltyLarge": 1500,
+        "recommendedStrategy": "tree-sitter"
+      }
+    },
+    {
+      "id": "gpt-5",
+      "name": "GPT-5",
+      "provider": "openai",
+      "tier": 2,
+      "invocationType": "gpt5",
+      "modelArgs": {
+        "model": "gpt-5",
+        "specialization": "general"
+      },
+      "capabilities": [
+        "general-reasoning",
+        "analysis",
+        "knowledge",
+        "multilingual"
+      ],
+      "pricing": {
+        "tiers": {
+          "batch": {
+            "inputPrice": 0.625,
+            "outputPrice": 5.00,
+            "cachedInputPrice": 0.0625
+          },
+          "flex": {
+            "inputPrice": 0.625,
+            "outputPrice": 5.00,
+            "cachedInputPrice": 0.0625
+          },
+          "standard": {
+            "inputPrice": 1.25,
+            "outputPrice": 10.00,
+            "cachedInputPrice": 0.125
+          },
+          "priority": {
+            "inputPrice": 2.50,
+            "outputPrice": 20.00,
+            "cachedInputPrice": 0.25
+          }
+        },
+        "currency": "USD",
+        "unit": "per_million_tokens"
+      },
+      "limits": {
+        "contextWindow": 128000,
+        "maxOutputTokens": 4096
+      },
+      "status": "active",
+      "description": "GPT-5 for general reasoning and knowledge tasks",
+      "accessMethod": "codex-mcp",
+      "contextOptimization": {
+        "maxRecommendedTokens": 100000,
+        "warningThreshold": 80000,
+        "costMultiplierLarge": 1.0,
+        "latencyPenaltyLarge": 300,
+        "recommendedStrategy": "rag"
+      }
+    },
+    {
+      "id": "gpt-5-codex",
+      "name": "GPT-5 Codex",
+      "provider": "openai",
+      "tier": 2,
+      "invocationType": "gpt5",
+      "modelArgs": {
+        "model": "gpt-5-codex",
+        "specialization": "coding"
+      },
+      "capabilities": [
+        "coding",
+        "debugging",
+        "architecture",
+        "code-generation",
+        "refactoring"
+      ],
+      "pricing": {
+        "tiers": {
+          "standard": {
+            "inputPrice": 1.25,
+            "outputPrice": 10.00,
+            "cachedInputPrice": 0.125
+          }
+        },
+        "currency": "USD",
+        "unit": "per_million_tokens"
+      },
+      "limits": {
+        "contextWindow": 128000,
+        "maxOutputTokens": 4096
+      },
+      "status": "active",
+      "description": "GPT-5 Codex specialized for coding tasks",
+      "accessMethod": "codex-mcp",
+      "preferredFor": ["coding-tasks", "debugging", "architecture-design"],
+      "contextOptimization": {
+        "maxRecommendedTokens": 100000,
+        "warningThreshold": 80000,
+        "costMultiplierLarge": 1.0,
+        "latencyPenaltyLarge": 400,
+        "recommendedStrategy": "diff-prompt"
+      }
+    },
+    {
+      "id": "qwen3-coder",
+      "name": "Qwen3 Coder",
+      "provider": "openrouter",
+      "tier": 2,
+      "invocationType": "openrouter",
+      "modelArgs": {
+        "model": "qwen/qwen3-coder",
+        "temperature": 0.7,
+        "maxTokens": 65536
+      },
+      "capabilities": [
+        "coding",
+        "debugging",
+        "code-generation",
+        "multi-file-reasoning",
+        "agentic-coding"
+      ],
+      "pricing": {
+        "inputPrice": 0.80,
+        "outputPrice": 2.40,
+        "currency": "USD",
+        "unit": "per_million_tokens"
+      },
+      "limits": {
+        "contextWindow": 32768,
+        "maxOutputTokens": 65536
+      },
+      "status": "active",
+      "description": "Qwen3 Coder 480B MoE (35B active) - Advanced agentic coding model",
+      "architecture": {
+        "type": "MoE",
+        "totalParameters": "480B",
+        "activeParameters": "35B"
+      },
+      "accessMethod": "openrouter-api",
+      "contextOptimization": {
+        "maxRecommendedTokens": 28000,
+        "warningThreshold": 25000,
+        "costMultiplierLarge": 1.0,
+        "latencyPenaltyLarge": 0,
+        "recommendedStrategy": "tree-sitter"
+      }
+    },
+    {
+      "id": "sonnet-4.5",
+      "name": "Claude Sonnet 4.5",
+      "provider": "anthropic",
+      "tier": 3,
+      "invocationType": "claude",
+      "modelArgs": {
+        "version": "sonnet-4.5"
+      },
+      "modelIdentifier": "claude-sonnet-4-5-20250929",
+      "capabilities": [
+        "analysis",
+        "coding",
+        "reasoning",
+        "aggregation",
+        "synthesis",
+        "fast-reasoning"
+      ],
+      "pricing": {
+        "inputPrice": 3.00,
+        "outputPrice": 15.00,
+        "currency": "USD",
+        "unit": "per_million_tokens"
+      },
+      "limits": {
+        "contextWindow": 200000,
+        "maxOutputTokens": 4096
+      },
+      "status": "active",
+      "role": "default-aggregator",
+      "description": "Default aggregator for synthesis and fast reasoning",
+      "contextOptimization": {
+        "maxRecommendedTokens": 150000,
+        "warningThreshold": 120000,
+        "costMultiplierLarge": 1.5,
+        "latencyPenaltyLarge": 1200,
+        "recommendedStrategy": "hybrid"
+      }
+    },
+    {
+      "id": "opus-4.1",
+      "name": "Claude Opus 4.1",
+      "provider": "anthropic",
+      "tier": 4,
+      "invocationType": "claude",
+      "modelArgs": {
+        "version": "opus-4.1"
+      },
+      "modelIdentifier": "claude-opus-4.1",
+      "capabilities": [
+        "complex-analysis",
+        "architecture",
+        "synthesis",
+        "deep-reasoning"
+      ],
+      "pricing": {
+        "inputPrice": 15.00,
+        "outputPrice": 75.00,
+        "currency": "USD",
+        "unit": "per_million_tokens"
+      },
+      "limits": {
+        "contextWindow": 200000,
+        "maxOutputTokens": 4096
+      },
+      "status": "active",
+      "role": "complex-aggregator",
+      "description": "Complex aggregator for architecture and deep analysis",
+      "contextOptimization": {
+        "maxRecommendedTokens": 150000,
+        "warningThreshold": 120000,
+        "costMultiplierLarge": 1.8,
+        "latencyPenaltyLarge": 2000,
+        "recommendedStrategy": "rag"
+      }
+    }
+  ],
+  "aggregatorSelection": {
+    "defaultAggregator": "sonnet-4.5",
+    "complexAggregator": "opus-4.1",
+    "complexityThreshold": 2,
+    "complexityIndicators": {
+      "keywords": [
+        "architect",
+        "design pattern",
+        "security (audit|review|analysis)",
+        "performance optimization"
+      ],
+      "japaneseKeywords": [
+        "複雑な",
+        "高度な",
+        "詳細な"
+      ],
+      "promptLengthThreshold": 500,
+      "questionMarkThreshold": 3
+    }
+  },
+  "taskTypeMapping": {
+    "critical": "opus-4.1",
+    "coding": ["qwen3-coder", "gpt-5-codex"],
+    "analysis": ["gemini-2.5-pro", "gpt-5"],
+    "reasoning": ["gemini-2.5-deepthinking", "gemini-2.5-pro"]
+  },
+  "providerConfig": {
+    "google": {
+      "accessMethod": "gemini-cli",
+      "requiresAuth": true,
+      "rateLimits": {
+        "requestsPerMinute": 60,
+        "tokensPerMinute": 1000000
+      }
+    },
+    "openai": {
+      "accessMethod": "codex-mcp",
+      "requiresAuth": true,
+      "rateLimits": {
+        "requestsPerMinute": 500,
+        "tokensPerMinute": 200000
+      }
+    },
+    "anthropic": {
+      "accessMethod": "anthropic-api",
+      "requiresAuth": true,
+      "rateLimits": {
+        "requestsPerMinute": 50,
+        "tokensPerMinute": 100000
+      }
+    },
+    "openrouter": {
+      "accessMethod": "openrouter-api",
+      "requiresAuth": true,
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "rateLimits": {
+        "requestsPerMinute": 200,
+        "tokensPerMinute": 500000
+      }
+    }
+  }
+}

@@ -85,7 +85,7 @@ TechSapo Wall-Bounce システムは、**複数のLLMプロバイダーを協調
 │  │   → Tier 1/2 General モデルを選択              │            │
 │  │   → providers = [                                │            │
 │  │       "gpt-5",           // GPT-5 標準          │            │
-│  │       "gemini-2.0-flash"   // Gemini 2.0 Flash │            │
+│  │       "gemini-2.5-pro"   // Gemini 2.5 Pro     │            │
 │  │     ]                                            │            │
 │  └─────────────────────────────────────────────────┘            │
 │                                                                   │
@@ -235,30 +235,30 @@ TechSapo Wall-Bounce システムは、**複数のLLMプロバイダーを協調
    │  ✓ qwen3-coder                      │
    │                                      │
    │ Validation (Tier 1 - 異なるベンダー):│
-   │  ✓ gemini-2.0-flash                 │
+   │  ✓ gemini-2.5-flash                 │
    └─────────────────────────────────────┘
 
 📊 Analysis タスク:
    ┌─────────────────────────────────────┐
    │ Primary (Tier 1/2 - General):       │
    │  ✓ gpt-5 (standard)                 │
-   │  ✓ gemini-1.5-pro                   │
+   │  ✓ gemini-2.5-pro                   │
    │                                      │
    │ Validation (Tier 1 - 高速):         │
-   │  ✓ gemini-2.0-flash                 │
+   │  ✓ gemini-2.5-flash                 │
    └─────────────────────────────────────┘
 
 ⚡ Basic タスク:
    ┌─────────────────────────────────────┐
    │ Cost-Efficient (Tier 1):            │
-   │  ✓ gemini-2.0-flash                 │
+   │  ✓ gemini-2.5-flash                 │
    │  ✓ gpt-5 (if needed)                │
    └─────────────────────────────────────┘
 
 🔐 Critical タスク:
    ┌─────────────────────────────────────┐
    │ All Available (Tier 1-4):           │
-   │  ✓ gemini-2.0-flash-thinking-exp    │
+   │  ✓ gemini-2.5-pro (Deep Think)      │
    │  ✓ gpt-5 / gpt-5-codex              │
    │  ✓ sonnet-4.5                       │
    │  ✓ opus-4.1                         │
@@ -516,9 +516,9 @@ Step 3: アグリゲーター統合
 │                                                              │
 │  Tier 1: 高速・コスト効率 (Primary Analysis)                │
 │  ┌────────────────────────────────────────────────────┐    │
-│  │  • Gemini 2.0 Flash Thinking - 深い推論 (実験版)    │    │
-│  │  • Gemini 1.5 Pro - 高品質分析                       │    │
-│  │  • Gemini 2.0 Flash - 高速分析                       │    │
+│  │  • Gemini 2.5 Pro (Deep Think) - 深い推論           │    │
+│  │  • Gemini 2.5 Pro - 高品質分析                       │    │
+│  │  • Gemini 2.5 Flash - 高速分析                       │    │
 │  │                                                      │    │
 │  │  特徴: 低コスト、高速、マルチリンガル                │    │
 │  │  用途: 初期分析、情報整理、要約                      │    │
@@ -628,7 +628,7 @@ Step 2: プロバイダー選択
   ┌─────────────────────────────┐
   │ 1. GPT-5 Codex (OpenAI)     │
   │ 2. Qwen3 Coder (OpenRouter) │
-  │ 3. Gemini 2.0 Flash (検証用) │
+  │ 3. Gemini 2.5 Flash (検証用) │
   └─────────────────────────────┘
 
 Step 3: 並列実行
@@ -753,7 +753,7 @@ Step 3: プロバイダー選択
 
   Selected:
   ┌────────────────────────────────────┐
-  │ 1. Gemini 2.0 Flash Thinking (実験)│
+  │ 1. Gemini 2.5 Pro (Deep Think)     │
   │ 2. GPT-5 (標準)                    │
   │ 3. Claude Sonnet 4.5 (分析用)      │
   └────────────────────────────────────┘
@@ -818,7 +818,7 @@ Step 6: アグリゲーター (Opus 4.1)
   メタデータ:
   • confidence: 0.92
   • consensus: 0.78
-  • providersUsed: ["gemini-2.0-flash-thinking-exp", "gpt-5", "sonnet-4.5"]
+  • providersUsed: ["gemini-2.5-pro", "gpt-5", "sonnet-4.5"]
   • aggregator: "opus-4.1"
 ```
 

@@ -1,6 +1,19 @@
 {
   "providers": [
     {
+      "key": "gemini-2.5-deepthinking",
+      "name": "Gemini2.5DeepThink",
+      "model": "gemini-2.5-pro",
+      "modelArgs": {
+        "version": "2.5-pro",
+        "thinkingMode": "deep-think"
+      },
+      "tier": 1,
+      "capabilities": ["advanced-reasoning", "mathematics", "scientific-discovery", "complex-problem-solving", "deep-thinking"],
+      "invocationType": "gemini",
+      "description": "Gemini 2.5 Pro (Deep Think mode) - Enhanced reasoning with parallel thinking"
+    },
+    {
       "key": "gemini-2.5-pro",
       "name": "Gemini2.5Pro",
       "model": "gemini-2.5-pro",
@@ -12,6 +25,29 @@
       "invocationType": "gemini"
     },
     {
+      "key": "gemini-2.5-flash",
+      "name": "Gemini2.5Flash",
+      "model": "gemini-2.5-flash",
+      "modelArgs": {
+        "version": "2.5-flash"
+      },
+      "tier": 1,
+      "capabilities": ["fast-analysis", "cost-efficient", "high-volume"],
+      "invocationType": "gemini"
+    },
+    {
+      "key": "gpt-5",
+      "name": "GPT5",
+      "model": "gpt-5",
+      "modelArgs": {
+        "model": "gpt-5",
+        "specialization": "general"
+      },
+      "tier": 2,
+      "capabilities": ["general-reasoning", "analysis", "knowledge", "multilingual"],
+      "invocationType": "gpt5"
+    },
+    {
       "key": "gpt-5-codex",
       "name": "GPT5Codex",
       "model": "gpt-5-codex",
@@ -20,7 +56,7 @@
         "specialization": "coding"
       },
       "tier": 2,
-      "capabilities": ["coding", "debugging", "architecture"],
+      "capabilities": ["coding", "debugging", "architecture", "code-generation"],
       "invocationType": "gpt5"
     },
     {
@@ -55,7 +91,7 @@
         "temperature": 0.7,
         "maxTokens": 65536
       },
-      "tier": 2.5,
+      "tier": 2,
       "capabilities": ["coding", "debugging", "code-generation", "multi-file-reasoning"],
       "invocationType": "openrouter",
       "description": "Qwen3 Coder 480B MoE (35B active) - Advanced agentic coding model"
