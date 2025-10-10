@@ -1,0 +1,509 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://techsapo.ai/schemas/llm-conversation-v1.json",
+  "title": "LLM Conversation Schema",
+  "description": "Schema for LLM-to-LLM conversation structure in Wall-Bounce system",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["conversationId", "startTime", "executionMode", "rounds", "finalResult", "performance"],
+  "properties": {
+    "conversationId": {
+      "type": "string",
+      "description": "Unique conversation identifier"
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "Optional session identifier"
+    },
+    "startTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Conversation start time (ISO 8601)"
+    },
+    "endTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Conversation end time (ISO 8601)"
+    },
+    "executionMode": {
+      "type": "string",
+      "enum": ["parallel", "sequential", "deep-sequential"],
+      "description": "Execution mode"
+    },
+    "rounds": {
+      "type": "array",
+      "description": "All conversation rounds",
+      "items": {
+        "$ref": "#/definitions/ConversationRound"
+      }
+    },
+    "consensusProcess": {
+      "$ref": "#/definitions/ConsensusProcess"
+    },
+    "aggregationProcess": {
+      "$ref": "#/definitions/AggregationProcess"
+    },
+    "finalResult": {
+      "type": "object",
+      "required": ["answer", "consensusScore", "qualityScore", "providersUsed"],
+      "properties": {
+        "answer": {
+          "type": "string"
+        },
+        "consensusScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "qualityScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "providersUsed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "performance": {
+      "$ref": "#/definitions/ConversationPerformance"
+    }
+  },
+  "definitions": {
+    "LLMMessage": {
+      "type": "object",
+      "required": ["id", "role", "content", "timestamp", "metadata"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["user", "provider", "aggregator", "system"]
+        },
+        "provider": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "$ref": "#/definitions/LLMMessageMetadata"
+        }
+      }
+    },
+    "LLMMessageMetadata": {
+      "type": "object",
+      "properties": {
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "tokens": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "number"
+            },
+            "output": {
+              "type": "number"
+            },
+            "total": {
+              "type": "number"
+            }
+          }
+        },
+        "cost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "latencyMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "model": {
+          "type": "string"
+        },
+        "fallbackFrom": {
+          "type": "string"
+        },
+        "reasoning": {
+          "type": "string"
+        }
+      }
+    },
+    "ConversationRound": {
+      "type": "object",
+      "required": ["roundNumber", "status", "mode", "startTime", "prompt", "providerResponses"],
+      "properties": {
+        "roundNumber": {
+          "type": "number",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "running", "completed", "failed", "skipped"]
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["parallel", "sequential", "deep-sequential"]
+        },
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "prompt": {
+          "type": "object",
+          "required": ["original"],
+          "properties": {
+            "original": {
+              "type": "string"
+            },
+            "enriched": {
+              "type": "string"
+            },
+            "context": {
+              "type": "string"
+            }
+          }
+        },
+        "providerResponses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProviderResponse"
+          }
+        },
+        "roundResult": {
+          "$ref": "#/definitions/RoundResult"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RoundError"
+          }
+        }
+      }
+    },
+    "ProviderResponse": {
+      "type": "object",
+      "required": ["providerId", "providerName", "tier", "message", "executionTime"],
+      "properties": {
+        "providerId": {
+          "type": "string"
+        },
+        "providerName": {
+          "type": "string"
+        },
+        "tier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "message": {
+          "$ref": "#/definitions/LLMMessage"
+        },
+        "executionTime": {
+          "type": "number",
+          "minimum": 0
+        },
+        "circuitBreakerState": {
+          "type": "string",
+          "enum": ["closed", "open", "half-open"]
+        }
+      }
+    },
+    "RoundResult": {
+      "type": "object",
+      "required": ["consensusScore", "qualityScore", "totalCost", "totalTokens"],
+      "properties": {
+        "consensusScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "qualityScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "bestResponse": {
+          "$ref": "#/definitions/ProviderResponse"
+        },
+        "totalCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "totalTokens": {
+          "type": "number",
+          "minimum": 0
+        },
+        "earlyStop": {
+          "type": "object",
+          "properties": {
+            "triggered": {
+              "type": "boolean"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "RoundError": {
+      "type": "object",
+      "required": ["providerId", "error", "timestamp", "recoverable"],
+      "properties": {
+        "providerId": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recoverable": {
+          "type": "boolean"
+        },
+        "fallbackUsed": {
+          "type": "string"
+        }
+      }
+    },
+    "ConsensusProcess": {
+      "type": "object",
+      "required": ["method", "scores", "consensus", "metrics"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["quorum", "weighted-average", "majority-vote"]
+        },
+        "scores": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "votes": {
+          "type": "object",
+          "properties": {
+            "confirm": {
+              "type": "number"
+            },
+            "abstain": {
+              "type": "number"
+            },
+            "reject": {
+              "type": "number"
+            },
+            "distribution": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "weights": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "consensus": {
+          "type": "object",
+          "required": ["content", "confidence", "reasoning"],
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "reasoning": {
+              "type": "string"
+            },
+            "achievedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "required": ["averageConfidence", "medianConfidence", "standardDeviation", "agreementRate"],
+          "properties": {
+            "averageConfidence": {
+              "type": "number"
+            },
+            "medianConfidence": {
+              "type": "number"
+            },
+            "standardDeviation": {
+              "type": "number"
+            },
+            "agreementRate": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "AggregationProcess": {
+      "type": "object",
+      "required": ["aggregatorId", "aggregatorTier", "inputResponses", "aggregatorResponse", "synthesis"],
+      "properties": {
+        "aggregatorId": {
+          "type": "string"
+        },
+        "aggregatorTier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "inputResponses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProviderResponse"
+          }
+        },
+        "aggregatorPrompt": {
+          "type": "object",
+          "properties": {
+            "template": {
+              "type": "string"
+            },
+            "context": {
+              "type": "string"
+            },
+            "fullPrompt": {
+              "type": "string"
+            }
+          }
+        },
+        "aggregatorResponse": {
+          "$ref": "#/definitions/LLMMessage"
+        },
+        "fallback": {
+          "type": "object",
+          "properties": {
+            "primaryAggregator": {
+              "type": "string"
+            },
+            "fallbackAggregator": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        },
+        "synthesis": {
+          "type": "object",
+          "required": ["finalAnswer", "confidence", "quality", "reasoning"],
+          "properties": {
+            "finalAnswer": {
+              "type": "string"
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "quality": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "reasoning": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "ConversationPerformance": {
+      "type": "object",
+      "required": ["totalDurationMs", "totalCost", "totalTokens", "providerBreakdown"],
+      "properties": {
+        "totalDurationMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "totalCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "totalTokens": {
+          "type": "object",
+          "required": ["input", "output", "total"],
+          "properties": {
+            "input": {
+              "type": "number"
+            },
+            "output": {
+              "type": "number"
+            },
+            "total": {
+              "type": "number"
+            }
+          }
+        },
+        "providerBreakdown": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["providerId", "calls", "totalCost", "totalTokens", "averageLatencyMs"],
+            "properties": {
+              "providerId": {
+                "type": "string"
+              },
+              "calls": {
+                "type": "number"
+              },
+              "totalCost": {
+                "type": "number"
+              },
+              "totalTokens": {
+                "type": "number"
+              },
+              "averageLatencyMs": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "earlyStopSavings": {
+          "type": "object",
+          "properties": {
+            "providersSkipped": {
+              "type": "number"
+            },
+            "estimatedCostSaved": {
+              "type": "number"
+            },
+            "estimatedTimeSaved": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

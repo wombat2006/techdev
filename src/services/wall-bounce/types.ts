@@ -17,6 +17,15 @@ export interface LLMResponse {
   provider?: string;
 }
 
+/**
+ * Response Metadata Extension
+ */
+export interface ResponseMetadata {
+  provider?: string;
+  round?: number;
+  fallbackFrom?: string;
+}
+
 export interface LLMProvider {
   name: string;
   model: string;
@@ -80,6 +89,8 @@ export interface WallBounceResult {
     tier_escalated: boolean;
     provider_errors?: string[];
   };
+  // 会話履歴（オプショナル - 後方互換性のため）
+  conversation_history?: import('../../types/llm-conversation-schemas').ConversationHistory;
 }
 
 export interface ExecuteOptions {
@@ -95,6 +106,10 @@ export interface ExecuteOptions {
   providerOrder?: string[];                 // シリアルモード時のプロバイダ順序
   customGuidance?: Record<string, string>;  // プロバイダ固有のカスタム指示
   timeout?: number;                         // タイムアウト延長 (ms, デフォルト: 120000)
+
+  // Conversation history
+  enableConversationHistory?: boolean;      // 会話履歴を記録 (デフォルト: false)
+  sessionId?: string;                       // セッションID（会話履歴用）
 
   // SSE streaming callbacks
   onThinking?: (provider: string, step: string, content: string) => void;

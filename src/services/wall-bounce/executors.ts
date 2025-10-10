@@ -15,6 +15,8 @@ import type {
 } from './types';
 import { logger } from '../../utils/logger';
 import AuditLogger from '../audit-logger';
+import { createConversationHistoryBuilder, ConversationHistoryBuilder } from '../../utils/conversation-history-builder';
+import { providersConfig } from './constants';
 
 export class WallBounceExecutor implements IWallBounceExecutor {
   constructor(
@@ -23,6 +25,14 @@ export class WallBounceExecutor implements IWallBounceExecutor {
     private promptBuilder: IWallBouncePromptBuilder,
     private taskAnalyzer: IWallBounceTaskAnalyzer
   ) {}
+
+  /**
+   * Get provider tier from configuration
+   */
+  private getProviderTier(providerKey: string): number {
+    const providerConfig = providersConfig.providers.find(p => p.key === providerKey);
+    return providerConfig?.tier || 3; // Default to tier 3 if not found
+  }
 
   /**
    * Wall-Bounceを実行（メインエントリーポイント）
@@ -35,7 +45,8 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       taskType: options.taskType || 'basic',
       depth: options.depth || 3,
       minProviders: options.minProviders || 2,
-      maxProviders: options.maxProviders || 6
+      maxProviders: options.maxProviders || 6,
+      enableConversationHistory: options.enableConversationHistory || false
     });
 
     await AuditLogger.logAction('wall_bounce_execution_start', {
@@ -44,6 +55,21 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       promptLength: prompt.length,
       timestamp: new Date().toISOString()
     });
+
+    // Initialize conversation history builder if enabled
+    let conversationBuilder: ConversationHistoryBuilder | undefined;
+    if (options.enableConversationHistory) {
+      const mode = options.mode || 'parallel';
+      const executionMode = mode === 'sequential'
+        ? (options.depth && options.depth >= 3 ? 'deep-sequential' : 'sequential')
+        : 'parallel';
+      conversationBuilder = createConversationHistoryBuilder(executionMode, options.sessionId);
+
+      logger.info('📚 Conversation history tracking enabled', {
+        executionMode,
+        sessionId: options.sessionId
+      });
+    }
 
     try {
       // Detect task type
@@ -62,20 +88,37 @@ export class WallBounceExecutor implements IWallBounceExecutor {
 
       switch (mode) {
         case 'parallel':
-          result = await this.executeParallel(prompt, options, detectedTaskType);
+          result = await this.executeParallel(prompt, options, detectedTaskType, conversationBuilder);
           break;
 
         case 'sequential':
           const depth = options.depth || 3;
           if (depth >= 3) {
-            result = await this.executeDeepSequential(prompt, options, detectedTaskType);
+            result = await this.executeDeepSequential(prompt, options, detectedTaskType, conversationBuilder);
           } else {
-            result = await this.executeSequential(prompt, options, detectedTaskType);
+            result = await this.executeSequential(prompt, options, detectedTaskType, conversationBuilder);
           }
           break;
 
         default:
           throw new Error(`Unknown execution mode: ${mode}`);
+      }
+
+      // Build conversation history if enabled
+      if (conversationBuilder) {
+        const history = conversationBuilder.build(
+          result.final_answer,
+          result.consensus_score,
+          result.quality_score,
+          result.providers_used
+        );
+        result.conversation_history = history;
+
+        logger.info('📚 Conversation history built successfully', {
+          conversationId: history.conversationId,
+          totalRounds: history.rounds.length,
+          totalCost: history.performance.totalCost
+        });
       }
 
       const processingTime = Date.now() - startTime;
@@ -97,6 +140,14 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       return result;
     } catch (error) {
       const processingTime = Date.now() - startTime;
+
+      // Mark conversation as failed if tracking enabled
+      if (conversationBuilder) {
+        conversationBuilder.failRound(
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+
       logger.error('❌ Wall-Bounce execution failed', {
         error: error instanceof Error ? error.message : String(error),
         processingTimeMs: processingTime
@@ -117,7 +168,8 @@ export class WallBounceExecutor implements IWallBounceExecutor {
   private async executeParallel(
     prompt: string,
     options: ExecuteOptions,
-    taskType: string
+    taskType: string,
+    conversationBuilder?: ConversationHistoryBuilder
   ): Promise<WallBounceResult> {
     const startTime = Date.now();
 
@@ -125,6 +177,11 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       taskType,
       minProviders: options.minProviders || 2
     });
+
+    // Start round if conversation history enabled
+    if (conversationBuilder) {
+      conversationBuilder.startRound(1, prompt);
+    }
 
     // Get provider order
     const providerOrder = this.providerManager.getProviderOrder(options);
@@ -140,6 +197,7 @@ export class WallBounceExecutor implements IWallBounceExecutor {
     const errors: string[] = [];
 
     const providerPromises = targetProviders.map(async (providerKey) => {
+      const execStart = Date.now();
       try {
         const providerPrompt = this.promptBuilder.buildProviderPrompt(
           prompt,
@@ -153,13 +211,41 @@ export class WallBounceExecutor implements IWallBounceExecutor {
           options
         );
 
+        const execTime = Date.now() - execStart;
+
         // Attach provider name to response
         (response as any).provider = providerKey;
+
+        // Record provider response in conversation history
+        if (conversationBuilder) {
+          const providerConfig = providersConfig.providers.find(p => p.key === providerKey);
+          const providerName = providerConfig?.name || providerKey;
+          const tier = this.getProviderTier(providerKey);
+
+          conversationBuilder.addProviderResponse(
+            providerKey,
+            providerName,
+            tier,
+            response,
+            execTime
+          );
+        }
+
         return response;
       } catch (error) {
         const errorMsg = `[${providerKey}] ${error instanceof Error ? error.message : String(error)}`;
         logger.warn(`⚠️ Provider failed in parallel execution: ${errorMsg}`);
         errors.push(errorMsg);
+
+        // Record error in conversation history
+        if (conversationBuilder) {
+          conversationBuilder.addRoundError(
+            providerKey,
+            error instanceof Error ? error.message : String(error),
+            true // recoverable
+          );
+        }
+
         return null;
       }
     });
@@ -188,7 +274,7 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       totalProviders: targetProviders.length
     });
 
-    // Select aggregator and run aggregation
+    // Select aggregator and run aggregation with fallback
     const aggregatorKey = this.providerManager.selectAggregator(
       prompt,
       options.taskType || 'basic'
@@ -196,27 +282,80 @@ export class WallBounceExecutor implements IWallBounceExecutor {
 
     logger.info(`🎯 Using aggregator: ${aggregatorKey}`);
 
-    const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
-      prompt,
-      responses
-    );
+    let finalAnalysis: LLMResponse;
+    try {
+      const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
+        prompt,
+        responses
+      );
 
-    const finalAnalysis = await this.invoker.invokeProvider(
-      aggregatorKey,
-      aggregatorPrompt,
-      options
-    );
+      finalAnalysis = await this.invoker.invokeProvider(
+        aggregatorKey,
+        aggregatorPrompt,
+        options
+      );
 
-    // Attach aggregator provider name
-    (finalAnalysis as any).provider = aggregatorKey;
+      // Attach aggregator provider name
+      (finalAnalysis as any).provider = aggregatorKey;
+    } catch (error) {
+      // Fallback to Sonnet 4.5 if primary aggregator fails
+      const fallbackAggregator = 'sonnet-4.5';
+
+      if (aggregatorKey !== fallbackAggregator) {
+        logger.warn(`⚠️ Aggregator ${aggregatorKey} failed, falling back to ${fallbackAggregator}`, {
+          primaryAggregator: aggregatorKey,
+          error: error instanceof Error ? error.message : String(error)
+        });
+
+        await AuditLogger.logAction('aggregator_fallback', {
+          primaryAggregator: aggregatorKey,
+          fallbackAggregator,
+          error: error instanceof Error ? error.message : String(error)
+        }, 'error');
+
+        const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
+          prompt,
+          responses
+        );
+
+        finalAnalysis = await this.invoker.invokeProvider(
+          fallbackAggregator,
+          aggregatorPrompt,
+          options
+        );
+
+        (finalAnalysis as any).provider = fallbackAggregator;
+        (finalAnalysis as any).fallbackFrom = aggregatorKey;
+      } else {
+        // If Sonnet 4.5 itself fails, throw the error
+        logger.error(`❌ Fallback aggregator ${fallbackAggregator} also failed`);
+        throw error;
+      }
+    }
 
     // Build result
-    return this.promptBuilder.buildWallBounceResult(
+    const result = this.promptBuilder.buildWallBounceResult(
       finalAnalysis,
       responses,
       options,
       startTime
     );
+
+    // Complete round if conversation history enabled
+    if (conversationBuilder) {
+      const totalCost = responses.reduce((sum, r) => sum + (r.cost || 0), 0) + (finalAnalysis.cost || 0);
+      const totalTokens = responses.reduce((sum, r) => sum + ((r.tokens?.total || 0) || (r.tokens?.input || 0) + (r.tokens?.output || 0)), 0) +
+        ((finalAnalysis.tokens?.total || 0) || (finalAnalysis.tokens?.input || 0) + (finalAnalysis.tokens?.output || 0));
+
+      conversationBuilder.completeRound(
+        result.consensus_score,
+        result.quality_score,
+        totalCost,
+        totalTokens
+      );
+    }
+
+    return result;
   }
 
   /**
@@ -225,7 +364,8 @@ export class WallBounceExecutor implements IWallBounceExecutor {
   private async executeSequential(
     prompt: string,
     options: ExecuteOptions,
-    taskType: string
+    taskType: string,
+    conversationBuilder?: ConversationHistoryBuilder
   ): Promise<WallBounceResult> {
     const startTime = Date.now();
 
@@ -233,6 +373,11 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       taskType,
       depth: options.depth || 2
     });
+
+    // Start round if conversation history enabled
+    if (conversationBuilder) {
+      conversationBuilder.startRound(1, prompt);
+    }
 
     const providerOrder = this.providerManager.getProviderOrder(options);
     const targetProviders = providerOrder.slice(0, options.maxProviders || 4);
@@ -242,6 +387,7 @@ export class WallBounceExecutor implements IWallBounceExecutor {
 
     // Execute providers sequentially with cumulative context
     for (const providerKey of targetProviders) {
+      const execStart = Date.now();
       try {
         const providerPrompt = this.promptBuilder.buildProviderPrompt(
           prompt,
@@ -262,8 +408,25 @@ export class WallBounceExecutor implements IWallBounceExecutor {
           options
         );
 
+        const execTime = Date.now() - execStart;
+
         (response as any).provider = providerKey;
         responses.push(response);
+
+        // Record provider response in conversation history
+        if (conversationBuilder) {
+          const providerConfig = providersConfig.providers.find(p => p.key === providerKey);
+          const providerName = providerConfig?.name || providerKey;
+          const tier = this.getProviderTier(providerKey);
+
+          conversationBuilder.addProviderResponse(
+            providerKey,
+            providerName,
+            tier,
+            response,
+            execTime
+          );
+        }
 
         logger.info(`✅ Sequential provider ${providerKey} completed`, {
           responseLength: response.text?.length || 0,
@@ -273,6 +436,15 @@ export class WallBounceExecutor implements IWallBounceExecutor {
         const errorMsg = `[${providerKey}] ${error instanceof Error ? error.message : String(error)}`;
         logger.warn(`⚠️ Provider failed in sequential execution: ${errorMsg}`);
         errors.push(errorMsg);
+
+        // Record error in conversation history
+        if (conversationBuilder) {
+          conversationBuilder.addRoundError(
+            providerKey,
+            error instanceof Error ? error.message : String(error),
+            true // recoverable
+          );
+        }
       }
     }
 
@@ -285,31 +457,84 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       );
     }
 
-    // Select aggregator and run aggregation
+    // Select aggregator and run aggregation with fallback
     const aggregatorKey = this.providerManager.selectAggregator(
       prompt,
       options.taskType || 'basic'
     );
 
-    const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
-      prompt,
-      responses
-    );
+    let finalAnalysis: LLMResponse;
+    try {
+      const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
+        prompt,
+        responses
+      );
 
-    const finalAnalysis = await this.invoker.invokeProvider(
-      aggregatorKey,
-      aggregatorPrompt,
-      options
-    );
+      finalAnalysis = await this.invoker.invokeProvider(
+        aggregatorKey,
+        aggregatorPrompt,
+        options
+      );
 
-    (finalAnalysis as any).provider = aggregatorKey;
+      (finalAnalysis as any).provider = aggregatorKey;
+    } catch (error) {
+      // Fallback to Sonnet 4.5 if primary aggregator fails
+      const fallbackAggregator = 'sonnet-4.5';
 
-    return this.promptBuilder.buildWallBounceResult(
+      if (aggregatorKey !== fallbackAggregator) {
+        logger.warn(`⚠️ Aggregator ${aggregatorKey} failed, falling back to ${fallbackAggregator}`, {
+          primaryAggregator: aggregatorKey,
+          error: error instanceof Error ? error.message : String(error)
+        });
+
+        await AuditLogger.logAction('aggregator_fallback', {
+          primaryAggregator: aggregatorKey,
+          fallbackAggregator,
+          error: error instanceof Error ? error.message : String(error)
+        }, 'error');
+
+        const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
+          prompt,
+          responses
+        );
+
+        finalAnalysis = await this.invoker.invokeProvider(
+          fallbackAggregator,
+          aggregatorPrompt,
+          options
+        );
+
+        (finalAnalysis as any).provider = fallbackAggregator;
+        (finalAnalysis as any).fallbackFrom = aggregatorKey;
+      } else {
+        // If Sonnet 4.5 itself fails, throw the error
+        logger.error(`❌ Fallback aggregator ${fallbackAggregator} also failed`);
+        throw error;
+      }
+    }
+
+    const result = this.promptBuilder.buildWallBounceResult(
       finalAnalysis,
       responses,
       options,
       startTime
     );
+
+    // Complete round if conversation history enabled
+    if (conversationBuilder) {
+      const totalCost = responses.reduce((sum, r) => sum + (r.cost || 0), 0) + (finalAnalysis.cost || 0);
+      const totalTokens = responses.reduce((sum, r) => sum + ((r.tokens?.total || 0) || (r.tokens?.input || 0) + (r.tokens?.output || 0)), 0) +
+        ((finalAnalysis.tokens?.total || 0) || (finalAnalysis.tokens?.input || 0) + (finalAnalysis.tokens?.output || 0));
+
+      conversationBuilder.completeRound(
+        result.consensus_score,
+        result.quality_score,
+        totalCost,
+        totalTokens
+      );
+    }
+
+    return result;
   }
 
   /**
@@ -318,7 +543,8 @@ export class WallBounceExecutor implements IWallBounceExecutor {
   private async executeDeepSequential(
     prompt: string,
     options: ExecuteOptions,
-    taskType: string
+    taskType: string,
+    conversationBuilder?: ConversationHistoryBuilder
   ): Promise<WallBounceResult> {
     const startTime = Date.now();
 
@@ -341,6 +567,18 @@ export class WallBounceExecutor implements IWallBounceExecutor {
 
       logger.info(`🎲 Wall-Bounce Round ${round}/${depth}: ${providerKey}`);
 
+      // Start round if conversation history enabled
+      if (conversationBuilder) {
+        const roundPrompt = this.promptBuilder.buildDeepSequentialPrompt(
+          prompt,
+          providerKey,
+          round,
+          allResponses
+        );
+        conversationBuilder.startRound(round, prompt, roundPrompt);
+      }
+
+      const execStart = Date.now();
       try {
         const roundPrompt = this.promptBuilder.buildDeepSequentialPrompt(
           prompt,
@@ -355,15 +593,42 @@ export class WallBounceExecutor implements IWallBounceExecutor {
           options
         );
 
+        const execTime = Date.now() - execStart;
+
         (response as any).provider = providerKey;
         (response as any).round = round;
         allResponses.push(response);
+
+        // Record provider response in conversation history
+        if (conversationBuilder) {
+          const providerConfig = providersConfig.providers.find(p => p.key === providerKey);
+          const providerName = providerConfig?.name || providerKey;
+          const tier = this.getProviderTier(providerKey);
+
+          conversationBuilder.addProviderResponse(
+            providerKey,
+            providerName,
+            tier,
+            response,
+            execTime
+          );
+        }
 
         logger.info(`✅ Round ${round}/${depth} completed: ${providerKey}`, {
           responseLength: response.text?.length || 0,
           confidence: response.confidence,
           cost: response.cost
         });
+
+        // Complete round if conversation history enabled
+        if (conversationBuilder) {
+          conversationBuilder.completeRound(
+            response.confidence || 0.7,
+            response.confidence || 0.7,
+            response.cost || 0,
+            (response.tokens?.total || 0) || (response.tokens?.input || 0) + (response.tokens?.output || 0)
+          );
+        }
 
         // Optional: SSE callback for round completion
         if (options.onProviderResponse) {
@@ -373,6 +638,23 @@ export class WallBounceExecutor implements IWallBounceExecutor {
         const errorMsg = `[Round ${round}] [${providerKey}] ${error instanceof Error ? error.message : String(error)}`;
         logger.warn(`⚠️ Round ${round} failed: ${errorMsg}`);
         errors.push(errorMsg);
+
+        // Record error in conversation history
+        if (conversationBuilder) {
+          conversationBuilder.addRoundError(
+            providerKey,
+            error instanceof Error ? error.message : String(error),
+            true // recoverable
+          );
+
+          // Fail round if catastrophic
+          if (round <= 2 && allResponses.length < 2) {
+            conversationBuilder.failRound(errorMsg);
+          } else {
+            // Complete with low scores if we have enough responses
+            conversationBuilder.completeRound(0.0, 0.0, 0, 0);
+          }
+        }
 
         // If early rounds fail, continue with next provider
         if (round <= 2 && allResponses.length < 2) {
@@ -396,7 +678,7 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       failedRounds: errors.length
     });
 
-    // Select aggregator for final synthesis
+    // Select aggregator for final synthesis with fallback
     const aggregatorKey = this.providerManager.selectAggregator(
       prompt,
       options.taskType || 'critical'
@@ -404,18 +686,56 @@ export class WallBounceExecutor implements IWallBounceExecutor {
 
     logger.info(`🎯 Final aggregation with ${aggregatorKey}`);
 
-    const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
-      prompt,
-      allResponses
-    );
+    let finalAnalysis: LLMResponse;
+    try {
+      const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
+        prompt,
+        allResponses
+      );
 
-    const finalAnalysis = await this.invoker.invokeProvider(
-      aggregatorKey,
-      aggregatorPrompt,
-      options
-    );
+      finalAnalysis = await this.invoker.invokeProvider(
+        aggregatorKey,
+        aggregatorPrompt,
+        options
+      );
 
-    (finalAnalysis as any).provider = aggregatorKey;
+      (finalAnalysis as any).provider = aggregatorKey;
+    } catch (error) {
+      // Fallback to Sonnet 4.5 if primary aggregator fails
+      const fallbackAggregator = 'sonnet-4.5';
+
+      if (aggregatorKey !== fallbackAggregator) {
+        logger.warn(`⚠️ Aggregator ${aggregatorKey} failed, falling back to ${fallbackAggregator}`, {
+          primaryAggregator: aggregatorKey,
+          error: error instanceof Error ? error.message : String(error)
+        });
+
+        await AuditLogger.logAction('aggregator_fallback', {
+          primaryAggregator: aggregatorKey,
+          fallbackAggregator,
+          error: error instanceof Error ? error.message : String(error),
+          executionMode: 'deep-sequential'
+        }, 'error');
+
+        const aggregatorPrompt = this.promptBuilder.buildAggregatorPrompt(
+          prompt,
+          allResponses
+        );
+
+        finalAnalysis = await this.invoker.invokeProvider(
+          fallbackAggregator,
+          aggregatorPrompt,
+          options
+        );
+
+        (finalAnalysis as any).provider = fallbackAggregator;
+        (finalAnalysis as any).fallbackFrom = aggregatorKey;
+      } else {
+        // If Sonnet 4.5 itself fails, throw the error
+        logger.error(`❌ Fallback aggregator ${fallbackAggregator} also failed`);
+        throw error;
+      }
+    }
 
     // Optional: SSE callback for final result
     if (options.onConsensusUpdate) {
@@ -424,11 +744,17 @@ export class WallBounceExecutor implements IWallBounceExecutor {
       options.onConsensusUpdate(consensusPreview);
     }
 
-    return this.promptBuilder.buildWallBounceResult(
+    const result = this.promptBuilder.buildWallBounceResult(
       finalAnalysis,
       allResponses,
       options,
       startTime
     );
+
+    // Note: For deep sequential, rounds are completed individually within the loop
+    // The final aggregation happens outside of the conversation history rounds
+    // This is by design - each wall-bounce round is tracked separately
+
+    return result;
   }
 }
