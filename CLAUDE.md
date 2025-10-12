@@ -61,11 +61,7 @@ sudo journalctl -u vm-monitor.timer    # Check scheduled runs (if using systemd)
 ## 🏗️ Architecture Overview
 
 ### Core Services
-- `src/index.ts` - TechSapoServer (Express main server)
-- `src/services/wall-bounce-analyzer.ts` - Multi-LLM orchestrator (standard)
-- `src/services/wall-bounce-analyzer-nextgen.ts` - NextGen analyzer (SSE)
-- `src/services/wall-bounce-orchestrator.ts` - Orchestration layer
-- `src/config/llm-providers.json` - LLM provider configuration
+`src/`: index.ts (Express), wall-bounce-analyzer (standard/nextgen), wall-bounce-orchestrator, config/llm-providers.json
 
 ### LLM Provider Tiers
 - **Tier 0**: Context7/Stash - Documentation reference (non-LLM)
@@ -77,17 +73,9 @@ sudo journalctl -u vm-monitor.timer    # Check scheduled runs (if using systemd)
 **→ See [LLM Providers Guide](./docs/LLM_PROVIDERS_GUIDE.md) for detailed provider rules and CLI usage**
 
 ### API Routes
-```
-/api/v1/
-  ├── /wall-bounce         # Standard multi-LLM analysis
-  ├── /wall-bounce-sse     # Server-Sent Events streaming
-  ├── /wall-bounce-serial  # Sequential processing mode
-  ├── /codex              # GPT-5 session management
-  ├── /gmail              # Gmail OAuth & email
-  ├── /rag                # Google Drive RAG search
-  ├── /context7           # Documentation service
-  └── /it-unified         # Unified IT support endpoint
-```
+`/api/v1/`: wall-bounce (standard/sse/serial), codex, gmail, rag, context7, it-unified
+
+**→ See [API Reference](./docs/API_REFERENCE.md) for complete endpoint documentation**
 
 ## ⚡ Critical Rules
 
@@ -120,110 +108,49 @@ UPSTASH_REDIS_REST_TOKEN=xxx
 
 ## 🚀 Quick Start
 
-### Development
 ```bash
-cd /ai/prj/techdev
-npm install
-cp .env.example .env  # Edit with your API keys
-npm run build
-npm run dev
-```
+# Development
+npm install && cp .env.example .env  # Edit with API keys
+npm run build && npm run dev
 
-### Production
-```bash
-# Deploy to /prod/techsapo
-npm run build
-sudo rsync -av dist/ /prod/techsapo/dist/
+# Production
+npm run build && sudo rsync -av dist/ /prod/techsapo/dist/
 sudo systemctl restart techsapo
-sudo systemctl status techsapo
-
-# VM Monitoring Setup (one-time)
-sudo cp /ai/prj/techdev/scripts/vm-monitor.sh /usr/local/bin/
-sudo chmod +x /usr/local/bin/vm-monitor.sh
-# Then setup systemd timer or cron (see DEPLOYMENT_GUIDE.md)
 ```
 
-**→ See [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) for production deployment details**
+**→ See [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md) for full deployment details**
 
 ## 💡 Key Development Patterns
 
-### Wall-Bounce Execution Flow
-1. User query → Claude Code analyzes
-2. Route to Tier 1/2 LLM (Gemini/GPT-5/Qwen3)
-3. Response → Different vendor LLM for validation
-4. Min 3 rounds, max 6 rounds
-5. Quality thresholds: confidence ≥0.7, consensus ≥0.6
-6. Claude Code synthesizes final response
+### Wall-Bounce Flow
+1. User query → Claude Code → Route to Tier 1/2 LLM
+2. Response → Different vendor for validation
+3. Min 3 rounds, quality thresholds: confidence ≥0.7, consensus ≥0.6
 
-**→ See [Wall-Bounce System](./docs/WALL_BOUNCE_SYSTEM.md) for detailed orchestration flow**
+**→ See [Wall-Bounce System](./docs/WALL_BOUNCE_SYSTEM.md) for details**
 
 ### Critical Patterns
-- **Redis**: Always use `JSON.stringify()`/`JSON.parse()`
-- **Environment**: Load via `initializeEnvironment()` from `src/config/environment.ts`
-- **Logging**: Use Winston logger (`src/utils/logger.ts`), never `console.log`
-- **Testing**: 600000ms timeout for wall-bounce integration tests
-- **Build**: JSON configs copied to `dist/config/` automatically
-
-### File Structure
-```
-src/
-├── services/    # Core business logic (~500 lines max)
-├── routes/      # API endpoint handlers
-├── config/      # Configuration (JSON + TypeScript)
-├── utils/       # Shared utilities
-└── types/       # TypeScript type definitions
-
-tests/
-├── unit/        # Unit tests
-├── integration/ # Integration tests
-└── setup.ts     # Jest setup
-```
+- **Redis**: `JSON.stringify()`/`JSON.parse()` | **Environment**: `initializeEnvironment()`
+- **Logging**: Winston logger, never `console.log` | **Testing**: 600000ms timeout
+- **File limit**: ~500 lines/file | **Structure**: `src/{services,routes,config,utils,types}`
 
 ## 🔒 Security & Compliance
 
-- **PII Protection**: `src/services/pii-protection.ts`
-- **Audit Logging**: `src/services/audit-logger.ts` (v1) and `audit-logger-v2.ts` (v2)
-- **Input Validation**: `src/utils/security.ts`
-- **Secrets**: AWS Secrets Manager for production
+PII Protection, Audit Logging (v1/v2), Input Validation, AWS Secrets Manager
 
 **→ See [Security Documentation](./docs/SECURITY.md)**
 
 ## 🎨 Special Features
 
-- **SSE Streaming**: `/api/v1/wall-bounce-sse` - Real-time progress updates
-- **Serial Mode**: `/api/v1/wall-bounce-serial` - Sequential LLM execution
-- **Context7**: Documentation lookup with MCP integration
-- **Cost Tracking**: Monthly budget $70, alerts at 80%
-- **VM Monitoring**: Automated infrastructure monitoring with LINE notifications
-  - Script: `/ai/prj/techdev/scripts/vm-monitor.sh`
-  - Monitors: CPU (>80%), Memory (>85%), Disk (>85%), Services (nginx, techsapo)
-  - **→ See [LINE Notification System](./docs/LINE_NOTIFICATION_SYSTEM.md) for notification setup**
+- **SSE Streaming**: Real-time progress | **Serial Mode**: Sequential execution
+- **Context7**: Documentation lookup | **Cost Tracking**: $70/month, 80% alerts
+- **VM Monitoring**: LINE notifications (CPU/Memory/Disk >85%, Services)
+
+**→ See [LINE Notification System](./docs/LINE_NOTIFICATION_SYSTEM.md) and [Operational Scripts](./docs/OPERATIONAL_SCRIPTS.md)**
 
 ## 🐛 Troubleshooting
 
-Quick checks for common issues:
-
-```bash
-# Health checks
-curl http://localhost:8443/health
-curl http://localhost:8443/api/v1/llm-health | jq
-curl http://localhost:8443/api/v1/mcp-health | jq
-
-# Redis connectivity
-echo $UPSTASH_REDIS_REST_URL
-echo $UPSTASH_REDIS_REST_TOKEN
-
-# MCP lock files
-ls -la /tmp/mcp-*.lock
-rm /tmp/mcp-*.lock  # If stuck
-
-# Gemini CLI
-which gemini
-gemini "test"
-
-# Codex CLI
-codex exec --model gpt-5-codex "test"
-```
+Common issues: Health checks, Redis connectivity, MCP locks, Gemini/Codex CLI
 
 **→ See [Troubleshooting Guide](./docs/TROUBLESHOOTING.md) for detailed solutions**
 
