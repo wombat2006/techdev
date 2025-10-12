@@ -56,9 +56,6 @@ claude mcp list         # Check MCP status
 # VM Monitoring (Infrastructure)
 /ai/prj/techdev/scripts/vm-monitor.sh  # Manual run
 sudo journalctl -u vm-monitor.timer    # Check scheduled runs (if using systemd)
-curl -X POST https://line-notification.com/api/notify \
-  -H "Content-Type: application/json" \
-  -d '{"message":"test","severity":"info","server":"techdev"}'  # Test LINE notifications
 ```
 
 ## 🏗️ Architecture Overview
@@ -200,8 +197,7 @@ tests/
 - **VM Monitoring**: Automated infrastructure monitoring with LINE notifications
   - Script: `/ai/prj/techdev/scripts/vm-monitor.sh`
   - Monitors: CPU (>80%), Memory (>85%), Disk (>85%), Services (nginx, techsapo)
-  - Notifications: Push to LINE via `https://line-notification.com/api/notify`
-  - **Critical Architecture**: line-notification.com is the ONLY server for LINE API (never changes)
+  - **→ See [LINE Notification System](./docs/LINE_NOTIFICATION_SYSTEM.md) for notification setup**
 
 ## 🐛 Troubleshooting
 
@@ -231,52 +227,6 @@ codex exec --model gpt-5-codex "test"
 
 **→ See [Troubleshooting Guide](./docs/TROUBLESHOOTING.md) for detailed solutions**
 
-## 🔔 LINE Notification System
-
-**Critical Infrastructure Decision**: `line-notification.com` is the **permanent, unchanging** server for all LINE API operations.
-
-### Architecture
-- **Server**: line-notification.com (54.65.178.168)
-- **Service**: Node.js Express app on port 3000 (internal)
-- **Public Access**: HTTPS on port 443 via Nginx reverse proxy
-- **Webhook**: `https://line-notification.com/webhook/line`
-- **Push API**: `https://line-notification.com/api/notify`
-
-### LINE Push Message API
-```bash
-# Send notification from any VM
-curl -X POST https://line-notification.com/api/notify \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "CPU usage high",
-    "severity": "warning",
-    "server": "techdev",
-    "details": "CPU: 85%\nMemory: 70%"
-  }'
-```
-
-**Severity Levels**:
-- `critical` 🚨 - Immediate attention required
-- `error` ❌ - Error conditions
-- `warning` ⚠️ - Warning conditions
-- `info` ℹ️ - Informational messages
-- `success` ✅ - Success confirmations
-
-### Admin User ID
-- **LINE User ID**: `Uab2a7efceaf0d9bb7b29c54c8664029b` (hardcoded in server)
-
-### Service Management
-```bash
-# On line-notification.com
-sudo systemctl status line-webhook
-sudo systemctl restart line-webhook
-sudo journalctl -u line-webhook -f
-
-# Test webhook
-curl http://127.0.0.1:3000/health  # Internal
-curl https://line-notification.com/health  # External
-```
-
 ## 📚 Complete Documentation
 
 | Topic | Documentation |
@@ -293,6 +243,8 @@ curl https://line-notification.com/health  # External
 | **Troubleshooting** | [TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) |
 | **AWS Secrets** | [AWS_SECRETS_MANAGER_SETUP.md](./docs/AWS_SECRETS_MANAGER_SETUP.md) |
 | **Audit Logging** | [AUDIT_LOGGING.md](./docs/AUDIT_LOGGING.md) |
+| **LINE Notifications** | [LINE_NOTIFICATION_SYSTEM.md](./docs/LINE_NOTIFICATION_SYSTEM.md) |
+| **Operational Scripts** | [OPERATIONAL_SCRIPTS.md](./docs/OPERATIONAL_SCRIPTS.md) |
 
 ### Integration Guides
 - [Gemini CLI Integration](./docs/GEMINI_CLI_INTEGRATION_GUIDE.md)
@@ -301,38 +253,18 @@ curl https://line-notification.com/health  # External
 
 ## 🧪 Testing Framework
 
-- **Framework**: Jest with ts-jest transformer
-- **Timeout**: 600000ms (10 minutes) for wall-bounce tests
-- **Mocks**: `ioredis-mock` for Redis, `nock` for HTTP
-- **Setup**: `tests/setup.ts` runs before all tests
-- **Coverage**: `src/**/*.ts` (excluding `*.d.ts` and `index.ts`)
+- Jest with ts-jest, 600000ms timeout for wall-bounce tests
+- Mocks: `ioredis-mock`, `nock` for HTTP
 
 **→ See [Testing Guide](./docs/TESTING_GUIDE.md) for comprehensive testing strategy**
 
 ## 🔧 Operational Scripts
 
-Located in `/ai/prj/techdev/scripts/`:
+Key scripts in `/ai/prj/techdev/scripts/`:
+- **Monitoring**: `vm-monitor.sh` (VM health with LINE notifications)
+- **Deployment**: `deploy-to-prod.sh`, `install-renewal-cron.sh`, `emergency-rollback-*.sh`
+- **Development**: `dev-watch.js`, `comprehensive-rag-test.sh`, `demo-sse-visualization.sh`
+- **MCP Services**: `mcp-cipher.service`, `mcp-serena.service`, `ensure-single-mcp-instance.sh`
+- **Documentation**: `generate-pdf*.js/sh`
 
-### Monitoring & Maintenance
-- **`vm-monitor.sh`**: Infrastructure monitoring (CPU, Memory, Disk, Services)
-  - Sends LINE notifications to `https://line-notification.com/api/notify`
-  - Severity levels: info, warning, critical
-  - Thresholds: CPU/Memory/Disk 80%+ warning, 95%+ critical
-
-### Deployment & Production
-- **`deploy-to-prod.sh`**: Production deployment automation
-- **`install-renewal-cron.sh`**: SSL certificate auto-renewal setup (90-day cycle)
-- **`emergency-rollback-*.sh`**: Emergency rollback procedures
-
-### Development & Testing
-- **`dev-watch.js`**: Development file watcher with auto-reload
-- **`comprehensive-rag-test.sh`**: RAG system integration testing
-- **`demo-sse-visualization.sh`**: SSE streaming demo
-
-### MCP Services
-- **`mcp-cipher.service`**: Cipher MCP systemd service definition
-- **`mcp-serena.service`**: Serena MCP systemd service definition
-- **`ensure-single-mcp-instance.sh`**: Prevent duplicate MCP instances
-
-### Documentation
-- **`generate-pdf*.js/sh`**: Generate PDF documentation from markdown
+**→ See [Operational Scripts Guide](./docs/OPERATIONAL_SCRIPTS.md) for detailed documentation**
