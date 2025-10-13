@@ -1,0 +1,9 @@
+[Unit]
+Description=VM Monitoring Health Report (Periodic Status)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vm-monitor.sh --mode report
+StandardOutput=journal
+StandardError=journal

@@ -1,0 +1,11 @@
+[Unit]
+Description=VM Monitoring Health Report Timer (Every 2 hours)
+Requires=vm-monitor-report.service
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=2h
+Unit=vm-monitor-report.service
+
+[Install]
+WantedBy=timers.target

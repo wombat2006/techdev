@@ -1,0 +1,21 @@
+# TechSapo Weekly LLM Evaluation Cron Job
+# Runs every Sunday at 2:00 AM
+#
+# Installation:
+#   sudo crontab -u wombat -e
+#   (Add the line below)
+#
+# Manual trigger:
+#   /ai/prj/techdev/scripts/run-weekly-eval.sh
+
+# Environment variables for cron
+OPENROUTER_API_KEY=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
+PATH=/usr/local/bin:/usr/bin:/bin:/data/.nvm/versions/node/v22.9.0/bin
+
+# Weekly evaluation: Sundays at 2:00 AM
+0 2 * * 0 /ai/prj/techdev/scripts/run-weekly-eval.sh
+
+# Alternative schedules (commented out):
+# Daily at 3:00 AM: 0 3 * * *
+# Twice per week (Sun, Wed at 2:00 AM): 0 2 * * 0,3
+# Monthly (1st of month at 2:00 AM): 0 2 1 * *

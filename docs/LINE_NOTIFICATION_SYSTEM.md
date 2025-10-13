@@ -525,12 +525,25 @@ curl -X POST https://line-notification.com/api/notify \
 
 **スクリプトパス**: `/ai/prj/techdev/scripts/vm-monitor.sh`
 
+VM監視システムは **2つのモード** で動作します：
+
+#### 1. エラー監視モード (`--mode check`)
+- **実行間隔**: 5分ごと
+- **通知**: エラー検知時のみ
+- **目的**: しきい値超過時の即座な通知
+
+#### 2. 定期ヘルスレポート (`--mode report`)
+- **実行間隔**: 2時間ごと
+- **通知**: 常に通知（正常時も含む）
+- **目的**: 定期的なシステム状態確認
+
 **監視対象**:
 - CPU 使用率
 - メモリ使用率
 - ディスク使用率
 - システム負荷 (Load Average)
 - サービス稼働状態 (nginx, techsapo)
+- システムアップタイム
 
 ### しきい値設定
 
@@ -563,70 +576,60 @@ curl -X POST https://line-notification.com/api/notify \
            LINE Notification API
 ```
 
-### インストールと設定
+### クイックインストール（推奨）
+
+**自動インストールスクリプト**を使用してワンコマンドでセットアップ：
 
 ```bash
-# スクリプトをコピー
-sudo cp /ai/prj/techdev/scripts/vm-monitor.sh /usr/local/bin/
-sudo chmod +x /usr/local/bin/vm-monitor.sh
-
-# ログディレクトリ作成
-sudo touch /var/log/vm-monitor.log
-sudo chown wombat:wombat /var/log/vm-monitor.log
-
-# 手動実行テスト
-/usr/local/bin/vm-monitor.sh
+cd /ai/prj/techdev/scripts
+sudo ./install-vm-monitor.sh
 ```
 
-### cron 設定（5分ごとに実行）
+このスクリプトは自動的に以下を実行します：
+1. vm-monitor.sh を `/usr/local/bin/` にインストール
+2. ログファイル `/var/log/vm-monitor.log` を作成
+3. systemd ユニット（4ファイル）をインストール:
+   - `vm-monitor-check.timer` / `.service` (エラー監視: 5分ごと)
+   - `vm-monitor-report.timer` / `.service` (ヘルスレポート: 2時間ごと)
+4. タイマーを有効化して起動
+
+### 手動実行とテスト
 
 ```bash
-# crontab 編集
-crontab -e
+# エラー監視モード（エラー時のみ通知）
+/usr/local/bin/vm-monitor.sh --mode check
 
-# 以下を追加
-*/5 * * * * /usr/local/bin/vm-monitor.sh >> /var/log/vm-monitor.log 2>&1
+# ヘルスレポートモード（常に通知）
+/usr/local/bin/vm-monitor.sh --mode report
+
+# タイマー状態確認
+sudo systemctl list-timers vm-monitor-*
 ```
 
-### systemd timer 設定（推奨）
+### 通知例
 
-```bash
-# タイマーユニット作成
-sudo tee /etc/systemd/system/vm-monitor.timer > /dev/null <<'EOF'
-[Unit]
-Description=VM Monitoring Timer
-Requires=vm-monitor.service
+#### エラー検知時の通知
+```
+⚠️ [TECHDEV] CPU usage high: 85%
 
-[Timer]
-OnBootSec=5min
-OnUnitActiveSec=5min
-Unit=vm-monitor.service
+Current: 85%
+Threshold: 80%
+```
 
-[Install]
-WantedBy=timers.target
-EOF
+#### 定期ヘルスレポート（2時間ごと）
+```
+✅ [TECHDEV] Periodic Health Report: ✅ Healthy
 
-# サービスユニット作成
-sudo tee /etc/systemd/system/vm-monitor.service > /dev/null <<'EOF'
-[Unit]
-Description=VM Monitoring Check
-After=network.target
+📊 System Metrics:
+CPU: 54% (2 cores)
+Memory: 19%
+Disk: 44%
+Load Avg: 0.16
+Uptime: 2 days, 5 hours
 
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/vm-monitor.sh
-StandardOutput=journal
-StandardError=journal
-EOF
-
-# 有効化と起動
-sudo systemctl daemon-reload
-sudo systemctl enable vm-monitor.timer
-sudo systemctl start vm-monitor.timer
-
-# 状態確認
-sudo systemctl status vm-monitor.timer
-sudo systemctl list-timers vm-monitor.timer
+🔧 Services:
+✅ nginx
+✅ techsapo
 ```
 
 ### ログ確認
@@ -635,11 +638,35 @@ sudo systemctl list-timers vm-monitor.timer
 # スクリプトログ
 sudo tail -f /var/log/vm-monitor.log
 
-# systemd ログ
-sudo journalctl -u vm-monitor.service -f
+# systemd ログ（エラー監視）
+sudo journalctl -u vm-monitor-check.service -f
+
+# systemd ログ（ヘルスレポート）
+sudo journalctl -u vm-monitor-report.service -f
 
 # タイマー実行履歴
-sudo journalctl -u vm-monitor.timer
+sudo journalctl -u vm-monitor-check.timer
+sudo journalctl -u vm-monitor-report.timer
+```
+
+### タイマー管理
+
+```bash
+# 状態確認
+sudo systemctl status vm-monitor-check.timer
+sudo systemctl status vm-monitor-report.timer
+
+# 停止
+sudo systemctl stop vm-monitor-check.timer vm-monitor-report.timer
+
+# 再開
+sudo systemctl start vm-monitor-check.timer vm-monitor-report.timer
+
+# 実行間隔の変更
+sudo vi /etc/systemd/system/vm-monitor-check.timer   # 5分を変更
+sudo vi /etc/systemd/system/vm-monitor-report.timer  # 2時間を変更
+sudo systemctl daemon-reload
+sudo systemctl restart vm-monitor-*.timer
 ```
 
 ---
@@ -1135,5 +1162,6 @@ sudo journalctl -u line-webhook -f
 
 | 日付 | バージョン | 変更内容 |
 |------|-----------|---------|
+| 2025-10-13 | 2.1 | VM監視システム拡張: 定期ヘルスレポート機能追加、自動インストールスクリプト追加 |
 | 2025-10-13 | 2.0 | 完全版ドキュメント作成: 詳細なセットアップガイド、API仕様、トラブルシューティング追加 |
 | 2025-10-12 | 1.0 | 初版作成 |

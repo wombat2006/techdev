@@ -1,0 +1,24 @@
+[Unit]
+Description=Cipher MCP Server for TechSapo
+After=network.target
+
+[Service]
+Type=simple
+User=wombat
+WorkingDirectory=/ai/prj/techdev
+Environment="NODE_ENV=development"
+ExecStartPre=/bin/bash -c 'pkill -f "cipher.*--mode mcp" || true'
+ExecStart=/data/.nvm/versions/node/v22.9.0/bin/npx @byterover/cipher --mode mcp --mcp-transport-type stdio
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+# Ensure only one instance runs
+# If service is already running, systemd will prevent duplicate instances
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

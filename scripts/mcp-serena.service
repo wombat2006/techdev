@@ -1,0 +1,22 @@
+[Unit]
+Description=Serena MCP Server for TechSapo
+After=network.target
+
+[Service]
+Type=simple
+User=wombat
+WorkingDirectory=/ai/prj/techdev
+ExecStartPre=/bin/bash -c 'pkill -f "serena start-mcp-server" || true'
+ExecStart=/home/wombat/.local/bin/uv run serena start-mcp-server
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+# Ensure only one instance runs
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -4,15 +4,22 @@
 # VM Monitoring Script for techdev
 # Monitors: CPU, Memory, Disk, Services
 # Sends notifications to line-notification.com
+#
+# Usage:
+#   vm-monitor.sh --mode check   # Error monitoring (notify on issues only)
+#   vm-monitor.sh --mode report  # Periodic health report (always notify)
 #############################################
 
 set -euo pipefail
 
 # Configuration
 readonly SERVER_NAME="techdev"
-readonly API_URL="http://line-notification.com:3000/api/notify"
+readonly API_URL="https://line-notification.com/api/notify"
 readonly LOG_FILE="/var/log/vm-monitor.log"
 readonly LOCK_FILE="/tmp/vm-monitor.lock"
+
+# Default mode
+MODE="check"
 
 # Thresholds
 readonly CPU_WARNING=80
@@ -164,8 +171,98 @@ check_load() {
     return 0
 }
 
+# Get current metrics
+get_cpu_usage() {
+    top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{printf "%.0f", 100 - $1}'
+}
+
+get_memory_usage() {
+    free | grep Mem | awk '{printf "%.0f", $3/$2 * 100}'
+}
+
+get_disk_usage() {
+    df -h / | awk 'NR==2 {print $5}' | sed 's/%//'
+}
+
+get_load_average() {
+    uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//'
+}
+
+get_uptime() {
+    uptime -p | sed 's/up //'
+}
+
+# Send periodic health report
+send_health_report() {
+    log "Generating periodic health report"
+
+    local cpu_usage=$(get_cpu_usage)
+    local mem_usage=$(get_memory_usage)
+    local disk_usage=$(get_disk_usage)
+    local load_avg=$(get_load_average)
+    local uptime_str=$(get_uptime)
+    local cpu_count=$(nproc)
+
+    # Check service status
+    local services_status=""
+    for service in "${SERVICES[@]}"; do
+        if sudo systemctl is-active --quiet "$service"; then
+            services_status+="✅ $service\n"
+        else
+            services_status+="❌ $service\n"
+        fi
+    done
+
+    # Determine overall health status
+    local health_status="✅ Healthy"
+    local severity="success"
+
+    if [ "$cpu_usage" -ge "$CPU_CRITICAL" ] || [ "$mem_usage" -ge "$MEMORY_CRITICAL" ] || [ "$disk_usage" -ge "$DISK_CRITICAL" ]; then
+        health_status="🚨 Critical"
+        severity="critical"
+    elif [ "$cpu_usage" -ge "$CPU_WARNING" ] || [ "$mem_usage" -ge "$MEMORY_WARNING" ] || [ "$disk_usage" -ge "$DISK_WARNING" ]; then
+        health_status="⚠️ Warning"
+        severity="warning"
+    fi
+
+    # Build detailed report
+    local details="📊 System Metrics:\n"
+    details+="CPU: ${cpu_usage}% (${cpu_count} cores)\n"
+    details+="Memory: ${mem_usage}%\n"
+    details+="Disk: ${disk_usage}%\n"
+    details+="Load Avg: ${load_avg}\n"
+    details+="Uptime: ${uptime_str}\n"
+    details+="\n🔧 Services:\n${services_status}"
+
+    send_notification "Periodic Health Report: ${health_status}" "$severity" "$details"
+
+    log "Periodic health report sent"
+}
+
 # Main execution
 main() {
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --mode)
+                MODE="$2"
+                shift 2
+                ;;
+            *)
+                echo "Unknown option: $1"
+                echo "Usage: $0 --mode <check|report>"
+                exit 1
+                ;;
+        esac
+    done
+
+    # Validate mode
+    if [[ "$MODE" != "check" && "$MODE" != "report" ]]; then
+        echo "Invalid mode: $MODE"
+        echo "Mode must be 'check' or 'report'"
+        exit 1
+    fi
+
     # Check for lock file to prevent concurrent runs
     if [ -f "$LOCK_FILE" ]; then
         log "Another instance is running. Exiting."
@@ -176,26 +273,33 @@ main() {
     touch "$LOCK_FILE"
     trap 'rm -f "$LOCK_FILE"' EXIT
 
-    log "=== Starting VM monitoring check ==="
+    log "=== Starting VM monitoring ($MODE mode) ==="
 
-    local exit_code=0
-
-    # Run all checks
-    check_cpu || exit_code=1
-    check_memory || exit_code=1
-    check_disk || exit_code=1
-    check_services || exit_code=1
-    check_load || exit_code=1
-
-    if [ $exit_code -eq 0 ]; then
-        log "All checks passed"
+    if [ "$MODE" = "report" ]; then
+        # Periodic health report mode - always send status
+        send_health_report
+        log "=== Health report completed ==="
+        exit 0
     else
-        log "Some checks failed"
+        # Error monitoring mode - only notify on issues
+        local exit_code=0
+
+        # Run all checks
+        check_cpu || exit_code=1
+        check_memory || exit_code=1
+        check_disk || exit_code=1
+        check_services || exit_code=1
+        check_load || exit_code=1
+
+        if [ $exit_code -eq 0 ]; then
+            log "All checks passed"
+        else
+            log "Some checks failed"
+        fi
+
+        log "=== Monitoring check completed ==="
+        exit $exit_code
     fi
-
-    log "=== Monitoring check completed ==="
-
-    exit $exit_code
 }
 
 # Run main function

@@ -1,0 +1,11 @@
+[Unit]
+Description=VM Monitoring Check Timer (Every 5 minutes)
+Requires=vm-monitor-check.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Unit=vm-monitor-check.service
+
+[Install]
+WantedBy=timers.target
