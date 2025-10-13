@@ -18,6 +18,38 @@ readonly API_URL="https://line-notification.com/api/notify"
 readonly LOG_FILE="/var/log/vm-monitor.log"
 readonly LOCK_FILE="/tmp/vm-monitor.lock"
 
+# Get global IP address (Elastic IP)
+get_global_ip() {
+    # Try multiple services for reliability
+    curl -s --max-time 5 ifconfig.me 2>/dev/null || \
+    curl -s --max-time 5 api.ipify.org 2>/dev/null || \
+    dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/null || \
+    echo "N/A"
+}
+
+# Get FQDN via reverse DNS lookup from global IP
+get_fqdn() {
+    local global_ip=$(get_global_ip)
+    if [ "$global_ip" != "N/A" ]; then
+        # Try reverse DNS lookup using host command
+        local fqdn=$(host "$global_ip" 2>/dev/null | awk '/domain name pointer/ {print $5}' | sed 's/\.$//')
+        if [ -n "$fqdn" ]; then
+            echo "$fqdn"
+        else
+            # Fallback to local hostname if reverse DNS fails
+            hostname -f 2>/dev/null || hostname
+        fi
+    else
+        # Fallback to local hostname if global IP cannot be determined
+        hostname -f 2>/dev/null || hostname
+    fi
+}
+
+# Get primary IP address (use global Elastic IP)
+get_primary_ip() {
+    get_global_ip
+}
+
 # Default mode
 MODE="check"
 
@@ -43,12 +75,16 @@ send_notification() {
     local severity="$2"
     local details="${3:-}"
 
+    local fqdn=$(get_fqdn)
+    local primary_ip=$(get_primary_ip)
+    local server_info="$SERVER_NAME ($fqdn / $primary_ip)"
+
     local json_payload
     json_payload=$(cat <<EOF
 {
   "message": "$message",
   "severity": "$severity",
-  "server": "$SERVER_NAME",
+  "server": "$server_info",
   "details": "$details"
 }
 EOF
@@ -226,7 +262,11 @@ send_health_report() {
     fi
 
     # Build detailed report
-    local details="📊 System Metrics:\n"
+    local fqdn=$(get_fqdn)
+    local primary_ip=$(get_primary_ip)
+
+    local details="🖥️ Server: ${fqdn} (${primary_ip})\n"
+    details+="\n📊 System Metrics:\n"
     details+="CPU: ${cpu_usage}% (${cpu_count} cores)\n"
     details+="Memory: ${mem_usage}%\n"
     details+="Disk: ${disk_usage}%\n"

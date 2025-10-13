@@ -610,7 +610,8 @@ sudo systemctl list-timers vm-monitor-*
 
 #### エラー検知時の通知
 ```
-⚠️ [TECHDEV] CPU usage high: 85%
+⚠️ [TECHDEV (ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com / xx.xxx.xxx.xxx)]
+CPU usage high: 85%
 
 Current: 85%
 Threshold: 80%
@@ -618,7 +619,10 @@ Threshold: 80%
 
 #### 定期ヘルスレポート（2時間ごと）
 ```
-✅ [TECHDEV] Periodic Health Report: ✅ Healthy
+✅ [TECHDEV (ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com / xx.xxx.xxx.xxx)]
+Periodic Health Report: ✅ Healthy
+
+🖥️ Server: ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com (xx.xxx.xxx.xxx)
 
 📊 System Metrics:
 CPU: 54% (2 cores)
@@ -631,6 +635,8 @@ Uptime: 2 days, 5 hours
 ✅ nginx
 ✅ techsapo
 ```
+
+**注**: サーバー名にはElastic IPから逆引きされたFQDNとグローバルIPアドレスが含まれます。
 
 ### ログ確認
 
@@ -1162,6 +1168,7 @@ sudo journalctl -u line-webhook -f
 
 | 日付 | バージョン | 変更内容 |
 |------|-----------|---------|
+| 2025-10-13 | 2.2 | サーバー情報強化: Elastic IPからの逆引きFQDNとグローバルIPアドレスを通知に含める機能追加 |
 | 2025-10-13 | 2.1 | VM監視システム拡張: 定期ヘルスレポート機能追加、自動インストールスクリプト追加 |
 | 2025-10-13 | 2.0 | 完全版ドキュメント作成: 詳細なセットアップガイド、API仕様、トラブルシューティング追加 |
 | 2025-10-12 | 1.0 | 初版作成 |
