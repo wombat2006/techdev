@@ -610,7 +610,7 @@ sudo systemctl list-timers vm-monitor-*
 
 #### エラー検知時の通知
 ```
-⚠️ [TECHDEV (ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com / xx.xxx.xxx.xxx)]
+⚠️ [TECHDEV (ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com / xx.xxx.xxx.xxx / ap-south-1)]
 CPU usage high: 85%
 
 Current: 85%
@@ -619,10 +619,10 @@ Threshold: 80%
 
 #### 定期ヘルスレポート（2時間ごと）
 ```
-✅ [TECHDEV (ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com / xx.xxx.xxx.xxx)]
+✅ [TECHDEV (ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com / xx.xxx.xxx.xxx / ap-south-1)]
 Periodic Health Report: ✅ Healthy
 
-🖥️ Server: ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com (xx.xxx.xxx.xxx)
+🖥️ Server: ec2-xx-xxx-xxx-xxx.ap-south-1.compute.amazonaws.com (xx.xxx.xxx.xxx / ap-south-1)
 
 📊 System Metrics:
 CPU: 54% (2 cores)
@@ -636,7 +636,10 @@ Uptime: 2 days, 5 hours
 ✅ techsapo
 ```
 
-**注**: サーバー名にはElastic IPから逆引きされたFQDNとグローバルIPアドレスが含まれます。
+**注**: サーバー名には以下の情報が含まれます：
+- FQDN（Elastic IPから逆引きDNS取得）
+- グローバルIPアドレス
+- EC2リージョン（IMDSv2経由で取得、非EC2環境では表示なし）
 
 ### ログ確認
 
@@ -1168,6 +1171,7 @@ sudo journalctl -u line-webhook -f
 
 | 日付 | バージョン | 変更内容 |
 |------|-----------|---------|
+| 2025-10-13 | 2.3 | EC2リージョン情報追加: IMDSv2経由でEC2リージョンを取得し通知に含める機能追加 |
 | 2025-10-13 | 2.2 | サーバー情報強化: Elastic IPからの逆引きFQDNとグローバルIPアドレスを通知に含める機能追加 |
 | 2025-10-13 | 2.1 | VM監視システム拡張: 定期ヘルスレポート機能追加、自動インストールスクリプト追加 |
 | 2025-10-13 | 2.0 | 完全版ドキュメント作成: 詳細なセットアップガイド、API仕様、トラブルシューティング追加 |

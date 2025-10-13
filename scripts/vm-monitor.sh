@@ -50,6 +50,32 @@ get_primary_ip() {
     get_global_ip
 }
 
+# Get EC2 region information
+get_ec2_region() {
+    # Try IMDSv2 (token-based, more secure)
+    local token=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" \
+        -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" \
+        --max-time 2 2>/dev/null)
+
+    if [ -n "$token" ]; then
+        # Get availability zone with token
+        local az=$(curl -s -H "X-aws-ec2-metadata-token: $token" \
+            http://169.254.169.254/latest/meta-data/placement/availability-zone \
+            --max-time 2 2>/dev/null)
+    else
+        # Fallback to IMDSv1 (without token)
+        local az=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone \
+            --max-time 2 2>/dev/null)
+    fi
+
+    # Extract region from availability zone (remove last character)
+    if [ -n "$az" ]; then
+        echo "${az%?}"
+    else
+        echo "N/A"
+    fi
+}
+
 # Default mode
 MODE="check"
 
@@ -77,7 +103,13 @@ send_notification() {
 
     local fqdn=$(get_fqdn)
     local primary_ip=$(get_primary_ip)
-    local server_info="$SERVER_NAME ($fqdn / $primary_ip)"
+    local region=$(get_ec2_region)
+
+    local server_info="$SERVER_NAME ($fqdn / $primary_ip"
+    if [ "$region" != "N/A" ]; then
+        server_info+=" / $region"
+    fi
+    server_info+=")"
 
     local json_payload
     json_payload=$(cat <<EOF
@@ -264,8 +296,13 @@ send_health_report() {
     # Build detailed report
     local fqdn=$(get_fqdn)
     local primary_ip=$(get_primary_ip)
+    local region=$(get_ec2_region)
 
-    local details="🖥️ Server: ${fqdn} (${primary_ip})\n"
+    local details="🖥️ Server: ${fqdn} (${primary_ip}"
+    if [ "$region" != "N/A" ]; then
+        details+=" / ${region}"
+    fi
+    details+=")\n"
     details+="\n📊 System Metrics:\n"
     details+="CPU: ${cpu_usage}% (${cpu_count} cores)\n"
     details+="Memory: ${mem_usage}%\n"
