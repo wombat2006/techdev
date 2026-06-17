@@ -14,7 +14,7 @@
 
 ### マルチLLMオーケストレーション
 - **Tier 1**: Claude Code（総司令官・ルーティング）
-- **Tier 2**: Gemini 2.5 Pro + GPT-5（基本処理）
+- **Tier 2**: Antigravity CLI（Gemini 2.5 Pro）+ GPT-5（基本処理）
 - **Tier 3**: Claude Sonnet4（プレミアム分析）
 - **Tier 4**: OpenRouter Ensemble（補助分析）
 - **Tier 5**: Claude Opus4.1（緊急時専用）
@@ -48,9 +48,14 @@
 ## 📋 必要環境
 
 - Node.js 18.0.0 以上
-- Docker & Docker Compose（またはPodman）
-- APIキー: OpenAI、Google（Gemini）、Claude、OpenRouter
-- （オプション）本番環境用Redis、MySQL
+- Docker & Docker Compose（または Podman）
+- **Antigravity CLI**（`agy`）— Google Tier 1（Gemini 2.5 Pro/Flash）。`agy auth login` で認証
+- **Codex CLI** — GPT-5 Codex 連携
+- API キー: OpenAI、Claude（SDK）、OpenRouter 等（Google Gemini API キー直埋めは禁止）
+- （オプション）本番環境用 Redis、MySQL
+
+> Google プロバイダー詳細: [docs/ANTIGRAVITY_CLI_MIGRATION.md](docs/ANTIGRAVITY_CLI_MIGRATION.md)  
+> ※ 実装は legacy `gemini` spawn のまま（Antigravity CLI へ移行予定）
 
 ## 🛠 クイックスタート
 

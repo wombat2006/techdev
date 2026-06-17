@@ -18,7 +18,7 @@ Model Context Protocol基盤の協調分析システム
 ### Multi-LLM MCP Orchestration
 - **Tier 0**: Stash/Context7 - リファレンス・ドキュメント参照層（非LLM）
 - **Tier 1**: Claude Code - ルーティング・統合責任者
-- **Tier 2**: Gemini 2.5 Flash + Claude Haiku 3.5 + cursor-mcp - 基本処理
+- **Tier 2**: Antigravity CLI（Gemini 2.5 Flash）+ Claude Haiku 3.5 + cursor-mcp - 基本処理
 - **Tier 3**: Claude Sonnet4 + OpenRouter - 複雑分析
 - **Tier 4**: GPT-5 - 最高品質
 - **Tier 5**: Claude Opus4.1 + Cipher - 緊急時・セキュリティ専用
@@ -80,8 +80,13 @@ Model Context Protocol基盤の協調分析システム
 
 - Node.js 18.0.0 以上
 - Docker & Docker Compose（またはPodman）
-- APIキー: OpenAI、Google（Gemini）、Claude、OpenRouter
-- （オプション）本番環境用Redis、MySQL
+- **Antigravity CLI**（`agy`）— Google Tier 1（Gemini 2.5 Pro/Flash）。`agy auth login` で認証
+- **Codex CLI** — GPT-5 Codex 連携
+- APIキー: OpenAI、Claude（SDK）、OpenRouter 等（Google Gemini API キー直埋めは禁止）
+- （オプション）本番環境用 Redis、MySQL
+
+> Google プロバイダー詳細: [docs/ANTIGRAVITY_CLI_MIGRATION.md](docs/ANTIGRAVITY_CLI_MIGRATION.md)  
+> ※ 実装は legacy `gemini` spawn のまま（Antigravity CLI へ移行予定）
 
 ## 🛠 クイックスタート
 

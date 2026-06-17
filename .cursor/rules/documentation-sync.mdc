@@ -1,0 +1,42 @@
+---
+description: 機能・設定変更時は関連ドキュメントを同一 commit に含める
+alwaysApply: true
+---
+
+# Documentation Sync on Commit
+
+機能・設定・アーキテクチャ・プロバイダー・CLI 要件が変わる作業では、**実装変更とドキュメント更新を同じ commit に含める**。
+
+## 必須チェック（commit 前）
+
+1. **README 同期**: `README.md` と `README_ja.md` を両方更新（片方だけにしない）
+2. **ナビゲーション**: `CLAUDE.md` / `docs/DOCUMENTATION_INDEX.md` に新規 doc があれば追記
+3. **提案物**: 顧客向け内容が変わる場合は `docs/proposals/` と `scripts/pptx-gen/slide-data.mjs`（必要なら PPTX 再生成）
+4. **ADR**: 設計決定は `docs/decisions/` に記録
+
+## 更新対象の目安
+
+| 変更内容 | 最低限更新する doc |
+|----------|-------------------|
+| LLM / CLI プロバイダー | `CLAUDE.md`, `docs/ARCHITECTURE.md`, README 両方, 該当 integration guide |
+| API / エンドポイント | `docs/API_REFERENCE.md`, `DEVELOPMENT_GUIDE.md` |
+| セキュリティ方針 | `docs/SECURITY.md`, `CLAUDE.md` |
+| Wall-Bounce 挙動 | `docs/WALL_BOUNCE_SYSTEM.md`, 関連 ADR |
+
+## commit メッセージ
+
+実装のみ・docs のみに分けず、**1 commit に実装 + docs** をまとめる（ユーザーが明示的に分割を求めた場合を除く）。
+
+## 例
+
+```
+# ✅ GOOD — 同一 commit
+feat: TaskRouter に codegen ルート追加
+  src/...
+  docs/ARCHITECTURE.md
+  README.md, README_ja.md
+
+# ❌ BAD — README だけ古いまま push
+feat: Antigravity CLI 対応
+  docs/ARCHITECTURE.md のみ更新、README 未更新
+```
