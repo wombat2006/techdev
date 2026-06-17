@@ -201,6 +201,12 @@ Example `~/.cursor/mcp.json` or **Cursor Settings → MCP** (exact path TBD in P
 
 ---
 
+## Operations
+
+- **Token & quota:** [CURSOR_MCP_TODO.md § Token & Quota Operations Guide](./CURSOR_MCP_TODO.md#token--quota-operations-guide) — when to use Cursor vs CLI vs Wall-Bounce; preset and mode levers within constitution bounds.
+
+---
+
 ## Related Documents
 
 - [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)

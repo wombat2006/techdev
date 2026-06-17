@@ -525,11 +525,117 @@ Reference: [WALL_BOUNCE_P5_ARCHITECTURE.md §4](./decisions/WALL_BOUNCE_P5_ARCHI
 
 ---
 
+## Token & Quota Operations Guide
+
+Cross-cutting guidance for **all Tracks (A/B/C)** and daily development. Optimizes quota use **without** bypassing constitution or Wall-Bounce requirements for production user-facing analysis.
+
+### Scope
+
+- **Quota optimization** — choose the cheapest path that still meets quality and policy.
+- **Constitution compliance** — production multi-LLM analysis must use Wall-Bounce (≥2 providers, confidence ≥ 0.7, consensus ≥ 0.6, 2–5 rounds per constitution; round enforcement in code is **To-Be** — Track C / TS-12).
+- **AS-IS vs To-Be** — InferenceProfile presets (`fast`, `balanced`, `deep`, `critical`) are documented in [TS-20](./decisions/TECH_STACK_INFERENCE_PROFILES.md); adapter wiring and Haiku registration are **Track B** until Gate B→C passes.
+
+### Three quota buckets
+
+| Bucket | What consumes it | Typical tasks |
+|--------|------------------|---------------|
+| **1. Cursor Agent** | Chat context, planning, tool selection, long threads | Doc audits, runbook edits, Agent-driven refactors |
+| **2. Subscription CLIs** | `claude`, `codex`, `agy` via WSL direct or MCP tool execution | Single-model coding, probes, MCP analyze tools |
+| **3. Wall-Bounce multiplier** | Bucket 2 × N providers × rounds × (sequential context growth) | User-facing analysis, consensus-required decisions |
+
+**Important:** Registering MCP (Track A) moves **inference** to subscription quota. It does **not** eliminate Cursor Agent tokens for planning, context, or orchestration around tool calls.
+
+### When to use which path
+
+| Task type | Recommended path | Token note |
+|-----------|------------------|------------|
+| Docs, grep, small edits | Cursor Ask / local tools | Lowest Cursor Agent use |
+| Single-model coding / debug | WSL CLI direct (`claude --print`, `codex`, `agy`) | Subscription only |
+| Multi-LLM consensus / user-facing analysis | Wall-Bounce API or MCP-backed Wall-Bounce | Highest cost; constitution applies |
+
+**Do not** route production user-facing analysis through a single CLI or direct LLM call to save tokens. Dev and doc work **may** use CLI direct per [CLAUDE.md](../CLAUDE.md).
+
+### Wall-Bounce token rules (within constitution)
+
+**Minimum-cost Wall-Bounce path (when quality allows):**
+
+1. **`parallel` mode** (default in `executeWallBounce`) — each provider receives the same prompt; you pay N provider outputs, not growing input context.
+2. **Minimum providers** — use **2** peer providers when thresholds are met; do not add providers without justification.
+3. **Stop when thresholds met** — confidence ≥ 0.7 and consensus ≥ 0.6; avoid extra constitution rounds unless quality requires them.
+4. **Avoid `sequential` mode** unless chain reasoning is required — each step appends prior provider output to the next prompt, so **input tokens grow per step**. Sequential `depth` defaults to **3** (valid range 3–5); `depth` is ignored in parallel mode.
+
+**Hard limits (do not violate to save tokens):**
+
+- Do **not** reduce below **2 providers** on Wall-Bounce production paths.
+- Do **not** use **1 round** for Wall-Bounce production paths (constitution forbids single-round execution; TS-12 enforcement pending).
+- Constitution **2–5 rounds** is the legal band until Track C implements the orchestrator counter — treat rounds beyond what quality needs as **voluntary cost**.
+
+```mermaid
+flowchart TD
+  task[Task arrives]
+  task --> needWB{Needs multi-LLM consensus?}
+  needWB -->|No| cli[WSL CLI or Cursor Ask]
+  needWB -->|Yes| wb[Wall-Bounce]
+  wb --> parallel{Sequential required?}
+  parallel -->|No| minParallel["Parallel, min 2 providers, fast preset"]
+  parallel -->|Yes| seqWarn["Sequential: higher input tokens per step"]
+  cli --> subQuota[Subscription or Cursor quota only]
+  minParallel --> multQuota[Subscription x N providers]
+  seqWarn --> seqQuota[Subscription x depth x growing context]
+```
+
+### InferenceProfile levers (TS-20)
+
+| Lever | Token impact | Guidance |
+|-------|--------------|----------|
+| **`model`** | High — smaller/faster models cost less | Prefer Haiku / Flash under `fast` when quality allows (**To-Be** until Track B-3) |
+| **`effort`** | Medium — higher effort → longer internal reasoning | Use `low` / `medium` for routine tasks |
+| **`cot`** | Medium–high — `full` adds visible reasoning tokens | Default **`cot: off`** for `fast`; **`effort: high` + `cot: off`** is valid (effort ≠ CoT) |
+| **`temperature`** | Low direct impact | Keep preset defaults unless domain requires override |
+
+**Preset defaults** (from [TS-20](./decisions/TECH_STACK_INFERENCE_PROFILES.md)):
+
+| Preset | Typical use | CoT |
+|--------|-------------|-----|
+| `fast` | Classification, short Q&A | off |
+| `balanced` | Default implementation | brief |
+| `deep` | Complex analysis | brief / full |
+| `critical` | Aggregator (`llm_aggregate`) | brief (pinned) |
+
+**AS-IS (before Gate B→C):** presets are documented; use CLI flags or MCP args manually. Do **not** assume `profile: fast` on the Wall-Bounce API selects Haiku until Track B-2/B-3 is complete.
+
+**Escalation path:** start `fast` or `balanced` → if confidence or consensus fails thresholds, escalate to `deep` / higher effort / `cot: brief` — not the reverse.
+
+### Cursor-specific habits
+
+- Start a **new chat** for large doc audits or long runbook sessions to limit context accumulation.
+- Prefer **Ask mode** for read-only questions; reserve **Agent** for edits that need tools.
+- After Track A-1, use MCP tools for provider inference; keep Agent prompts concise (goal + constraints, not full doc dumps).
+- Gate A→B criterion **G3** requires the team to understand **Cursor Agent vs MCP tool billing** — revisit this section at that Gate.
+
+### Quick checklist (before a heavy task)
+
+- [ ] Does this need Wall-Bounce, or is a single WSL CLI enough?
+- [ ] If Wall-Bounce: **parallel** + **min 2 providers** + **`fast` or `balanced`** preset (when Track B live)?
+- [ ] Is **sequential** depth (3–5) justified by chain reasoning needs?
+- [ ] Is **`cot: full`** necessary, or will `off` / `brief` meet the bar?
+- [ ] New Cursor chat if context is already large?
+
+### Related references
+
+- [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md) — schema, presets, CoT independence
+- [WALL_BOUNCE_SYSTEM.md](./WALL_BOUNCE_SYSTEM.md) — execution modes, quality thresholds
+- [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) — MCP phases and quota expectations
+- [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0) — CLI direct usage
+
+---
+
 ## Related documents
 
 | Doc | Link |
 |-----|------|
 | Plan overview | [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) |
+| Token & quota ops | [§ Token & Quota Operations Guide](#token--quota-operations-guide) (this file) |
 | WSL CLI quick ref | [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0) |
 | InferenceProfile ADR | [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md) |
 | P5 architecture | [WALL_BOUNCE_P5_ARCHITECTURE.md](./decisions/WALL_BOUNCE_P5_ARCHITECTURE.md) |
