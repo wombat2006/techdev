@@ -1,12 +1,13 @@
 # Cursor MCP Integration Plan
 
-**Status**: PLANNING — Phase 0 prerequisite defined; Cursor MCP servers not registered yet  
+**Status**: PLANNING — Phase 0 prerequisite defined; **implementation moves to Full-Fork `techdev-cursor`**  
 **Owner**: TechSapo Development Team  
-**Last updated**: 2026-06-17
+**Last updated**: 2026-06-18
 
 Register TechSapo provider MCP servers in **Cursor IDE** so Agent tool calls can use **subscription quota** (`claude`, `codex`, `agy`) instead of Cursor-only models.
 
-**Execution checklist:** [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) (step-by-step; Track A → Gate → B → Gate → C)
+**Execution checklist:** [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) (step-by-step; Track A → Gate → B → Gate → C)  
+**Full-Fork (primary):** [FORK_CURSOR.md](./FORK_CURSOR.md) — unified MCP + adapters in `techdev-cursor`
 
 Related: [MCP_SERVICES.md](./MCP_SERVICES.md) · [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0) · [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md)
 
@@ -21,6 +22,21 @@ Related: [MCP_SERVICES.md](./MCP_SERVICES.md) · [DEVELOPMENT_GUIDE.md § WSL Na
 | **Wall-Bounce alignment** | Same adapters as `wall-bounce-analyzer.ts` — no duplicate spawn logic |
 
 **Out of scope (this plan):** Replacing Cursor Agent reasoning entirely; Tab completion; BYOK API keys in Cursor Settings.
+
+---
+
+## Full-Fork: techdev-cursor (primary)
+
+**Decision:** Cursor MCP implementation uses a **Full-Fork** of this repo → **`techdev-cursor`** (fork_primary). This upstream repo keeps policy docs and Runbook; **code implementation** (Unified MCP, adapters) proceeds in the fork.
+
+→ Details: [FORK_CURSOR.md](./FORK_CURSOR.md)
+
+| Item | upstream `techdev` | fork `techdev-cursor` |
+|------|-------------------|----------------------|
+| Role | Reference / archive | **Primary development** |
+| Unified MCP | Documented only | **Implement** |
+| `forkProfile.yaml` | — | Create in fork root |
+| Track D (tokenizer/cache) | Documented | **LOW PRIORITY** after Gate A→B |
 
 ---
 
@@ -137,41 +153,47 @@ Only then proceed to **Phase 1**.
 
 ---
 
-## Phase 1: Cursor MCP Registration (Planned)
+## Phase 1: Cursor MCP Registration (Planned — in fork)
 
-Target MCP servers (stdio, run from repo root):
+**Topology:** **Unified** single server `techsapo-providers` (replaces dual-server design below).
 
 | Cursor MCP name | Command | Purpose |
 |-----------------|---------|---------|
-| `techsapo-codex` | `npm run codex-mcp` | OpenAI Codex subscription |
-| `techsapo-claude` | `npm run claude-code-mcp` | Claude Code / MAX |
-| `techsapo-*` (agy) | TBD — agy MCP wrapper or spawn adapter | Google Antigravity |
+| `techsapo-providers` | `node dist/services/techsapo-providers-mcp-server.js` | Unified: `analyze_claude`, `analyze_codex`, `analyze_agy` |
 
-Example `~/.cursor/mcp.json` or **Cursor Settings → MCP** (exact path TBD in Phase 1):
+**Do not** register `npm run codex-mcp` in Cursor — the shell script daemonizes and breaks stdio transport.
+
+Example **Cursor Settings → MCP** (fork clone):
 
 ```json
 {
   "mcpServers": {
-    "techsapo-codex": {
-      "command": "npm",
-      "args": ["run", "codex-mcp"],
-      "cwd": "/home/<user>/techdev"
-    },
-    "techsapo-claude": {
-      "command": "npm",
-      "args": ["run", "claude-code-mcp"],
-      "cwd": "/home/<user>/techdev"
+    "techsapo-providers": {
+      "command": "node",
+      "args": ["dist/services/techsapo-providers-mcp-server.js"],
+      "cwd": "/home/<user>/techdev-cursor"
     }
   }
 }
 ```
 
-**Phase 1 tasks:**
+**Phase 1 tasks (in fork):**
 
-1. Confirm stdio MCP starts after Phase 0 (`npm run build && npm run codex-mcp-test`)
-2. Document canonical Cursor config location for WSL + Cursor Desktop
-3. Fix `config/codex-mcp.toml` auth path for WSL
-4. Add agy MCP or document gap if no MCP wrapper exists yet
+1. Implement `techsapo-providers-mcp-server.ts` + `src/adapters/*` — see [FORK_CURSOR.md](./FORK_CURSOR.md)
+2. `npm run build`; start stdio server (not daemon script)
+3. Register in Cursor; verify three `analyze_*` tools
+4. Deprecate dual-server template; canonical template in fork [config/cursor-mcp.template.json](../config/cursor-mcp.template.json) updated on fork
+
+<details>
+<summary>Legacy dual-server design (superseded — do not use for new registration)</summary>
+
+| Cursor MCP name | Command | Purpose |
+|-----------------|---------|---------|
+| `techsapo-codex` | `npm run codex-mcp` | OpenAI Codex — **broken for Cursor** (daemon) |
+| `techsapo-claude` | `npm run claude-code-mcp` | Claude Code / MAX |
+| `techsapo-*` (agy) | TBD | Google Antigravity |
+
+</details>
 
 ---
 
@@ -209,6 +231,7 @@ Example `~/.cursor/mcp.json` or **Cursor Settings → MCP** (exact path TBD in P
 
 ## Related Documents
 
+- [FORK_CURSOR.md](./FORK_CURSOR.md) (Full-Fork primary — unified MCP)
 - [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
 - [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) (Phased Execution Runbook)
 - [codex-mcp-implementation.md](./codex-mcp-implementation.md)

@@ -39,22 +39,26 @@ const response = await cipherMCP.askCipher({
 
 **Integration**: Background knowledge layer, not in critical path
 
-### Cursor MCP (TechSapo providers — Planned)
+### Cursor MCP (TechSapo providers — Planned; implement in fork)
 
-Register TechSapo stdio MCP servers in **Cursor IDE** so tool calls use **subscription quota** (`claude`, `codex`, `agy`).
+Register **unified** stdio MCP server in **Cursor IDE** so tool calls use **subscription quota** (`claude`, `codex`, `agy`).
 
 | Phase | Scope | Status |
 |-------|-------|--------|
 | **0** | **WSL native install + auth** for all peer CLIs | **Prerequisite — defined** |
-| 1 | Cursor Settings / `mcp.json` registration | Planned |
+| 1 | Unified `techsapo-providers` registration | Planned — **in `techdev-cursor` fork** |
 | 2 | InferenceProfile pass-through | Planned |
+| D | Tokenizer / response cache | **LOW PRIORITY** — after Gate A→B |
 
 **Phase 0 MUST complete before registration.** Windows npm CLIs do not run under WSL MCP spawn.
 
 → Full plan: [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md)  
+→ **Full-Fork (primary):** [FORK_CURSOR.md](./FORK_CURSOR.md)  
 → Checklist: [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
 
-Planned servers: `techsapo-codex` (`npm run codex-mcp`), `techsapo-claude` (`npm run claude-code-mcp`), agy wrapper TBD.
+**Target server:** `techsapo-providers` — tools `analyze_claude`, `analyze_codex`, `analyze_agy` via `node dist/services/techsapo-providers-mcp-server.js` (stdio). **Not** `npm run codex-mcp` (daemon).
+
+Legacy dual-server (`techsapo-codex` + `techsapo-claude`) is superseded — see [FORK_CURSOR.md](./FORK_CURSOR.md).
 
 ### 2. Codex MCP
 

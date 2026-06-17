@@ -2,13 +2,16 @@
 
 **Status**: ACTIVE — start with Track A; do not skip Gates  
 **Owner**: TechSapo Development Team  
-**Last updated**: 2026-06-17
+**Last updated**: 2026-06-18
 
 Step-by-step checklist for **subscription-quota** development via Cursor MCP and downstream platform work.
+
+> **Full-Fork (primary):** Unified MCP implementation runs in **`techdev-cursor`** fork, not this upstream repo. See [FORK_CURSOR.md](./FORK_CURSOR.md). This Runbook remains the procedure source; execute steps in the **fork clone** (`cwd` = fork root).
 
 | Document | Role |
 |----------|------|
 | [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) | Policy and phase overview |
+| [FORK_CURSOR.md](./FORK_CURSOR.md) | Full-Fork `techdev-cursor` — unified MCP target |
 | **This file** | Executable steps, acceptance criteria, Gate reviews |
 
 **Progression rule:** Complete **Track A** → Gate A→B → **Track B** → Gate B→C → **Track C**. At each Gate, review logic and methodology before continuing.
@@ -232,34 +235,50 @@ Each task block: **Purpose** → **Steps** → **Done when** → **Reflection me
 
 ---
 
-### A-1: Cursor MCP registration
+### A-1: Cursor MCP registration (Unified — in fork)
 
-**Purpose:** Cursor Agent tool calls route to TechSapo MCP servers (subscription quota for tool execution).
+**Purpose:** Cursor Agent tool calls route to **single unified** MCP server `techsapo-providers` (subscription quota for tool execution).
+
+**Prerequisite:** Fork cloned — [FORK_CURSOR.md](./FORK_CURSOR.md). Work in `~/techdev-cursor`, not upstream `~/techdev`.
 
 **Steps:**
 
-1. Build:
+1. Build (fork):
    ```bash
-   cd ~/techdev && npm run build
+   cd ~/techdev-cursor && npm run build
    ```
-2. Test MCP servers locally (stdio):
+2. Verify stdio server starts (fork — **not** `npm run codex-mcp` daemon):
    ```bash
-   npm run codex-mcp-test
-   ./scripts/start-claude-code-mcp.sh -t
+   node dist/services/techsapo-providers-mcp-server.js
+   # Ctrl+C after confirming no startup error; Cursor will spawn this via MCP config
    ```
-   > **Note:** `start-claude-code-mcp.sh` may require `ANTHROPIC_API_KEY` in its launcher check — prefer registering Cursor with `npm run claude-code-mcp` directly (OAuth in server) until launcher is fixed.
-3. Confirm [config/codex-mcp.toml](../config/codex-mcp.toml):
-   ```toml
-   auth_file = "/home/<user>/.codex/auth.json"   # WSL path, not Windows
+3. Confirm WSL auth per A-0 (`~/.codex/auth.json`, Claude OAuth, agy auth).
+4. Register in **Cursor Settings → MCP**. Template: fork [config/cursor-mcp.template.json](../config/cursor-mcp.template.json) — unified `techsapo-providers`, **`node` direct**:
+   ```json
+   {
+     "mcpServers": {
+       "techsapo-providers": {
+         "command": "node",
+         "args": ["dist/services/techsapo-providers-mcp-server.js"],
+         "cwd": "/home/<user>/techdev-cursor"
+       }
+     }
+   }
    ```
-4. Register in **Cursor Settings → MCP** (or project MCP config). Template: [config/cursor-mcp.template.json](../config/cursor-mcp.template.json)
-5. Reload Cursor; confirm tools listed for `techsapo-codex` and `techsapo-claude`.
-6. Invoke once from Cursor Agent (e.g. Codex analyze, Claude analyze_with_sonnet45).
-7. **Gap (explicit):** `agy` MCP wrapper **TBD** — not required for A-1 completion.
+5. Reload Cursor; confirm tools: `analyze_claude`, `analyze_codex`, `analyze_agy`.
+6. Invoke each once from Cursor Agent.
+7. **AS-IS:** Until fork implements unified server, this step is blocked — legacy dual MCP in upstream is superseded.
 
-**Done when:** `[ ]` Both MCP servers visible in Cursor; `[ ]` at least one successful tool invoke each.
+**Done when:** `[ ]` Unified server visible in Cursor; `[ ]` all three `analyze_*` tools invoke successfully.
 
-**Reflection memo:** _Cursor Agent planning still uses Cursor quota; MCP tools use subscription — document which task goes where._
+**Reflection memo:** _Cursor Agent planning still uses Cursor quota; MCP tools use subscription — see Token & Quota Operations Guide._
+
+<details>
+<summary>Legacy A-1 (dual-server — superseded)</summary>
+
+Previously: separate `techsapo-codex` + `techsapo-claude` via `npm run codex-mcp` / `claude-code-mcp`. Do not use for new registration (`codex-mcp` daemonizes).
+
+</details>
 
 ---
 
@@ -310,7 +329,7 @@ Each task block: **Purpose** → **Steps** → **Done when** → **Reflection me
 | G4 | **Provider parity:** claude / codex / agy treated as peer Tier 1–3; Opus aggregator-only | | |
 | G5 | **Operability:** A-0 steps reproducible on clean WSL | | |
 | G6 | **A-0 sign-off:** All five checkboxes `[x]` | | |
-| G7 | **A-1 invoke:** codex + claude MCP each succeeded once from Cursor | | |
+| G7 | **A-1 invoke:** all three `analyze_*` tools succeeded once from Cursor (unified MCP) | | |
 
 **Pass when:** G1–G7 all Yes.
 
@@ -635,6 +654,7 @@ flowchart TD
 | Doc | Link |
 |-----|------|
 | Plan overview | [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) |
+| Full-Fork primary | [FORK_CURSOR.md](./FORK_CURSOR.md) |
 | Token & quota ops | [§ Token & Quota Operations Guide](#token--quota-operations-guide) (this file) |
 | WSL CLI quick ref | [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0) |
 | InferenceProfile ADR | [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md) |
@@ -649,3 +669,4 @@ flowchart TD
 - PPTX updates
 - P5 Phase 1+ (Grounding, AWS, NDL)
 - Auto-routing shell script (by design — use presets + TaskRouter)
+- **Track D** (tokenizer / response cache) — **LOW PRIORITY**; see [FORK_CURSOR.md](./FORK_CURSOR.md#track-d-low-priority)
