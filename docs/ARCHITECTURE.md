@@ -127,6 +127,12 @@ Final Response + Consensus Score
 SSE Complete Event
 ```
 
+### Provider transport (same node)
+
+Co-located providers (`agy`, `codex`, Claude Code MCP) use **stdio / MCP / in-process EventEmitter** — not HTTP streaming between providers. **HTTP SSE** is used only at the **external API boundary** (browser/clients). Inter-round Wall-Bounce passes **text context in prompts** after each round; there is no direct LLM-to-LLM HTTP pipe.
+
+Optional **Provider Gateway (HTTP/SSE)** may be added later for sidecar or multi-node deployment (TS-08). See [decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md](./decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md).
+
 ### MCP Integration Flow
 
 ```
@@ -181,6 +187,22 @@ Response to Wall-Bounce
 - **Prometheus**: Metrics scraping
 - **Grafana**: Dashboards and visualization
 - **AlertManager**: Threshold-based alerts
+
+### AWS peripheral (planned)
+
+Surrounding platform features target **AWS** (not yet implemented in application code):
+
+| Concern | Service | Use |
+|---------|---------|-----|
+| Email | **Amazon SES** | Notifications, alerts |
+| Object storage | **Amazon S3** | Artifacts, exports, optional document staging |
+| Secrets (non-LLM) | **Secrets Manager** | DB URLs, webhook tokens, etc. |
+| Key encryption | **KMS** | Secrets and S3 SSE-KMS |
+
+LLM access remains **CLI/SDK only** — see [SECURITY.md](./SECURITY.md).  
+Decision record: [decisions/TECH_STACK_AWS_PERIPHERAL.md](./decisions/TECH_STACK_AWS_PERIPHERAL.md) · workspace: [TECH_STACK_WORKSPACE.md](./TECH_STACK_WORKSPACE.md)
+
+**Placeholders:** primary region **`ap-northeast-1` (Tokyo)** · SES From **`noreply@notify.techsapo.example`** (virtual domain, not production)
 
 ## Security Architecture
 
@@ -247,6 +269,7 @@ Located in `src/config/feature-flags.ts`:
 
 ## Related Documentation
 
+- **TECH_STACK_WORKSPACE.md** - Tech stack refinement workspace (prep)
 - **WALL_BOUNCE_SYSTEM.md** - Wall-Bounce implementation details
 - **MCP_SERVICES.md** - MCP service architecture
 - **DEVELOPMENT_GUIDE.md** - Development workflows

@@ -59,18 +59,34 @@ function slideBase(style, ...children) {
   }, ...children);
 }
 
-function footer() {
+function footerBar(mutedColor = COLORS.muted) {
   return el('div', {
     style: {
-      position: 'absolute',
-      bottom: 28,
-      left: 64,
-      right: 64,
+      flexShrink: 0,
+      marginTop: 'auto',
+      paddingTop: SPACE.footerPadTop,
+      minHeight: SPACE.footerMinH,
+      borderTop: `1px solid ${COLORS.border}`,
       fontSize: TYPE.footer,
-      color: COLORS.muted,
+      lineHeight: 1.35,
+      color: mutedColor,
       fontFamily: FONT_FAMILY,
+      display: 'flex',
+      alignItems: 'center',
     },
   }, FOOTER);
+}
+
+function bodyWrap(...children) {
+  return el('div', {
+    style: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: 0,
+      overflow: 'hidden',
+    },
+  }, ...children);
 }
 
 function head(title) {
@@ -193,28 +209,32 @@ export function slideToTree(slide) {
       const bg = slide.theme === 'light' ? COLORS.light : COLORS.white;
       return slideBase({ backgroundColor: bg, color: COLORS.text }, [
         head(slide.title),
-        el('div', { style: { display: 'flex', flexDirection: 'column' } }, [
-          bullets(slide.bullets),
-          slide.note ? slideNote(slide.note) : null,
-        ]),
-        footer(),
+        bodyWrap(
+          el('div', { style: { display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' } }, [
+            bullets(slide.bullets),
+            slide.note ? slideNote(slide.note) : null,
+          ]),
+        ),
+        footerBar(),
       ]);
     }
 
     case 'two-col':
       return slideBase({ backgroundColor: COLORS.white, color: COLORS.text }, [
         head(slide.title),
-        el('div', { style: { display: 'flex', flexDirection: 'row', gap: 40 } }, [
-          el('div', { style: { flex: 1, display: 'flex', flexDirection: 'column' } }, [
-            el('div', { style: { fontSize: TYPE.h3, fontWeight: 700, color: COLORS.accent, marginBottom: 16, fontFamily: FONT_FAMILY } }, slide.leftTitle),
-            bullets(slide.left, TYPE.bodySm),
+        bodyWrap(
+          el('div', { style: { display: 'flex', flexDirection: 'row', gap: 40, flex: 1, minHeight: 0 } }, [
+            el('div', { style: { flex: 1, display: 'flex', flexDirection: 'column' } }, [
+              el('div', { style: { fontSize: TYPE.h3, fontWeight: 700, color: COLORS.accent, marginBottom: 16, fontFamily: FONT_FAMILY } }, slide.leftTitle),
+              bullets(slide.left, TYPE.bodySm),
+            ]),
+            el('div', { style: { flex: 1, display: 'flex', flexDirection: 'column' } }, [
+              el('div', { style: { fontSize: TYPE.h3, fontWeight: 700, color: COLORS.accent, marginBottom: 16, fontFamily: FONT_FAMILY } }, slide.rightTitle),
+              bullets(slide.right, TYPE.bodySm),
+            ]),
           ]),
-          el('div', { style: { flex: 1, display: 'flex', flexDirection: 'column' } }, [
-            el('div', { style: { fontSize: TYPE.h3, fontWeight: 700, color: COLORS.accent, marginBottom: 16, fontFamily: FONT_FAMILY } }, slide.rightTitle),
-            bullets(slide.right, TYPE.bodySm),
-          ]),
-        ]),
-        footer(),
+        ),
+        footerBar(),
       ]);
 
     case 'table': {
@@ -238,29 +258,35 @@ export function slideToTree(slide) {
       );
       return slideBase({ backgroundColor: COLORS.white }, [
         head(slide.title),
-        el('div', { style: { display: 'flex', flexDirection: 'column', width: '100%' } }, [
-          el('div', { style: { display: 'flex', flexDirection: 'row' } }, th),
-          ...rows,
-        ]),
-        footer(),
+        bodyWrap(
+          el('div', { style: { display: 'flex', flexDirection: 'column', width: '100%', flex: 1, minHeight: 0, overflow: 'hidden' } }, [
+            el('div', { style: { display: 'flex', flexDirection: 'row' } }, th),
+            ...rows,
+          ]),
+        ),
+        footerBar(),
       ]);
     }
 
     case 'flowchart':
       return slideBase({ backgroundColor: COLORS.white, color: COLORS.text }, [
         head(slide.title),
-        el('div', {
-          style: {
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            width: '100%',
-          },
-        }, renderFlowchart(slide.variant)),
-        slide.note ? slideNote(slide.note) : null,
-        footer(),
+        bodyWrap(
+          el('div', {
+            style: {
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%',
+              minHeight: 0,
+              overflow: 'hidden',
+            },
+          }, renderFlowchart(slide.variant)),
+          slide.note ? slideNote(slide.note) : null,
+        ),
+        footerBar(),
       ]);
 
     case 'closing':

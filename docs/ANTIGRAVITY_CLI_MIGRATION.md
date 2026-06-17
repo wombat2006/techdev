@@ -1,42 +1,42 @@
-# Antigravity CLI 移行（Google Tier 1 プロバイダー）
+# Antigravity CLI Migration (Google Tier 1 Provider)
 
-**版**: 1.0  
-**日付**: 2026-06-18  
-**ステータス**: ドキュメント採択（実装移行は別タスク）
-
----
-
-## 背景
-
-Google は **Gemini CLI** から **Antigravity CLI** への統合を進めている。TechSapo の Tier 1（Google / Gemini 系分析）プロバイダーアクセスは、**Antigravity CLI** を標準とする。
-
-- **CLI コマンド**: `agy`（旧: `gemini`）
-- **認証**: `agy auth login`（OAuth。API キー直埋めは引き続き禁止）
-- **モデル例**: Gemini 2.5 Pro / Flash（Antigravity ハーネス経由）
-
-参考: [Google Developers Blog — Transitioning Gemini CLI to Antigravity CLI](https://developers.googleblog.com/en/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)
+**Version**: 1.0  
+**Date**: 2026-06-18  
+**Status**: Documentation adopted (implementation migration is a separate task)
 
 ---
 
-## TechSapo での位置づけ
+## Background
 
-| 項目 | ドキュメント上の標準 | 実装（AS-IS） |
-|------|---------------------|---------------|
-| Google Tier 1 | Antigravity CLI（`agy`） | `wall-bounce-analyzer.ts` が legacy `gemini` を spawn |
-| セキュリティ | CLI spawn のみ、API キー禁止 | 変更なし |
-| Wall-Bounce | 多プロバイダー協調 | 変更なし |
+Google is consolidating **Gemini CLI** into **Antigravity CLI**. TechSapo Tier 1 (Google / Gemini analysis) provider access standard is **Antigravity CLI**.
 
-**実装移行**（将来）: `spawn('gemini', …)` → `spawn('agy', …)`、引数・認証フローの Antigravity 仕様への合わせ込み。本ドキュメント採択時点では **コード変更は行わない**。
+- **CLI command**: `agy` (formerly: `gemini`)
+- **Authentication**: `agy auth login` (OAuth; embedded API keys remain forbidden)
+- **Example models**: Gemini 2.5 Pro / Flash (via Antigravity harness)
+
+Reference: [Google Developers Blog — Transitioning Gemini CLI to Antigravity CLI](https://developers.googleblog.com/en/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)
 
 ---
 
-## 開発環境セットアップ
+## Role in TechSapo
+
+| Item | Documentation standard | Implementation (AS-IS) |
+|------|------------------------|-------------------------|
+| Google Tier 1 | Antigravity CLI (`agy`) | `wall-bounce-analyzer.ts` spawns legacy `gemini` |
+| Security | CLI spawn only, no API keys | Unchanged |
+| Wall-Bounce | Multi-provider coordination | Unchanged |
+
+**Future implementation migration**: `spawn('gemini', …)` → `spawn('agy', …)`, align arguments and auth flow with Antigravity spec. At documentation adoption time, **no code changes** are made.
+
+---
+
+## Development Environment Setup
 
 ```bash
-# Antigravity CLI インストール（公式）
+# Install Antigravity CLI (official)
 curl -fsSL https://antigravity.google/cli/install.sh | bash
 
-# 動作確認
+# Verify
 which agy
 agy --version
 agy auth login
@@ -44,23 +44,23 @@ agy auth login
 
 ---
 
-## 関連ドキュメント
+## Related Documentation
 
-| 文書 | 内容 |
-|------|------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | プロバイダー Tier 構成 |
-| [SECURITY.md](./SECURITY.md) | CLI spawn セキュリティ |
-| [GEMINI_CLI_INTEGRATION_GUIDE.md](./GEMINI_CLI_INTEGRATION_GUIDE.md) | 旧 Gemini CLI ガイド（参照用・Antigravity へ置換予定） |
-| [WALL_BOUNCE_SYSTEM.md](./WALL_BOUNCE_SYSTEM.md) | Wall-Bounce プロバイダー構成 |
+| Document | Content |
+|----------|---------|
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Provider tier layout |
+| [SECURITY.md](./SECURITY.md) | CLI spawn security |
+| [GEMINI_CLI_INTEGRATION_GUIDE.md](./GEMINI_CLI_INTEGRATION_GUIDE.md) | Legacy Gemini CLI guide (reference; to be superseded by Antigravity) |
+| [WALL_BOUNCE_SYSTEM.md](./WALL_BOUNCE_SYSTEM.md) | Wall-Bounce provider configuration |
 
 ---
 
-## 用語
+## Terminology
 
-| 旧 | 新（ドキュメント標準） |
-|----|------------------------|
+| Legacy | New (documentation standard) |
+|--------|------------------------------|
 | Gemini CLI | Antigravity CLI |
-| `gemini` コマンド | `agy` コマンド |
-| Gemini CLI 経由 | Antigravity CLI 経由 |
+| `gemini` command | `agy` command |
+| Via Gemini CLI | Via Antigravity CLI |
 
-モデル名 **Gemini 2.5 Pro / Flash** は Antigravity 上で利用する LLM モデル名として引き続き使用する。
+Model names **Gemini 2.5 Pro / Flash** remain the LLM model names used on Antigravity.

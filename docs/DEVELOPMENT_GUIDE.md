@@ -109,7 +109,7 @@ Key variables defined in `src/config/environment.ts`:
 ### Service Dependencies
 - **Node.js**: ≥18.0.0 required
 - **Antigravity CLI**: `agy` on PATH for Google Tier 1（`agy auth login`）。→ [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)  
-  ※ 実装は legacy `gemini` spawn のまま（移行予定）
+  Note: implementation still spawns legacy `gemini` (migration pending)
 - **Redis**: Required for caching and session management
 - **Database**: MySQL2 for audit logs and monitoring data
 - **Monitoring**: Prometheus + Grafana stack in Docker containers

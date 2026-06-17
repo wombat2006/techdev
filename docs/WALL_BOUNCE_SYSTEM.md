@@ -1,22 +1,24 @@
 # Wall-Bounce Analysis System
 
-## 🏓 Wall-Bounce Analysis Overview
+## Wall-Bounce Analysis Overview
 
-Wall-Bounce分析システムは、複数のLLMプロバイダーを協調させて高品質な回答を生成する中核機能です。
+The Wall-Bounce analysis system is the core capability that coordinates multiple LLM providers to produce high-quality responses.
 
-## 🎯 Core Principles
+## Core Principles
 
-### 必須ルール
-- **最低2プロバイダー**: すべての分析で最低2つのLLMプロバイダーを使用
-- **コンセンサス必須**: プロバイダー間での合意形成が必要
-- **品質閾値**: 信頼度 ≥ 0.7、コンセンサス ≥ 0.6
-- **日本語応答**: 基本的に日本語での回答生成
+### Mandatory Rules
+- **Constitution (supreme)**: Wall-bounce requires **minimum 2 rounds, maximum 5 rounds** (single-round forbidden) — [CLAUDE.md Constitution](../CLAUDE.md#constitution)
+- **Minimum 2 providers**: Every analysis uses at least two LLM providers
+- **Consensus required**: Providers must reach agreement
+- **Quality thresholds**: confidence ≥ 0.7, consensus ≥ 0.6
+- **Japanese responses**: Primary language for user-facing output
+- **Same-node transport**: stdio/MCP between orchestrator and providers; HTTP SSE for external clients only — [TECH_STACK_LLM_PROVIDER_TRANSPORT.md](./decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md)
 
 ### LLM Provider Configuration
 
 #### OpenAI
 ```typescript
-// GPT-5専用 - GPT-4/GPT-4o使用禁止
+// GPT-5 only — GPT-4/GPT-4o forbidden
 const openaiConfig = {
   model: 'gpt-5', // ONLY GPT-5 allowed
   temperature: 0.7,
@@ -26,28 +28,28 @@ const openaiConfig = {
 
 #### Anthropic
 ```typescript
-// SDK使用のみ - API_KEY禁止 (MAX x5 Plan cost avoidance)
+// SDK only — no API_KEY (MAX x5 Plan cost avoidance)
 import { Anthropic } from '@anthropic-ai/sdk';
 const anthropic = new Anthropic({
-  // SDK経由でのみ使用、API_KEYは使用しない
-  apiKey: process.env.ANTHROPIC_SDK_KEY // SDK専用キー
+  // SDK only; do not use direct API_KEY
+  apiKey: process.env.ANTHROPIC_SDK_KEY // SDK-only key
 });
 ```
 
-#### Google Gemini（Antigravity CLI 経由）
+#### Google Gemini (via Antigravity CLI)
 
-Tier 1 プロバイダー。モデルは **Gemini 2.5 Pro / Flash**。**Antigravity CLI（`agy`）** で spawn（API キー直埋め禁止）。→ [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)
+Tier 1 provider. Models: **Gemini 2.5 Pro / Flash**. Spawn via **Antigravity CLI (`agy`)** (no embedded API keys). → [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)
 
 ```typescript
 const geminiConfig = {
-  model: 'gemini-2.5-flash', // または gemini-2.5-pro
+  model: 'gemini-2.5-flash', // or gemini-2.5-pro
   temperature: 0.8,
   maxTokens: 1500
 };
-// 実行: spawn('agy', …) — 実装移行中（現行コードは legacy gemini）
+// Execution: spawn('agy', …) — migration in progress (current code uses legacy gemini)
 ```
 
-## 🏗️ Wall-Bounce Architecture
+## Wall-Bounce Architecture
 
 ### Analysis Flow
 ```
@@ -74,43 +76,43 @@ const geminiConfig = {
 ### Task Types & Provider Selection
 
 #### Basic Task
-- **プロバイダー数**: 2
-- **使用モデル**: GPT-5 + Gemini 2.5 Flash
-- **信頼度閾値**: 0.7
-- **コスト優先**: 低コストモデル選択
+- **Providers**: 2
+- **Models**: GPT-5 + Gemini 2.5 Flash
+- **Confidence threshold**: 0.7
+- **Priority**: Cost-efficient model selection
 
 #### Premium Task
-- **プロバイダー数**: 3
-- **使用モデル**: GPT-5 + Gemini 2.5 Pro + Claude (SDK)
-- **信頼度閾値**: 0.8
-- **バランス重視**: 品質とコストのバランス
+- **Providers**: 3
+- **Models**: GPT-5 + Gemini 2.5 Pro + Claude (SDK)
+- **Confidence threshold**: 0.8
+- **Priority**: Balance quality and cost
 
 #### Critical Task
-- **プロバイダー数**: 3-4
-- **使用モデル**: 全プロバイダー + OpenRouter
-- **信頼度閾値**: 0.9
-- **品質優先**: 最高品質の分析
+- **Providers**: 3–4
+- **Models**: All providers + OpenRouter
+- **Confidence threshold**: 0.9
+- **Priority**: Highest quality analysis
 
-## 📊 Quality Metrics
+## Quality Metrics
 
 ### Confidence Scoring
 ```typescript
 interface QualityMetrics {
-  confidence: number;      // 0.0-1.0: 回答の信頼度
-  consensus: number;       // 0.0-1.0: プロバイダー間合意度
-  coherence: number;       // 0.0-1.0: 回答の一貫性
-  completeness: number;    // 0.0-1.0: 回答の完全性
+  confidence: number;      // 0.0-1.0: response confidence
+  consensus: number;       // 0.0-1.0: inter-provider agreement
+  coherence: number;       // 0.0-1.0: response coherence
+  completeness: number;    // 0.0-1.0: response completeness
 }
 ```
 
 ### Consensus Algorithm
-1. **Response Collection**: 各プロバイダーからの回答収集
-2. **Semantic Similarity**: 回答間の意味的類似度計算
-3. **Quality Scoring**: 各回答の品質スコア算出
-4. **Consensus Building**: 重み付き平均による合意形成
-5. **Final Integration**: 統合された最終回答生成
+1. **Response Collection**: Gather responses from each provider
+2. **Semantic Similarity**: Compute semantic similarity between responses
+3. **Quality Scoring**: Score each response
+4. **Consensus Building**: Weighted average for agreement
+5. **Final Integration**: Produce integrated final response
 
-## 🔄 Wall-Bounce Process
+## Wall-Bounce Process
 
 ### Step 1: Query Analysis
 ```typescript
@@ -164,7 +166,7 @@ const integratedResponse = {
 };
 ```
 
-## 🚨 Error Handling & Fallbacks
+## Error Handling & Fallbacks
 
 ### Provider Failures
 ```typescript
@@ -178,29 +180,29 @@ const failureHandling = {
 ### Quality Thresholds
 ```typescript
 if (consensus < 0.6) {
-  // 追加プロバイダーでの再分析
+  // Re-analyze with additional providers
   additionalAnalysis();
 }
 
 if (confidence < 0.7) {
-  // 自動エスカレーション
+  // Auto-escalation
   escalateToHigherTier();
 }
 ```
 
-## 📈 Performance Optimization
+## Performance Optimization
 
 ### Caching Strategy
-- **Query Caching**: 類似クエリのキャッシュ利用
-- **Provider Caching**: プロバイダー応答の一時保存
-- **Consensus Caching**: 合意結果の再利用
+- **Query Caching**: Reuse cache for similar queries
+- **Provider Caching**: Temporarily store provider responses
+- **Consensus Caching**: Reuse consensus results
 
 ### Cost Optimization
-- **Smart Routing**: コスト効率を考慮したプロバイダー選択
-- **Batch Processing**: 複数クエリのまとめ処理
-- **Budget Management**: リアルタイムコスト監視
+- **Smart Routing**: Provider selection with cost efficiency
+- **Batch Processing**: Batch multiple queries
+- **Budget Management**: Real-time cost monitoring
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 ```bash

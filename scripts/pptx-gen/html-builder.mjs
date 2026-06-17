@@ -174,8 +174,8 @@ export function slideToHtml(slide) {
   <header class="slide__head"><h2>${esc(slide.title)}</h2></header>
   <div class="slide__main">
     ${FLOWCHARTS[slide.variant] || ''}
+    ${slide.note ? `<p class="slide__note">${esc(slide.note)}</p>` : ''}
   </div>
-  ${slide.note ? `<p class="slide__note">${esc(slide.note)}</p>` : ''}
   ${footerHtml()}
 </div>`;
       break;

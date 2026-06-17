@@ -1,42 +1,56 @@
 ---
-description: 機能・設定変更時は関連ドキュメントを同一 commit に含める
+description: Include related documentation in the same commit; logic docs in English
 alwaysApply: true
 ---
 
 # Documentation Sync on Commit
 
-機能・設定・アーキテクチャ・プロバイダー・CLI 要件が変わる作業では、**実装変更とドキュメント更新を同じ commit に含める**。
+When features, configuration, architecture, providers, or CLI requirements change, **include implementation and documentation updates in the same commit**.
 
-## 必須チェック（commit 前）
+## Pre-commit Checklist
 
-1. **README 同期**: `README.md` と `README_ja.md` を両方更新（片方だけにしない）
-2. **ナビゲーション**: `CLAUDE.md` / `docs/DOCUMENTATION_INDEX.md` に新規 doc があれば追記
-3. **提案物**: 顧客向け内容が変わる場合は `docs/proposals/` と `scripts/pptx-gen/slide-data.mjs`（必要なら PPTX 再生成）
-4. **ADR**: 設計決定は `docs/decisions/` に記録
+1. **README sync**: Update both `README.md` and `README_ja.md` (never one without the other)
+2. **Navigation**: Add new docs to `CLAUDE.md` (skeleton only), `docs/claude-*.md` (details), and `docs/DOCUMENTATION_INDEX.md`. Do not add detail to `CLAUDE.md`
+3. **Proposals**: If customer-facing content changes, update `docs/proposals/` and `scripts/pptx-gen/slide-data.mjs` (regenerate PPTX if needed)
+4. **ADR**: Record design decisions in `docs/decisions/`
 
-## 更新対象の目安
+## What to Update
 
-| 変更内容 | 最低限更新する doc |
-|----------|-------------------|
-| LLM / CLI プロバイダー | `CLAUDE.md`, `docs/ARCHITECTURE.md`, README 両方, 該当 integration guide |
-| API / エンドポイント | `docs/API_REFERENCE.md`, `DEVELOPMENT_GUIDE.md` |
-| セキュリティ方針 | `docs/SECURITY.md`, `CLAUDE.md` |
-| Wall-Bounce 挙動 | `docs/WALL_BOUNCE_SYSTEM.md`, 関連 ADR |
+| Change | Minimum docs to update |
+|--------|------------------------|
+| LLM / CLI provider | `CLAUDE.md` (summary only), `docs/claude-development-notes.md`, `docs/ARCHITECTURE.md`, both READMEs, relevant integration guide |
+| API / endpoints | `docs/API_REFERENCE.md`, `DEVELOPMENT_GUIDE.md` |
+| Security policy | `docs/SECURITY.md`, `CLAUDE.md` |
+| Wall-Bounce behavior | `docs/WALL_BOUNCE_SYSTEM.md`, related ADR |
+| Tech stack | `docs/TECH_STACK_WORKSPACE.md`, `docs/decisions/TECH_STACK_*.md`, `docs/ARCHITECTURE.md` |
 
-## commit メッセージ
+## CLAUDE.md Policy
 
-実装のみ・docs のみに分けず、**1 commit に実装 + docs** をまとめる（ユーザーが明示的に分割を求めた場合を除く）。
+- `CLAUDE.md` is skeleton only (Quick Nav + Mandatory Rules summary + link table)
+- Put details in `docs/claude-commands.md`, `claude-mcp-rules.md`, `claude-development-notes.md`
 
-## 例
+## Logic Documentation Language
+
+**Logic and rule docs MUST be written in English**, including:
+
+- `CLAUDE.md`, `docs/claude-*.md`
+- `docs/WALL_BOUNCE_SYSTEM.md`, `docs/ANTIGRAVITY_CLI_MIGRATION.md`
+- `.cursor/rules/*.mdc` (agent rules)
+
+Customer-facing proposals (`docs/proposals/`) and `README_ja.md` may remain in Japanese.
+
+Do not split implementation-only and docs-only commits unless the user explicitly requests it — **one commit with implementation + docs**.
+
+## Examples
 
 ```
-# ✅ GOOD — 同一 commit
-feat: TaskRouter に codegen ルート追加
+# ✅ GOOD — same commit
+feat: add codegen route to TaskRouter
   src/...
   docs/ARCHITECTURE.md
   README.md, README_ja.md
 
-# ❌ BAD — README だけ古いまま push
-feat: Antigravity CLI 対応
-  docs/ARCHITECTURE.md のみ更新、README 未更新
+# ❌ BAD — README left stale
+feat: Antigravity CLI support
+  docs/ARCHITECTURE.md only, README not updated
 ```

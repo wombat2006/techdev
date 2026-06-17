@@ -14,10 +14,11 @@ html, body {
   height: 1080px;
   display: flex;
   flex-direction: column;
-  padding: 48px 64px 36px;
+  padding: 48px 64px 32px;
   color: #2D3748;
   background: #FFFFFF;
   position: relative;
+  overflow: hidden;
 }
 
 .slide--primary { background: #1A365D; color: #fff; }
@@ -25,13 +26,17 @@ html, body {
 .slide--light { background: #F7FAFC; }
 
 .slide__footer {
-  position: absolute;
-  bottom: 28px;
-  left: 64px;
-  right: 64px;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 14px;
+  min-height: 48px;
+  border-top: 1px solid #E2E8F0;
   font-size: 20px;
+  line-height: 1.35;
   color: #718096;
   letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
 }
 .slide--primary .slide__footer,
 .slide--accent .slide__footer { color: rgba(255,255,255,0.45); }
@@ -101,6 +106,7 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }
 
 .slide-content ul.bullets {
@@ -127,7 +133,8 @@ html, body {
 }
 
 .slide-content .slide__note {
-  margin-top: 24px;
+  flex-shrink: 0;
+  margin-top: auto;
   padding-top: 18px;
   border-top: 1px solid #E2E8F0;
   font-size: 24px;

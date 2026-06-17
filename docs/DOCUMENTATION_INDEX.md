@@ -7,10 +7,11 @@
 ## 📖 Quick Start by Role
 
 ### 👩‍💻 Developer
-1. **CLAUDE.md** - Navigation guide
-2. **docs/ARCHITECTURE.md** - System design
-3. **docs/WALL_BOUNCE_SYSTEM.md** - Core implementation
-4. **docs/DEVELOPMENT_GUIDE.md** - Development workflows
+1. **CLAUDE.md** - Navigation skeleton (entry point)
+2. **docs/claude-commands.md** · **claude-mcp-rules.md** · **claude-development-notes.md** - CLAUDE detail docs (English)
+3. **docs/ARCHITECTURE.md** - System design
+4. **docs/WALL_BOUNCE_SYSTEM.md** - Core implementation
+5. **docs/DEVELOPMENT_GUIDE.md** - Development workflows
 
 ### 🔧 Operations
 1. **docs/DEPLOYMENT_GUIDE.md** - Production deployment
@@ -25,6 +26,14 @@
 ---
 
 ## 📁 Essential Documentation
+
+### Claude Code Navigation (CLAUDE.md details)
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **../CLAUDE.md** | Skeleton only (Quick Nav + Mandatory Rules summary) | All AI agents / developers |
+| **claude-commands.md** | dev / test / MCP / monitoring / emergency commands | Developers |
+| **claude-mcp-rules.md** | Serena / Cipher / Codex / Context7 rules | AI agents |
+| **claude-development-notes.md** | Common tasks, structure, API summary | Developers |
 
 ### Core Architecture
 | Document | Purpose | Audience |
@@ -46,6 +55,8 @@
 ### Integration Guides
 | Document | Purpose | Audience |
 |----------|---------|----------|
+| **TECH_STACK_WORKSPACE.md** | Tech stack AS-IS inventory & decision backlog (prep) | Architects / leads |
+| **decisions/README.md** | ADR index + stack decision template | All developers |
 | **codex-mcp-implementation.md** | Codex MCP integration | Developers |
 | **mcp-integration-guide.md** | MCP protocol patterns | Integration engineers |
 | **gemini-api-migration-guide.md** | Gemini API / Antigravity 関連 | Developers |

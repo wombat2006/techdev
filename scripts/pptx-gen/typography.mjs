@@ -25,8 +25,10 @@ export const TYPE = {
 };
 
 export const SPACE = {
-  slidePad: '48px 64px 36px',
+  slidePad: '48px 64px 32px',
   headGap: 24,
   bulletGap: 18,
   bulletDot: 12,
+  footerMinH: 48,
+  footerPadTop: 14,
 };
