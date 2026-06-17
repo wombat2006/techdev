@@ -239,7 +239,7 @@ Each task block: **Purpose** → **Steps** → **Done when** → **Reflection me
 
 **Purpose:** Cursor Agent tool calls route to **single unified** MCP server `techsapo-providers` (subscription quota for tool execution).
 
-**Prerequisite:** Fork cloned — [FORK_CURSOR.md](./FORK_CURSOR.md). Work in `~/techdev-cursor`, not upstream `~/techdev`.
+**Prerequisite:** Fork cloned — [FORK_CURSOR.md](./FORK_CURSOR.md). Complete [Fork bootstrap](./FORK_CURSOR.md#fork-bootstrap-mcp-implementation-ready) (Day 0 config + directory layout) before coding. Work in `~/techdev-cursor`, not upstream `~/techdev`.
 
 **Steps:**
 
