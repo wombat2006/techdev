@@ -34,7 +34,7 @@ Requirements: [TESTING_GUIDE.md](./TESTING_GUIDE.md)
 
 ## MCP Services
 
-**Prerequisite:** Complete [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) **Phase 0** (WSL-native `claude`, `codex`, `agy` + auth) before Cursor MCP registration.
+**Prerequisite:** Complete [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) **Track A-0** (WSL-native `claude`, `codex`, `agy` + auth) before Cursor MCP registration.
 
 ```bash
 npm run cipher-mcp        # Long-term memory MCP
@@ -73,7 +73,7 @@ test -f ~/.codex/auth.json && echo "codex auth ok"
 redis-cli ping
 ```
 
-Details: [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) · [DEVELOPMENT_GUIDE.md](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
+Details: [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) · [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) · [DEVELOPMENT_GUIDE.md](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
 
 ```bash
 which agy             # Antigravity CLI (required)

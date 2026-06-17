@@ -22,7 +22,7 @@
 | Add new LLM provider | `src/services/wall-bounce-analyzer.ts` | `initializeProviders()` |
 | Modify quality threshold | `src/services/wall-bounce-analyzer.ts` | `executeWallBounce()` |
 | Inference profile / CoT | `config/inference-profiles.json` (planned), provider adapters | [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md) |
-| Cursor MCP registration | After Phase 0 WSL CLI + auth | [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) |
+| Cursor MCP registration | After Track A-0 in [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) | [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) |
 | Add API endpoint | `src/routes/` | Create new route file |
 | Update MCP approval | `src/services/mcp-approval-manager.ts` | `assessRisk()` |
 

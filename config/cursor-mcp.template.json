@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "techsapo-codex": {
+      "command": "npm",
+      "args": ["run", "codex-mcp"],
+      "cwd": "<REPO_ROOT>"
+    },
+    "techsapo-claude": {
+      "command": "npm",
+      "args": ["run", "claude-code-mcp"],
+      "cwd": "<REPO_ROOT>"
+    }
+  }
+}

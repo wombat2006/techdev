@@ -9,9 +9,10 @@
 ### 👩‍💻 Developer
 1. **CLAUDE.md** - Navigation skeleton (entry point)
 2. **docs/claude-commands.md** · **claude-mcp-rules.md** · **claude-development-notes.md** - CLAUDE detail docs (English)
-3. **docs/ARCHITECTURE.md** - System design
-4. **docs/WALL_BOUNCE_SYSTEM.md** - Core implementation
-5. **docs/DEVELOPMENT_GUIDE.md** - Development workflows
+3. **docs/CURSOR_MCP_TODO.md** - Phased execution runbook (Track A → B → C)
+4. **docs/ARCHITECTURE.md** - System design
+5. **docs/WALL_BOUNCE_SYSTEM.md** - Core implementation
+6. **docs/DEVELOPMENT_GUIDE.md** - Development workflows
 
 ### 🔧 Operations
 1. **docs/DEPLOYMENT_GUIDE.md** - Production deployment
@@ -20,9 +21,10 @@
 
 ### 🎯 Integration Engineer
 1. **docs/MCP_SERVICES.md** - MCP architecture
-2. **docs/CURSOR_MCP_PLAN.md** - Cursor MCP plan (Phase 0: WSL CLI + auth)
-3. **docs/codex-mcp-implementation.md** - Codex MCP setup
-4. **docs/API_REFERENCE.md** - API specifications
+2. **docs/CURSOR_MCP_TODO.md** - Phased execution runbook (WSL CLI → Cursor MCP → TS-20 → P5)
+3. **docs/CURSOR_MCP_PLAN.md** - Cursor MCP plan (policy overview)
+4. **docs/codex-mcp-implementation.md** - Codex MCP setup
+5. **docs/API_REFERENCE.md** - API specifications
 
 ---
 
@@ -63,6 +65,7 @@
 | **decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md** | Loose add-ons; cohesive Wall-Bounce core (TS-18) | Architects / leads |
 | **decisions/TECH_STACK_INFERENCE_PROFILES.md** | Model, effort, CoT, temperature profiles (TS-20) | Architects / core devs |
 | **CURSOR_MCP_PLAN.md** | Cursor MCP plan; Phase 0 WSL CLI + auth prerequisite (TS-21) | Developers |
+| **CURSOR_MCP_TODO.md** | Phased execution runbook — Track A/B/C + Gate reviews | Developers |
 | **TECH_STACK_WORKSPACE.md** | Tech stack AS-IS inventory & decision backlog TS-01…21 | Architects / leads |
 
 ### Integration Guides

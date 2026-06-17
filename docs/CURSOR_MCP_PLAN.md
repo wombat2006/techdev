@@ -6,6 +6,8 @@
 
 Register TechSapo provider MCP servers in **Cursor IDE** so Agent tool calls can use **subscription quota** (`claude`, `codex`, `agy`) instead of Cursor-only models.
 
+**Execution checklist:** [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) (step-by-step; Track A → Gate → B → Gate → C)
+
 Related: [MCP_SERVICES.md](./MCP_SERVICES.md) · [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0) · [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md)
 
 ---
@@ -184,7 +186,7 @@ Example `~/.cursor/mcp.json` or **Cursor Settings → MCP** (exact path TBD in P
 ## Phase 3: Unified Config (Planned)
 
 - Single `config/inference-profiles.json` consumed by Wall-Bounce and Cursor MCP adapters
-- Optional: workspace `.cursor/mcp.json` committed as template (`config/cursor-mcp.template.json`)
+- Workspace template: [config/cursor-mcp.template.json](../config/cursor-mcp.template.json) — see [CURSOR_MCP_TODO.md § A-3](./CURSOR_MCP_TODO.md#a-3-unified-config-template)
 
 ---
 
@@ -202,6 +204,7 @@ Example `~/.cursor/mcp.json` or **Cursor Settings → MCP** (exact path TBD in P
 ## Related Documents
 
 - [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
+- [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) (Phased Execution Runbook)
 - [codex-mcp-implementation.md](./codex-mcp-implementation.md)
 - [CLAUDE_CODE_MCP_IMPLEMENTATION.md](./CLAUDE_CODE_MCP_IMPLEMENTATION.md)
 - [TECH_STACK_WORKSPACE.md § TS-21](./TECH_STACK_WORKSPACE.md) (backlog)

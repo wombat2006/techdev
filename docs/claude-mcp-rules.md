@@ -96,6 +96,7 @@ Example: latest Express.js SSE middleware patterns.
 Phase 0 is **mandatory**: Cursor spawns MCP in WSL; Windows `/mnt/c/.../npm` CLIs fail.
 
 → [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md)  
+→ [CURSOR_MCP_TODO.md](./CURSOR_MCP_TODO.md) (execution runbook)  
 → [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
 
 ---
