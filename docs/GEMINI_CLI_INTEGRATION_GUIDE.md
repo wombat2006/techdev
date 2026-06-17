@@ -1,5 +1,8 @@
-# TechSapo Gemini CLI 統合ガイド
-## Google API からGemini CLI への移行戦略
+# TechSapo Antigravity CLI 統合ガイド
+
+> **2026-06 更新**: 本リポジトリの標準は **Antigravity CLI（`agy`）** です。実装移行の全体方針は [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md) を参照。本文は legacy Gemini CLI 時代の設計メモを Antigravity 表記に更新したものです。
+
+## Google API から Antigravity CLI への移行戦略
 
 **作成日**: 2025-09-27
 **対象**: TechSapo Wall-bounce Analyzer
@@ -9,7 +12,7 @@
 
 ## 📋 概要
 
-TechSapoの現在のGemini 2.5 Pro統合を、Google API直接呼び出しから**Gemini CLI経由**に変更する技術ガイドです。
+TechSapoの現在のGemini 2.5 Pro統合を、Google API直接呼び出しから**Antigravity CLI経由**に変更する技術ガイドです。
 
 ### 変更の背景
 - **依存関係軽減**: Google API SDK削除
@@ -19,7 +22,7 @@ TechSapoの現在のGemini 2.5 Pro統合を、Google API直接呼び出しから
 
 ---
 
-## 🔍 Gemini CLI 分析結果
+## 🔍 Antigravity CLI 分析結果
 
 ### 基本情報
 - **プロジェクト**: [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli)
@@ -76,7 +79,7 @@ async invokeGemini(prompt: string): Promise<LLMResponse> {
 }
 ```
 
-### 提案する新実装（Gemini CLI経由）
+### 提案する新実装（Antigravity CLI経由）
 ```typescript
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -90,7 +93,7 @@ async invokeGeminiCLI(prompt: string): Promise<LLMResponse> {
     // セキュリティ: プロンプトのエスケープ
     const escapedPrompt = this.escapeShellArgument(prompt);
 
-    // Gemini CLI実行
+    // Antigravity CLI実行
     const command = `gemini -p "${escapedPrompt}" --output-format json --model gemini-2.5-pro`;
 
     const { stdout, stderr } = await execAsync(command, {
@@ -115,11 +118,11 @@ async invokeGeminiCLI(prompt: string): Promise<LLMResponse> {
     };
 
   } catch (error) {
-    logger.error('Gemini CLI execution failed', {
+    logger.error('Antigravity CLI execution failed', {
       error: error.message,
       stderr: error.stderr
     });
-    throw new Error(`Gemini CLI failed: ${error.message}`);
+    throw new Error(`Antigravity CLI failed: ${error.message}`);
   }
 }
 
@@ -155,7 +158,7 @@ async invokeGeminiWithFallback(prompt: string): Promise<LLMResponse> {
     // まずCLI試行
     return await this.invokeGeminiCLI(prompt);
   } catch (cliError) {
-    logger.warn('Gemini CLI failed, falling back to API', {
+    logger.warn('Antigravity CLI failed, falling back to API', {
       error: cliError.message
     });
 
@@ -211,7 +214,7 @@ npm uninstall @google/generative-ai
 | 方式 | プロセス起動 | ネットワーク | 総時間推定 |
 |------|-------------|-------------|------------|
 | Google API | 0ms | 56,400ms | 56,400ms |
-| Gemini CLI | +50-100ms | 56,400ms | 56,450-500ms |
+| Antigravity CLI | +50-100ms | 56,400ms | 56,450-500ms |
 | **影響** | **+0.1-0.2%** | **変化なし** | **微小影響** |
 
 ### コスト比較（月間1,000リクエスト想定）
@@ -221,7 +224,7 @@ npm uninstall @google/generative-ai
 - Output: 1,500,000 tokens × $0.005/1K = $7.50
 - 月額合計: $7.52
 
-新方式（Gemini CLI）:
+新方式（Antigravity CLI）:
 - 無料枠内: $0.00
 - 年間削減: $90.24
 ```
@@ -230,7 +233,7 @@ npm uninstall @google/generative-ai
 | 方式 | 分間制限 | 日間制限 | 現在の使用量 |
 |------|----------|----------|-------------|
 | Google API | 15 req/min | - | 十分 |
-| Gemini CLI | 60 req/min | 1,000 req/day | **4倍向上** |
+| Antigravity CLI | 60 req/min | 1,000 req/day | **4倍向上** |
 
 ---
 
@@ -238,7 +241,7 @@ npm uninstall @google/generative-ai
 
 ### Step 1: 開発環境準備
 ```bash
-# 1. Gemini CLI 動作確認
+# 1. Antigravity CLI 動作確認
 npx @google/gemini-cli -p "Hello TechSapo integration test"
 
 # 2. 認証設定
@@ -309,7 +312,7 @@ export interface GeminiCLIResponse {
 
 export class GeminiCLIError extends Error {
   constructor(message: string) {
-    super(`Gemini CLI Error: ${message}`);
+    super(`Antigravity CLI Error: ${message}`);
     this.name = 'GeminiCLIError';
   }
 }
@@ -413,7 +416,7 @@ describe('GeminiCLIWrapper', () => {
     // Mock invalid CLI response
     jest.spyOn(wrapper as any, 'execAsync').mockRejectedValue(new Error('Command failed'));
 
-    await expect(wrapper.generateContent('test')).rejects.toThrow('Gemini CLI Error');
+    await expect(wrapper.generateContent('test')).rejects.toThrow('Antigravity CLI Error');
   });
 });
 ```
@@ -421,7 +424,7 @@ describe('GeminiCLIWrapper', () => {
 ### Integration Tests
 ```typescript
 // tests/integration/wall-bounce-gemini-cli.test.ts
-describe('Wall-bounce with Gemini CLI', () => {
+describe('Wall-bounce with Antigravity CLI', () => {
   test('should process request with CLI strategy', async () => {
     process.env.GEMINI_STRATEGY = 'cli';
 
@@ -457,19 +460,19 @@ describe('Wall-bounce with Gemini CLI', () => {
 export const geminiMetrics = {
   cliCallsTotal: new Counter({
     name: 'gemini_cli_calls_total',
-    help: 'Total number of Gemini CLI calls',
+    help: 'Total number of Antigravity CLI calls',
     labelNames: ['status', 'model']
   }),
 
   cliLatencyHistogram: new Histogram({
     name: 'gemini_cli_latency_seconds',
-    help: 'Gemini CLI call latency',
+    help: 'Antigravity CLI call latency',
     buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 120]
   }),
 
   cliErrorsTotal: new Counter({
     name: 'gemini_cli_errors_total',
-    help: 'Total number of Gemini CLI errors',
+    help: 'Total number of Antigravity CLI errors',
     labelNames: ['error_type']
   }),
 
@@ -483,7 +486,7 @@ export const geminiMetrics = {
 
 ### ダッシュボード項目
 ```yaml
-# Grafana Dashboard - Gemini CLI Metrics
+# Grafana Dashboard - Antigravity CLI Metrics
 panels:
   - title: "Gemini Strategy Distribution"
     type: "pie"
@@ -507,7 +510,7 @@ panels:
 ## 🚨 リスク・緩和策
 
 ### 主要リスク
-1. **CLI依存**: Gemini CLI自体の障害
+1. **CLI依存**: Antigravity CLI自体の障害
 2. **プロセス起動**: オーバーヘッド増加
 3. **認証期限**: Google Login セッション切れ
 4. **出力解析**: JSON形式変更リスク
@@ -564,7 +567,7 @@ async invokeGeminiWithAutoFallback(prompt: string): Promise<LLMResponse> {
 
 ### 事前準備
 ```
-□ Gemini CLI動作確認
+□ Antigravity CLI動作確認
 □ 認証設定完了（Google Login）
 □ 開発環境テスト実行
 □ セキュリティレビュー完了

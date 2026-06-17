@@ -56,11 +56,11 @@ class WallBounceAnalyzer {
 
 ### 2. LLMプロバイダー統合
 
-#### 2.1 Gemini CLI統合 (`wall-bounce-analyzer.ts:194-220`)
+#### 2.1 Antigravity CLI統合 (`wall-bounce-analyzer.ts:194-220`)
 ```typescript
 private async executeGeminiCLI(prompt: string, version: 'gemini-2.5-pro' | 'gemini-2.5-flash'): Promise<LLMResponse> {
   const args = [prompt, '--model', version, '--output-format', 'json'];
-  const child = spawn('gemini', args, {
+  const child = spawn('agy', args, {
     timeout: config.wallBounce.enableTimeout ? config.wallBounce.timeoutMs : undefined,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: { ...process.env }  // API_KEY除去済み

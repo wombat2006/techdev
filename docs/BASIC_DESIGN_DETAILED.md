@@ -124,7 +124,7 @@ graph TB
     end
 
     subgraph "External Integrations"
-        Gemini[Gemini CLI<br/>🟢 2.5 Pro/Flash<br/>📊 Cost: $0.002/1K]
+        Gemini[Antigravity CLI<br/>🟢 2.5 Pro/Flash<br/>📊 Cost: $0.002/1K]
         OpenAI[OpenAI Codex<br/>🔵 GPT-5<br/>💰 Cost: $0.03/1K]
         Anthropic[Anthropic Claude<br/>🟣 Opus 4.1/Sonnet 4<br/>💎 Premium Tier]
         Drive[Google Drive<br/>☁️ Knowledge Base<br/>📁 Document Storage]
@@ -316,7 +316,7 @@ graph TB
         B --> B3[💎 Premium Tier]
         
         C[Google] --> C1[❌ API_KEY使用禁止]
-        C --> C2[✅ Gemini CLI経由のみ]
+        C --> C2[✅ Antigravity CLI経由のみ]
         C --> C3[💚 コスト効率最高]
     end
     
@@ -476,7 +476,7 @@ sequenceDiagram
     participant User as 👤 User
     participant API as 🌐 API Gateway
     participant WB as 🤖 Wall-Bounce Analyzer
-    participant G as 🟢 Gemini CLI
+    participant G as 🟢 Antigravity CLI
     participant O as 🔵 OpenAI Codex
     participant A as 🟣 Anthropic Claude
     participant R as ⚡ Redis Cache
@@ -736,7 +736,7 @@ flowchart LR
     end
     
     subgraph "External APIs"
-        GEMINI[Gemini CLI<br/>🟢 Google AI]
+        GEMINI[Antigravity CLI<br/>🟢 Google AI]
         OPENAI[OpenAI Codex<br/>🔵 GPT Models]
         CLAUDE[Claude API<br/>🟣 Anthropic]
         DRIVE[Google Drive<br/>☁️ Documents]
@@ -1180,7 +1180,7 @@ flowchart LR
         A[User Request] --> B[Load Balancer]
         B --> C[Provider Pool]
         
-        C --> D[Gemini CLI]
+        C --> D[Antigravity CLI]
         C --> E[OpenAI Codex]
         C --> F[Anthropic Claude]
         
@@ -1635,7 +1635,7 @@ flowchart TD
 ```mermaid
 graph LR
     subgraph "External Dependencies"
-        A[Gemini CLI<br/>🟢 Google AI]
+        A[Antigravity CLI<br/>🟢 Google AI]
         B[OpenAI Codex<br/>🔵 GPT Models]
         C[Anthropic Claude<br/>🟣 Claude API]
         D[Google Drive<br/>☁️ Documents]

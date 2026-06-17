@@ -87,7 +87,7 @@ export const SLIDES = [
     headers: ['領域', '状態', '備考'],
     rows: [
       ['Wall-Bounce コア', '✅ 実装済', 'parallel / sequential / Aggregator'],
-      ['マルチ LLM', '✅ 実装済', 'Gemini / Codex / Claude MCP'],
+      ['マルチ LLM', '✅ 実装済', 'Antigravity / Codex / Claude MCP'],
       ['品質 Hard gate', '❌ 未実装', '閾値未満でも返却'],
       ['confidence', '⚠️ 固定値', '参考表示のみ'],
       ['Grounding 統合', '⚠️ 部分', 'RAG と WB 経路分離'],
@@ -143,7 +143,7 @@ export const SLIDES = [
     right: [
       '誤 API 参照: -40〜70%（Context7）',
       '設計・実装矛盾: -25〜40%',
-      'Codex + Gemini + Sonnet 役割分担',
+      'Codex + Antigravity + Sonnet 役割分担',
     ],
   },
   {

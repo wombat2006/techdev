@@ -46,7 +46,7 @@ graph TB
     end
 
     subgraph "External Integrations"
-        Gemini[Gemini CLI<br/>2.5 Pro/Flash]
+        Gemini[Antigravity CLI<br/>2.5 Pro/Flash]
         OpenAI[OpenAI Codex<br/>GPT-5]
         Anthropic[Anthropic Claude<br/>Opus 4.1/Sonnet 4]
         Drive[Google Drive<br/>Knowledge Base]
@@ -92,7 +92,7 @@ graph TB
 
 #### 外部統合
 - **LLM Providers**: 
-  - Gemini CLI (2.5 Pro/Flash)
+  - Antigravity CLI (2.5 Pro/Flash)
   - OpenAI Codex (GPT-5)
   - Anthropic Claude (Opus 4.1/Sonnet 4)
 - **Knowledge Base**: Google Drive API v3
@@ -114,7 +114,7 @@ graph TB
 #### 3.1.2 プロバイダー制約
 - **OpenAI**: 必ずCodex経由で呼び出し（直接API使用禁止）
 - **Anthropic**: Claude Code直接呼び出しのみ（API使用絶対禁止）
-- **Google**: Gemini CLI経由のみ（API_KEY使用禁止）
+- **Google**: Antigravity CLI経由のみ（API_KEY使用禁止）
 
 #### 3.1.3 品質保証
 - Confidence ≥ 0.7（信頼度閾値）
@@ -230,7 +230,7 @@ flowchart TD
     Session --> Redis[(Redis Cache)]
     
     Session --> WallBounce[Wall-Bounce実行]
-    WallBounce --> Provider1[Gemini CLI]
+    WallBounce --> Provider1[Antigravity CLI]
     WallBounce --> Provider2[OpenAI Codex]
     WallBounce --> Provider3[Anthropic Claude]
     
@@ -326,7 +326,7 @@ interface EnvironmentConfig {
 #### 6.2.1 プロバイダー別戦略
 ```typescript
 // Gemini: CLI専用（API_KEY使用禁止）
-const geminiExecution = spawn('gemini', args, {
+const geminiExecution = spawn('agy', args, {
   env: { ...process.env }  // API_KEY除去済み
 });
 

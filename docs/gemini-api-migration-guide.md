@@ -1,5 +1,7 @@
 # Gemini API Migration Guide Analysis
 
+> **2026-06 更新**: TechSapo の Google Tier 1 アクセス標準は **Antigravity CLI（`agy`）** です。本書は Gemini API / SDK の技術分析であり、CLI 運用方針は [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md) を優先してください。
+
 ## Overview
 
 This document analyzes the Gemini API migration guide from Google AI, focusing on the transition to the new Google GenAI SDK and its implications for TechSapo's Wall-Bounce Analysis System integration with Gemini 2.5 Pro.
@@ -162,7 +164,7 @@ export class ModernGeminiWallBounceProvider {
 ### 6. Migration Implementation for TechSapo
 
 #### Phase 1: Assessment and Planning
-1. **Current Integration Analysis**: Review existing Gemini CLI integration
+1. **Current Integration Analysis**: Review existing Antigravity CLI integration
 2. **Security Requirements**: Ensure new SDK meets TechSapo's security standards
 3. **Performance Benchmarking**: Compare CLI vs SDK performance
 4. **Cost Analysis**: Evaluate API usage patterns and optimization opportunities
@@ -390,7 +392,7 @@ export class RobustGeminiProvider {
 ## Implementation Timeline
 
 ### Week 1-2: Assessment and Setup
-- Analyze current Gemini CLI integration
+- Analyze current Antigravity CLI integration
 - Install and configure new Google GenAI SDK
 - Set up development environment with new SDK
 - Create hybrid provider for testing

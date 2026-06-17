@@ -30,10 +30,12 @@ Multi-LLM orchestration engine ensuring quality through provider diversity.
 - Real-time SSE streaming for UI updates
 
 **Provider Tiers**:
-1. **Gemini 2.5 Pro** - CLI integration, no API keys
+1. **Gemini 2.5 Pro** - Antigravity CLI (`agy`) integration, no API keys
 2. **GPT-5 Codex** - MCP/CLI integration via Codex MCP Server
 3. **Claude Sonnet 4** - Internal SDK, cost-managed
 4. **Claude Opus 4.1** - Aggregator role, synthesis
+
+> **Implementation note**: Documentation standard is Antigravity CLI. Source may still spawn legacy `gemini` until migration — see [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md).
 
 **Execution Modes**:
 - `parallel`: Concurrent provider execution (default)

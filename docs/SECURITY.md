@@ -21,7 +21,7 @@ TechSapo implements defense-in-depth security across all layers, with special em
 // Correct: CLI spawn with sanitized input
 const { spawn } = require('child_process');
 const sanitizedPrompt = prompt.replace(/[`$\\]/g, '\\$&');
-spawn('gemini', ['-p', sanitizedPrompt, '--model', 'gemini-2.5-pro']);
+spawn('agy', ['-p', sanitizedPrompt, '--model', 'gemini-2.5-pro']);
 ```
 
 #### ✅ GPT-5 Codex
@@ -112,7 +112,7 @@ export const validateWallBounceRequest = (
 
 ```typescript
 // ✅ GOOD: Arguments array, timeout, error handling
-const child = spawn('gemini', args, {
+const child = spawn('agy', args, {
   timeout: 120000,
   stdio: ['ignore', 'pipe', 'pipe'],
   env: { ...process.env }

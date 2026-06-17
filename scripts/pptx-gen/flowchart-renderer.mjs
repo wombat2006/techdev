@@ -137,7 +137,7 @@ export function renderWallBounceFlow() {
     flowNode('TaskRouter', { sub: 'requiresWallBounce = true', tone: 'primary', minWidth: 320 }),
     arrow('down'),
     branchRow([
-      { node: flowNode('Gemini 2.5 Pro', { sub: '分析 · 調査', tone: 'sky', minWidth: 200 }) },
+      { node: flowNode('Antigravity\nGemini 2.5 Pro', { sub: '分析 · 調査', tone: 'sky', minWidth: 200 }) },
       { node: flowNode('GPT-5 Codex', { sub: 'コード · 設計', tone: 'sky', minWidth: 200 }) },
       { node: flowNode('Claude Sonnet', { sub: '編集 · 統合', tone: 'sky', minWidth: 200 }) },
     ]),

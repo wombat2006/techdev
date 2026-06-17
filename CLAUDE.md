@@ -55,11 +55,13 @@ sudo systemctl status techsapo    # Production service status
 
 ### Provider Architecture
 ```
-Tier 1: Gemini 2.5 Pro     → CLI only (gemini command)
+Tier 1: Gemini 2.5 Pro     → Antigravity CLI only (agy command)
 Tier 2: GPT-5 Codex        → MCP/CLI (codex command)
-Tier 3: Claude Sonnet 4    → Internal SDK
-Tier 4: Claude Opus 4.1    → Aggregator (synthesis)
+Tier 3: Claude Sonnet 4      → Internal SDK
+Tier 4: Claude Opus 4.1      → Aggregator (synthesis)
 ```
+
+> **実装注記**: ドキュメント標準は Antigravity CLI（`agy`）。`wall-bounce-analyzer.ts` の spawn 先は legacy `gemini` のまま（移行予定）。→ [ANTIGRAVITY_CLI_MIGRATION.md](docs/ANTIGRAVITY_CLI_MIGRATION.md)
 
 **Implementation**: `WallBounceAnalyzer.executeWallBounce()`
 - `parallel` mode: Concurrent execution (default)
@@ -72,7 +74,7 @@ Tier 4: Claude Opus 4.1    → Aggregator (synthesis)
 ## 🔒 Security Requirements
 
 ### LLM Provider Access
-- ✅ **Allowed**: CLI spawn (gemini, codex), Internal SDK (Anthropic)
+- ✅ **Allowed**: CLI spawn (agy/Antigravity, codex), Internal SDK (Anthropic)
 - ❌ **Forbidden**: Direct API keys in code, environment variables
 
 ### Code Security
@@ -187,7 +189,8 @@ npm run test:watch        # Watch mode
 ### Integration Guides
 - `codex-mcp-implementation.md` - Codex MCP server setup
 - `mcp-integration-guide.md` - MCP protocol patterns  
-- `gemini-api-migration-guide.md` - Gemini CLI usage
+- `ANTIGRAVITY_CLI_MIGRATION.md` - Antigravity CLI（Tier 1 Google）移行方針
+- `gemini-api-migration-guide.md` - Gemini API / Antigravity 関連（参照）
 - `MCP_SERVICES.md` - MCP service architecture
 
 ### Operations & Deployment
@@ -324,7 +327,7 @@ await cipher.askCipher({
 
 ### Coding Practices
 - **Never bypass Wall-Bounce** - All LLM calls via `wall-bounce-analyzer.ts`
-- **No API keys** - CLI/SDK only (gemini, codex, Anthropic SDK)
+- **No API keys** - CLI/SDK only (Antigravity `agy`, codex, Anthropic SDK)
 - **Japanese responses** - Primary language for user-facing content
 - **Test coverage** - 100% for Wall-Bounce components
 
@@ -339,7 +342,7 @@ await cipher.askCipher({
 ### Environment Setup
 ```bash
 # Required CLI tools
-which gemini          # Gemini CLI (required)
+which agy             # Antigravity CLI (required)
 which codex           # Codex CLI (required for GPT-5)
 
 # Required services  

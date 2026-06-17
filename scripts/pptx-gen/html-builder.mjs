@@ -62,7 +62,7 @@ const FLOWCHARTS = {
     flowArrow(),
     flowNode('TaskRouter', 'requiresWallBounce = true', 'primary'),
     flowArrow(),
-    `<div class="flow-branch">${['Gemini 2.5 Pro', 'GPT-5 Codex', 'Claude Sonnet'].map((l) =>
+    `<div class="flow-branch">${['Antigravity / Gemini 2.5 Pro', 'GPT-5 Codex', 'Claude Sonnet'].map((l) =>
       `<div class="flow-branch-col">${flowNode(l, '', 'sky')}</div>`,
     ).join('')}</div>`,
     flowArrow(),

@@ -42,7 +42,7 @@ npm run cipher-api   # Start Cipher API mode
 #### Wall-Bounce Analyzer (`src/services/wall-bounce-analyzer.ts`)
 - **Multi-LLM Orchestration**: Coordinates multiple AI providers for consensus
 - **Quality Assurance**: Confidence scoring and consensus validation
-- **Provider Support**: OpenAI GPT-5, Google Gemini, OpenRouter (NO Anthropic API_KEY)
+- **Provider Support**: OpenAI GPT-5, Google Gemini via **Antigravity CLI（`agy`）**, OpenRouter (NO Anthropic API_KEY)
 - **Task Types**: basic, premium, critical with different provider configurations
 - **Agent Framework**: Optional integration with `@openai/agents` for multi-agent workflows
 
@@ -108,6 +108,8 @@ Key variables defined in `src/config/environment.ts`:
 
 ### Service Dependencies
 - **Node.js**: ≥18.0.0 required
+- **Antigravity CLI**: `agy` on PATH for Google Tier 1（`agy auth login`）。→ [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)  
+  ※ 実装は legacy `gemini` spawn のまま（移行予定）
 - **Redis**: Required for caching and session management
 - **Database**: MySQL2 for audit logs and monitoring data
 - **Monitoring**: Prometheus + Grafana stack in Docker containers

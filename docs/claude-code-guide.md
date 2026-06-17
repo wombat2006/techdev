@@ -77,7 +77,7 @@ docs/                # Project documentation
 - **Quality Thresholds**: Confidence ≥ 0.7, Consensus ≥ 0.6 or auto-escalation
 - **Japanese Responses**: Primary language for user-facing content
 - **Provider Architecture**:
-  - **Tier 1**: Gemini 2.5 Pro (CLI required, no API key)
+  - **Tier 1**: Gemini 2.5 Pro (Antigravity CLI / `agy`, no API key)
   - **Tier 2**: GPT-5 Codex + GPT-5 General (CLI required via Codex MCP)
   - **Tier 3**: Anthropic Sonnet 4 (internal calls only, no API)
   - **Tier 4**: Anthropic Opus 4.1 (internal calls only, aggregator role)
@@ -100,7 +100,7 @@ docs/                # Project documentation
 - Node.js ≥18.0.0 required
 - TypeScript configuration: ES2022 target, CommonJS modules
 - Redis required for caching and session management
-- CLI Requirements: `gemini` CLI must be installed for Gemini 2.5 Pro access
+- CLI Requirements: `agy`（Antigravity CLI）must be installed for Gemini 2.5 Pro access
 - MCP Dependencies: `@modelcontextprotocol/sdk` for protocol integration
 - Security: All provider communications use secure spawn/CLI patterns
 - Test environment: Jest with 5-minute timeout for integration tests

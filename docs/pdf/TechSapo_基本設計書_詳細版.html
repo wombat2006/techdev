@@ -449,7 +449,7 @@ subgraph &quot;Data Layer&quot;
 end
 
 subgraph &quot;External Integrations&quot;
-    Gemini[Gemini CLI&lt;br/&gt;🟢 2.5 Pro/Flash&lt;br/&gt;📊 Cost: $0.002/1K]
+    Gemini[Antigravity CLI&lt;br/&gt;🟢 2.5 Pro/Flash&lt;br/&gt;📊 Cost: $0.002/1K]
     OpenAI[OpenAI Codex&lt;br/&gt;🔵 GPT-5&lt;br/&gt;💰 Cost: $0.03/1K]
     Anthropic[Anthropic Claude&lt;br/&gt;🟣 Opus 4.1/Sonnet 4&lt;br/&gt;💎 Premium Tier]
     Drive[Google Drive&lt;br/&gt;☁️ Knowledge Base&lt;br/&gt;📁 Document Storage]
@@ -639,7 +639,7 @@ style C fill:#ffcdd2&lt;/div&gt;
     B --&gt; B3[💎 Premium Tier]
     
     C[Google] --&gt; C1[❌ API_KEY使用禁止]
-    C --&gt; C2[✅ Gemini CLI経由のみ]
+    C --&gt; C2[✅ Antigravity CLI経由のみ]
     C --&gt; C3[💚 コスト効率最高]
 end
 
@@ -796,7 +796,7 @@ SESS --&gt; MON&lt;/div&gt;
     participant User as 👤 User
     participant API as 🌐 API Gateway
     participant WB as 🤖 Wall-Bounce Analyzer
-    participant G as 🟢 Gemini CLI
+    participant G as 🟢 Antigravity CLI
     participant O as 🔵 OpenAI Codex
     participant A as 🟣 Anthropic Claude
     participant R as ⚡ Redis Cache
@@ -1053,7 +1053,7 @@ subgraph &quot;Data Storage&quot;
 end
 
 subgraph &quot;External APIs&quot;
-    GEMINI[Gemini CLI&lt;br/&gt;🟢 Google AI]
+    GEMINI[Antigravity CLI&lt;br/&gt;🟢 Google AI]
     OPENAI[OpenAI Codex&lt;br/&gt;🔵 GPT Models]
     CLAUDE[Claude API&lt;br/&gt;🟣 Anthropic]
     DRIVE[Google Drive&lt;br/&gt;☁️ Documents]
@@ -1492,7 +1492,7 @@ end&lt;/div&gt;
         A[User Request] --> B[Load Balancer]
         B --> C[Provider Pool]
         
-<pre><code>    C --&gt; D[Gemini CLI]
+<pre><code>    C --&gt; D[Antigravity CLI]
     C --&gt; E[OpenAI Codex]
     C --&gt; F[Anthropic Claude]
     
@@ -1940,7 +1940,7 @@ end&lt;/div&gt;
       <div class="diagram-title">📊 システム構成図</div>
       <div class="diagram-code">graph LR
     subgraph "External Dependencies"
-        A[Gemini CLI<br/>🟢 Google AI]
+        A[Antigravity CLI<br/>🟢 Google AI]
         B[OpenAI Codex<br/>🔵 GPT Models]
         C[Anthropic Claude<br/>🟣 Claude API]
         D[Google Drive<br/>☁️ Documents]

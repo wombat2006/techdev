@@ -34,13 +34,17 @@ const anthropic = new Anthropic({
 });
 ```
 
-#### Google Gemini
+#### Google Gemini（Antigravity CLI 経由）
+
+Tier 1 プロバイダー。モデルは **Gemini 2.5 Pro / Flash**。**Antigravity CLI（`agy`）** で spawn（API キー直埋め禁止）。→ [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)
+
 ```typescript
 const geminiConfig = {
   model: 'gemini-2.5-flash', // または gemini-2.5-pro
   temperature: 0.8,
   maxTokens: 1500
 };
+// 実行: spawn('agy', …) — 実装移行中（現行コードは legacy gemini）
 ```
 
 ## 🏗️ Wall-Bounce Architecture

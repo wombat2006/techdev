@@ -48,7 +48,8 @@
 |----------|---------|----------|
 | **codex-mcp-implementation.md** | Codex MCP integration | Developers |
 | **mcp-integration-guide.md** | MCP protocol patterns | Integration engineers |
-| **gemini-api-migration-guide.md** | Gemini CLI usage | Developers |
+| **gemini-api-migration-guide.md** | Gemini API / Antigravity 関連 | Developers |
+| **ANTIGRAVITY_CLI_MIGRATION.md** | Antigravity CLI（Tier 1 Google）移行方針 | Developers |
 | **openai-agents-js-analysis.md** | OpenAI Agents framework | AI developers |
 
 ---
