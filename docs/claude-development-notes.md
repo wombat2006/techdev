@@ -116,6 +116,7 @@ Details: [WALL_BOUNCE_SYSTEM.md](./WALL_BOUNCE_SYSTEM.md)
 - [mcp-integration-guide.md](./mcp-integration-guide.md)
 - [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)
 - [decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md](./decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md) — stdio/MCP vs HTTP SSE
+- [decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md](./decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md) — core vs add-on coupling
 - [GEMINI_CLI_INTEGRATION_GUIDE.md](./GEMINI_CLI_INTEGRATION_GUIDE.md) (legacy reference)
 
 ### Operations

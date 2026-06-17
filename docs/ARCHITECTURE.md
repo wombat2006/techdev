@@ -133,6 +133,8 @@ Co-located providers (`agy`, `codex`, Claude Code MCP) use **stdio / MCP / in-pr
 
 Optional **Provider Gateway (HTTP/SSE)** may be added later for sidecar or multi-node deployment (TS-08). See [decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md](./decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md).
 
+**Core vs add-on:** Keep Orchestrator + Wall-Bounce cohesive; plug Grounding, AWS, and fork features behind interfaces (loose coupling). See [decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md](./decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md).
+
 ### MCP Integration Flow
 
 ```
