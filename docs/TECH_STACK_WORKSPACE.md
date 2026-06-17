@@ -88,6 +88,7 @@ npm run audit:tech-stack
 | Codex MCP | custom server | `npm run codex-mcp` |
 | Claude Code MCP | `@anthropic-ai/claude-agent-sdk` | `claude-code-mcp` script |
 | Context7 | external MCP | Cursor / desktop config |
+| Cursor MCP (TechSapo) | **not registered** | Phase 0: WSL `claude`/`codex`/`agy` + auth → [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) |
 
 ### Testing & quality
 
@@ -156,6 +157,7 @@ Priority is **not fixed** — reorder as needed during refinement.
 | TS-18 | Core vs add-on | Coupling strategy for fork / AWS / Grounding | partial / ad-hoc | **Loose add-ons; cohesive core + contracts** | [TECH_STACK_CORE_VS_ADDON_COUPLING.md](./decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md) |
 | TS-19 | Morphological analysis | Japanese prompt parsing for PromptAnalyzer | regex-only (B5) | **MeCab-class parser, Phase 0** | [WALL_BOUNCE_P5_ARCHITECTURE.md §7](./decisions/WALL_BOUNCE_P5_ARCHITECTURE.md#7-形態素解析の位置づけ) |
 | TS-20 | Inference profiles | Model, effort, CoT, temperature per task/provider | fragmented / hardcoded | **InferenceProfile + presets, Phase 0** | [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md) |
+| TS-21 | Cursor MCP | TechSapo providers in Cursor IDE | not registered | **Phase 0: WSL CLI + auth → Phase 1: MCP register** | [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) |
 
 ---
 

@@ -85,6 +85,21 @@ Example: latest Express.js SSE middleware patterns.
 
 ---
 
+## Rule 4: Cursor MCP (TechSapo providers — Planned)
+
+```
+⛔ Do NOT register Cursor MCP until Phase 0 complete
+✅ Phase 0 FIRST: WSL-native claude + codex + agy with auth
+✅ THEN: register techsapo-codex / techsapo-claude in Cursor Settings → MCP
+```
+
+Phase 0 is **mandatory**: Cursor spawns MCP in WSL; Windows `/mnt/c/.../npm` CLIs fail.
+
+→ [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md)  
+→ [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
+
+---
+
 ## Workflow Example
 
 ```typescript

@@ -43,6 +43,8 @@ Multi-LLM orchestration engine ensuring quality through provider diversity.
 
 **Inference profiles (TS-20)**: Per-task control of model, thinking effort, CoT, and temperature via `InferenceProfile` presets — see [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md) and [WALL_BOUNCE_SYSTEM.md](./WALL_BOUNCE_SYSTEM.md#inference-profiles-model-effort-cot-temperature).
 
+**Cursor MCP (TS-21, planned)**: Phase 0 requires WSL-native `claude` / `codex` / `agy` + auth before IDE registration — [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md).
+
 ### 3. MCP Services Architecture
 
 Model Context Protocol integration for standardized LLM interactions.

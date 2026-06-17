@@ -1,5 +1,7 @@
 # Claude Code MCP Server Implementation
 
+> **前提:** Cursor MCP 登録前に [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) **Phase 0** を完了すること — WSL ネイティブ `claude` + OAuth（`ANTHROPIC_API_KEY` 未設定）。
+
 ## 概要
 
 Wall-BounceシステムでSonnet 4.5を確実に使用するため、Claude Code CLIをラップしたMCPサーバを実装しました。

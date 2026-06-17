@@ -34,13 +34,17 @@ Requirements: [TESTING_GUIDE.md](./TESTING_GUIDE.md)
 
 ## MCP Services
 
+**Prerequisite:** Complete [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) **Phase 0** (WSL-native `claude`, `codex`, `agy` + auth) before Cursor MCP registration.
+
 ```bash
-npm run cipher-mcp   # Long-term memory MCP
-npm run codex-mcp    # GPT-5/Codex MCP integration
-npm run cipher-api   # Cipher API mode (port 3002)
+npm run cipher-mcp        # Long-term memory MCP
+npm run codex-mcp         # GPT-5/Codex MCP integration
+npm run claude-code-mcp   # Claude Code MCP (Sonnet 4.5)
+npm run codex-mcp-test    # Verify Codex MCP after Phase 0
+npm run cipher-api        # Cipher API mode (port 3002)
 ```
 
-Architecture: [MCP_SERVICES.md](./MCP_SERVICES.md)
+Architecture: [MCP_SERVICES.md](./MCP_SERVICES.md) · Cursor plan: [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md)
 
 ---
 
@@ -56,6 +60,20 @@ Details: [MONITORING_OPERATIONS.md](./MONITORING_OPERATIONS.md)
 ---
 
 ## Environment Verification
+
+**Cursor MCP Phase 0** — all must pass (WSL-native paths only):
+
+```bash
+which claude && claude --version    # NOT /mnt/c/.../npm/claude
+which codex  && codex --version     # WSL: npm install -g @openai/codex
+which agy    && agy --version       # ~/.local/bin/agy
+unset ANTHROPIC_API_KEY
+test -f ~/.claude/.credentials.json || test -f ~/.claude/session  # Claude OAuth
+test -f ~/.codex/auth.json && echo "codex auth ok"
+redis-cli ping
+```
+
+Details: [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) · [DEVELOPMENT_GUIDE.md](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
 
 ```bash
 which agy             # Antigravity CLI (required)

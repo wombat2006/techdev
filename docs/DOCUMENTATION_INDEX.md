@@ -20,8 +20,9 @@
 
 ### 🎯 Integration Engineer
 1. **docs/MCP_SERVICES.md** - MCP architecture
-2. **docs/codex-mcp-implementation.md** - Codex MCP setup
-3. **docs/API_REFERENCE.md** - API specifications
+2. **docs/CURSOR_MCP_PLAN.md** - Cursor MCP plan (Phase 0: WSL CLI + auth)
+3. **docs/codex-mcp-implementation.md** - Codex MCP setup
+4. **docs/API_REFERENCE.md** - API specifications
 
 ---
 
@@ -61,7 +62,8 @@
 | **decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md** | stdio/MCP same-node; HTTP SSE at API boundary (TS-17) | Architects / core devs |
 | **decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md** | Loose add-ons; cohesive Wall-Bounce core (TS-18) | Architects / leads |
 | **decisions/TECH_STACK_INFERENCE_PROFILES.md** | Model, effort, CoT, temperature profiles (TS-20) | Architects / core devs |
-| **TECH_STACK_WORKSPACE.md** | Tech stack AS-IS inventory & decision backlog TS-01…20 | Architects / leads |
+| **CURSOR_MCP_PLAN.md** | Cursor MCP plan; Phase 0 WSL CLI + auth prerequisite (TS-21) | Developers |
+| **TECH_STACK_WORKSPACE.md** | Tech stack AS-IS inventory & decision backlog TS-01…21 | Architects / leads |
 
 ### Integration Guides
 | Document | Purpose | Audience |

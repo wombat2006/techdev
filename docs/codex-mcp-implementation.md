@@ -1,5 +1,7 @@
 # OpenAI Codex MCP Server Implementation
 
+> **Prerequisite:** Complete [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) **Phase 0** — WSL-native `codex` install + `~/.codex/auth.json` before running or registering this MCP in Cursor.
+
 ## Overview
 
 This document describes the comprehensive implementation of the OpenAI Codex MCP (Model Context Protocol) server for TechSapo's Wall-Bounce Analysis System. The implementation is based on the official OpenAI Codex documentation and provides enterprise-grade integration with advanced security, monitoring, and multi-LLM coordination capabilities.

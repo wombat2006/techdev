@@ -39,6 +39,23 @@ const response = await cipherMCP.askCipher({
 
 **Integration**: Background knowledge layer, not in critical path
 
+### Cursor MCP (TechSapo providers — Planned)
+
+Register TechSapo stdio MCP servers in **Cursor IDE** so tool calls use **subscription quota** (`claude`, `codex`, `agy`).
+
+| Phase | Scope | Status |
+|-------|-------|--------|
+| **0** | **WSL native install + auth** for all peer CLIs | **Prerequisite — defined** |
+| 1 | Cursor Settings / `mcp.json` registration | Planned |
+| 2 | InferenceProfile pass-through | Planned |
+
+**Phase 0 MUST complete before registration.** Windows npm CLIs do not run under WSL MCP spawn.
+
+→ Full plan: [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md)  
+→ Checklist: [DEVELOPMENT_GUIDE.md § WSL Native CLI](./DEVELOPMENT_GUIDE.md#wsl-native-cli-prerequisites-cursor-mcp-phase-0)
+
+Planned servers: `techsapo-codex` (`npm run codex-mcp`), `techsapo-claude` (`npm run claude-code-mcp`), agy wrapper TBD.
+
 ### 2. Codex MCP
 
 **Purpose**: GPT-5/GPT-5-Codex integration with approval workflows

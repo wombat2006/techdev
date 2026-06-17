@@ -107,18 +107,43 @@ Key variables defined in `src/config/environment.ts`:
 - **Security**: Input validation, authentication middleware, CORS configuration
 
 ### Service Dependencies
-- **Node.js**: ≥18.0.0 required
-- **Antigravity CLI**: `agy` on PATH for Google Tier 1（`agy auth login`）。→ [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)  
+- **Node.js**: ≥18.0.0 required (WSL-native for Cursor MCP — see [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) Phase 0)
+- **Claude Code CLI**: WSL-native `@anthropic-ai/claude-code` + OAuth (not Windows `/mnt/c/` shim)
+- **Codex CLI**: WSL-native `@openai/codex` + `~/.codex/auth.json` (not Windows npm)
+- **Antigravity CLI**: `agy` on WSL PATH for Google Tier 1（`agy auth login`）。→ [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)  
   Note: implementation still spawns legacy `gemini` (migration pending)
 - **Redis**: Required for caching and session management
 - **Database**: MySQL2 for audit logs and monitoring data
 - **Monitoring**: Prometheus + Grafana stack in Docker containers
 
+### WSL Native CLI Prerequisites (Cursor MCP Phase 0)
+
+**Mandatory before Cursor MCP registration** (Phase 1). Full plan: [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md).
+
+On WSL2, **Windows npm CLIs** (`/mnt/c/.../claude`, `codex`) fail with `Exec format error`. Cursor MCP spawns processes in WSL — install and authenticate **Linux-native** binaries only.
+
+| CLI | Install (WSL) | Auth | Verify |
+|-----|---------------|------|--------|
+| **Claude Code** | `npm install -g @anthropic-ai/claude-code` | OAuth: `claude login` **or** symlink `~/.claude/.credentials.json` ← Windows | `unset ANTHROPIC_API_KEY`; `claude --print --model sonnet "ok"` |
+| **Codex** | `npm install -g @openai/codex` | `codex login` → `~/.codex/auth.json` | `which codex` not under `/mnt/c/` |
+| **Antigravity** | `agy` in `~/.local/bin` | `agy auth login` (or install docs) | `agy --print --model gemini-2.5-flash "ok"` |
+
+**PATH rule:** `which claude` and `which codex` MUST resolve to WSL paths (e.g. `~/.nvm/.../bin/`), not `/mnt/c/Users/.../npm/`.
+
+**Phase 0 sign-off checklist** (all required before Phase 1):
+
+```
+[ ] claude  — WSL native + OAuth (no ANTHROPIC_API_KEY)
+[ ] codex   — WSL native + ~/.codex/auth.json
+[ ] agy     — WSL native + auth
+[ ] npm run build — project compiles
+```
+
 ### CLI inference knobs (subscription quota)
 
 Use provider CLIs directly to consume **subscription quota** (not Cursor Agent). Each CLI accepts model and reasoning controls mapped from [InferenceProfile](./decisions/TECH_STACK_INFERENCE_PROFILES.md) (TS-20).
 
-**Claude Code** (Anthropic MAX / OAuth — WSL: `~/.claude/.credentials.json` symlink from Windows):
+**Claude Code** (after Phase 0 above):
 
 ```bash
 unset ANTHROPIC_API_KEY
@@ -129,7 +154,7 @@ claude --print --model opus    --effort max    "Architecture trade-off synthesis
 
 CoT is controlled via profile `cot` (`off` | `brief` | `full`) in orchestrated calls; for manual CLI sessions, use explicit prompts (e.g. "think step by step" when `full` is desired) until adapter pass-through lands in Phase 0.
 
-**Codex** (OpenAI subscription — WSL-native install recommended):
+**Codex** (after WSL-native install + `codex login`):
 
 ```bash
 # reasoning_effort via MCP / config: minimal | medium | high

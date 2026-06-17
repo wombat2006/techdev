@@ -32,6 +32,8 @@ Reference: [Google Developers Blog — Transitioning Gemini CLI to Antigravity C
 
 ## Development Environment Setup
 
+**WSL2:** Install `agy` **inside WSL** (`~/.local/bin/agy`). Required for Cursor MCP Phase 0 — see [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md).
+
 ```bash
 # Install Antigravity CLI (official)
 curl -fsSL https://antigravity.google/cli/install.sh | bash
@@ -52,6 +54,7 @@ agy auth login
 | [SECURITY.md](./SECURITY.md) | CLI spawn security |
 | [GEMINI_CLI_INTEGRATION_GUIDE.md](./GEMINI_CLI_INTEGRATION_GUIDE.md) | Legacy Gemini CLI guide (reference; to be superseded by Antigravity) |
 | [WALL_BOUNCE_SYSTEM.md](./WALL_BOUNCE_SYSTEM.md) | Wall-Bounce provider configuration |
+| [CURSOR_MCP_PLAN.md](./CURSOR_MCP_PLAN.md) | WSL CLI prerequisite for Cursor MCP |
 
 ---
 

@@ -28,6 +28,7 @@ Details: [WALL_BOUNCE_SYSTEM.md](docs/WALL_BOUNCE_SYSTEM.md)
 |------|--------------|---------------|
 | Wall-Bounce Analysis | `src/services/wall-bounce-analyzer.ts` | [WALL_BOUNCE_SYSTEM.md](docs/WALL_BOUNCE_SYSTEM.md) |
 | MCP Integration | `src/services/mcp-integration-service.ts` | [MCP_SERVICES.md](docs/MCP_SERVICES.md) |
+| Cursor MCP (planned) | Phase 0: WSL CLI + auth first | [CURSOR_MCP_PLAN.md](docs/CURSOR_MCP_PLAN.md) |
 | API Routes | `src/routes/wall-bounce-api.ts` | [API_REFERENCE.md](docs/API_REFERENCE.md) |
 | Security & Auth | `src/middleware/` | [SECURITY.md](docs/SECURITY.md) |
 | System Architecture | `src/index.ts` | [ARCHITECTURE.md](docs/ARCHITECTURE.md) |
