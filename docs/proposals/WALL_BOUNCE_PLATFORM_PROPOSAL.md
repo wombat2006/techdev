@@ -121,6 +121,7 @@ TechSapo Core（フォーク元）
 | コード Agent | WB 統合 | **MCP 単体のみ** |
 | APS | e-Gov / NDL / 判例 | **未実装** |
 | 子タスク LLM 選定 | 最適化 | **taskType 固定リスト** |
+| プロンプト解析 | 形態素解析 + 辞書 | **regex 主体（Phase 0 で形態素解析へ）** |
 
 ### 3.3 現時点の適合ユースケース
 
@@ -137,11 +138,19 @@ TechSapo Core（フォーク元）
 
 | Phase | 内容 | 顧客価値 |
 |---|---|---|
-| **0** | Hard gate、PromptAnalyzer、辞書 v0、**憲法ラウンド enforce** | 品質契約の開始 |
+| **0** | Hard gate、PromptAnalyzer（**形態素解析**）、辞書 v0、**憲法ラウンド enforce** | 品質契約の開始 |
 | **1** | Grounding 統合、Context7、e-Gov 法令 API | 条文・API 正確性 |
 | **2** | 独自 DB、NDL、hybrid RAG | 社内手順・文献 citation |
 | **3** | Cipher verified、判例 Adapter | 運用記憶・事例 |
 | **4** | スケール、監査、SLA | エンタープライズ |
+
+### 形態素解析（Phase 0）
+
+日本語プロンプトの routing 精度向上のため、**PromptAnalyzer で形態素解析を行う**（regex 主体の AS-IS から移行）。
+
+- **実施タイミング**: プロンプト受信後、RAG / Grounding クエリ生成前（1 リクエスト 1 回）
+- **目的**: クエリ正規化、専門辞書照合、TaskRouter 特徴量、hybrid search 用 term 抽出
+- **詳細**: [WALL_BOUNCE_P5_ARCHITECTURE.md §7](../decisions/WALL_BOUNCE_P5_ARCHITECTURE.md#7-形態素解析の位置づけ)
 
 ### Grounding 優先順位
 

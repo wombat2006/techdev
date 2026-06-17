@@ -154,6 +154,7 @@ Priority is **not fixed** — reorder as needed during refinement.
 | TS-16 | S3 | Bucket layout, lifecycle, SSE-KMS | none | Amazon S3 | — |
 | TS-17 | LLM transport | HTTP streaming between co-located providers? | stdio/MCP + user SSE | **stdio/MCP default; HTTP SSE outer boundary only** | [TECH_STACK_LLM_PROVIDER_TRANSPORT.md](./decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md) |
 | TS-18 | Core vs add-on | Coupling strategy for fork / AWS / Grounding | partial / ad-hoc | **Loose add-ons; cohesive core + contracts** | [TECH_STACK_CORE_VS_ADDON_COUPLING.md](./decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md) |
+| TS-19 | Morphological analysis | Japanese prompt parsing for PromptAnalyzer | regex-only (B5) | **MeCab-class parser, Phase 0** | [WALL_BOUNCE_P5_ARCHITECTURE.md §7](./decisions/WALL_BOUNCE_P5_ARCHITECTURE.md#7-形態素解析の位置づけ) |
 
 ---
 

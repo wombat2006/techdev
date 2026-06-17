@@ -2,15 +2,15 @@
  * Slide definitions for TechSapo proposal deck
  */
 
-export const FOOTER = 'TechSapo Wall-Bounce Platform  |  Confidential';
+export const FOOTER = '$ techsapo/proposal  ·  region: ap-northeast-1  ·  CONFIDENTIAL';
 
 export const SLIDES = [
   {
     type: 'title',
-    eyebrow: 'TechSapo',
+    eyebrow: 'techsapo',
     title: 'Wall-Bounce Platform',
-    subtitle: 'フォーク可能な AI オーケストレーション基盤\n検証付き分析・コード生成・権威ソース Grounding',
-    meta: '技術提案書  |  AS-IS / To-Be 正直開示版  |  v1.1 · 2026-06-17',
+    subtitle: 'フォーク可能な AI オーケストレーション基盤\n検証付き分析 · コード生成 · Grounding Tier 0–3',
+    meta: '$ wall-bounce analyze --rounds 2-5 --providers agy,codex,claude  ·  v1.2-tech  ·  2026-06-17',
   },
   {
     type: 'content',
@@ -234,7 +234,7 @@ export const SLIDES = [
   {
     type: 'closing',
     title: 'Thank You',
-    tagline: 'Wall-Bounce Core — Fork Ready for Your Domain',
+    tagline: 'git push origin master — fork-ready core',
     team: 'TechSapo Development Team',
   },
 ];

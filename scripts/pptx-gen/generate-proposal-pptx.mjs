@@ -2,7 +2,7 @@
 /**
  * TechSapo 提案 PPTX
  *
- * Pipeline: slide-data → Satori (flexbox layout) → PNG → pptxgenjs
+ * Pipeline: slide-data → Satori (flexbox, tech theme) → PNG → pptxgenjs
  * HTML/CSS (slides/theme.css) はプレビュー用。レイアウト定義は satori-renderer と同期。
  *
  * Usage: node generate-proposal-pptx.mjs

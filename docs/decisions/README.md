@@ -17,7 +17,7 @@ Index of design decisions for TechSapo. Logic/rule ADRs are written in **English
 
 ## Planned (backlog)
 
-Tech stack decisions will be added as `TECH_STACK_<topic>.md` when accepted. See workspace backlog TS-01 … TS-18.
+Tech stack decisions will be added as `TECH_STACK_<topic>.md` when accepted. See workspace backlog TS-01 … TS-19.
 
 ---
 

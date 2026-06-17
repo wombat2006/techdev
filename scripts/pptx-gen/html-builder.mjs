@@ -26,6 +26,10 @@ function tableHtml(headers, rows) {
   return `<table class="data"><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
 }
 
+function chromeHtml(label = 'techsapo — wall-bounce-proposal') {
+  return `<div class="slide__chrome"><div class="slide__chrome-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div><span class="slide__chrome-label">${esc(label)}</span></div>`;
+}
+
 function footerHtml(show = true) {
   return show ? `<div class="slide__footer">${esc(FOOTER)}</div>` : '';
 }
@@ -109,8 +113,9 @@ export function slideToHtml(slide) {
   switch (slide.type) {
     case 'title':
       body = `
-<div class="slide slide--primary slide-title">
-  <div class="eyebrow">${esc(slide.eyebrow)}</div>
+<div class="slide slide--primary slide-title" style="padding-top:56px">
+  ${chromeHtml('techsapo — init')}
+  <div class="eyebrow">$ ${esc(slide.eyebrow)}</div>
   <h1>${esc(slide.title)}</h1>
   <p class="subtitle">${slide.subtitle.split('\n').map(esc).join('<br>')}</p>
   <p class="meta">${esc(slide.meta)}</p>
@@ -128,7 +133,8 @@ export function slideToHtml(slide) {
     case 'content': {
       const theme = slide.theme === 'light' ? ' slide--light' : '';
       body = `
-<div class="slide slide-content${theme}">
+<div class="slide slide-content${theme}" style="padding-top:56px">
+  ${chromeHtml()}
   <header class="slide__head"><h2>${esc(slide.title)}</h2></header>
   <div class="slide__main">
     ${bulletsHtml(slide.bullets)}
@@ -141,7 +147,8 @@ export function slideToHtml(slide) {
 
     case 'two-col':
       body = `
-<div class="slide slide-content slide-two-col">
+<div class="slide slide-content slide-two-col" style="padding-top:56px">
+  ${chromeHtml()}
   <header class="slide__head"><h2>${esc(slide.title)}</h2></header>
   <div class="slide__main">
     <div class="col">
@@ -159,7 +166,8 @@ export function slideToHtml(slide) {
 
     case 'table':
       body = `
-<div class="slide slide-content slide-table">
+<div class="slide slide-content slide-table" style="padding-top:56px">
+  ${chromeHtml()}
   <header class="slide__head"><h2>${esc(slide.title)}</h2></header>
   <div class="slide__main">
     ${tableHtml(slide.headers, slide.rows)}
@@ -170,7 +178,8 @@ export function slideToHtml(slide) {
 
     case 'flowchart':
       body = `
-<div class="slide slide-content slide-flowchart">
+<div class="slide slide-content slide-flowchart" style="padding-top:56px">
+  ${chromeHtml()}
   <header class="slide__head"><h2>${esc(slide.title)}</h2></header>
   <div class="slide__main">
     ${FLOWCHARTS[slide.variant] || ''}

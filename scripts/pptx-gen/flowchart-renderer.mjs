@@ -1,28 +1,5 @@
 import { TYPE } from './typography.mjs';
-
-const COLORS = {
-  primary: '#1A365D',
-  accent: '#2B6CB0',
-  light: '#F7FAFC',
-  text: '#2D3748',
-  muted: '#718096',
-  border: '#E2E8F0',
-  white: '#FFFFFF',
-  sky: '#4299E1',
-  green: '#276749',
-  greenBg: '#C6F6D5',
-  orange: '#C05621',
-  orangeBg: '#FEEBC8',
-};
-
-const NODE_COLORS = {
-  primary: { bg: COLORS.primary, fg: COLORS.white },
-  accent: { bg: COLORS.accent, fg: COLORS.white },
-  light: { bg: COLORS.light, fg: COLORS.text, border: COLORS.border },
-  sky: { bg: '#EBF8FF', fg: COLORS.primary, border: COLORS.sky },
-  green: { bg: COLORS.greenBg, fg: COLORS.green, border: COLORS.green },
-  orange: { bg: COLORS.orangeBg, fg: COLORS.orange, border: COLORS.orange },
-};
+import { COLORS, NODE_COLORS } from './theme-tech.mjs';
 
 function el(type, props, ...children) {
   const flat = children.flat().filter((c) => c !== null && c !== false && c !== '');
@@ -46,7 +23,7 @@ function flowNode(label, { sub, tone = 'primary', width, minWidth = 200 } = {}) 
     backgroundColor: c.bg,
     color: c.fg,
     padding: '16px 22px',
-    borderRadius: 14,
+    borderRadius: 8,
     border: c.border ? `2px solid ${c.border}` : 'none',
     fontSize: TYPE.flowLabel,
     fontFamily: 'Noto Sans JP',
@@ -69,7 +46,7 @@ function arrow(dir = 'down') {
   return el('div', {
     style: {
       fontSize: TYPE.flowArrow,
-      color: COLORS.accent,
+      color: COLORS.green,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

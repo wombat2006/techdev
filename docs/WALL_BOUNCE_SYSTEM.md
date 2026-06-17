@@ -49,6 +49,16 @@ const geminiConfig = {
 // Execution: spawn('agy', …) — migration in progress (current code uses legacy gemini)
 ```
 
+## Prompt Analysis (Planned — Phase 0)
+
+Japanese user prompts will undergo **morphological analysis** (形態素解析) in `PromptAnalyzer` before RAG / Grounding query generation — replacing regex-only parsing (P5 gap B5).
+
+- **When**: Once per request, before Grounding fetch
+- **Uses**: Query normalization, dictionary lookup, TaskRouter features, hybrid search term extraction
+- **Not used for**: Direct morpheme substitution of LLM prompts, embedding preprocessing, consensus scoring alone
+
+Details: [WALL_BOUNCE_P5_ARCHITECTURE.md §7](./decisions/WALL_BOUNCE_P5_ARCHITECTURE.md)
+
 ## Wall-Bounce Architecture
 
 ### Analysis Flow
