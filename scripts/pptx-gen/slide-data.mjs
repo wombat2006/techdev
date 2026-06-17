@@ -1,0 +1,208 @@
+/**
+ * Slide definitions for TechSapo proposal deck
+ */
+
+export const FOOTER = 'TechSapo Wall-Bounce Platform  |  Confidential';
+
+export const SLIDES = [
+  {
+    type: 'title',
+    eyebrow: 'TechSapo',
+    title: 'Wall-Bounce Platform',
+    subtitle: 'フォーク可能な AI オーケストレーション基盤\n検証付き分析・コード生成・権威ソース Grounding',
+    meta: '技術提案書  |  AS-IS / To-Be 正直開示版  |  2026',
+  },
+  {
+    type: 'content',
+    title: 'エグゼクティブサマリー',
+    bullets: [
+      'Wall-Bounce = 複数 LLM 協調 + Grounding による hallucination 低減基盤',
+      'コアをフォークし、InfraOps / LegalTech / DevAssist 等へ専門化可能',
+      'Codex + Claude Agent + Context7 による検証付きコード生成',
+      'P5+ で e-Gov 法令 API・NDL・社内 KB 等の権威ソース grounding を段階導入',
+    ],
+  },
+  { type: 'section', title: '課題', subtitle: '単一 LLM では足りない' },
+  {
+    type: 'content',
+    title: 'なぜ Wall-Bounce か',
+    bullets: [
+      'Hallucination: もっともらしい誤った条文・API・手順の生成',
+      '単一バイアス: 1 ベンダー・1 モデルの知識偏り',
+      '根拠欠如: 引用なしの断言',
+      'コード: 動くが誤 API・保守不能な実装',
+      '→ 多視点検証 + 外部根拠 + 品質ゲートが必要',
+    ],
+  },
+  { type: 'section', title: 'ソリューション', subtitle: 'TechSapo Wall-Bounce Platform' },
+  {
+    type: 'content',
+    title: '3 つの差別化',
+    bullets: [
+      '① フォーク可能コア — 専門辞書・Grounding・TaskRouter だけ差し替え',
+      '② 検証付きコード生成 — Assist / Agent / Verified の三段階',
+      '③ 権威ソース APS — e-Gov・NDL・社内正本 DB（P5+）',
+    ],
+  },
+  {
+    type: 'content',
+    title: 'アーキテクチャ概要',
+    bullets: [
+      '固定 Orchestrator — TaskGraph · Grounding · Hard gate · 監査',
+      'フレキシブル子タスク — TaskRouter が LLM を種別ごとに選択',
+      'Wall-Bounce — 合意が必要な子タスクのみ multi-LLM 実行',
+    ],
+    note: '詳細は次スライドの処理フロー図を参照。',
+  },
+  {
+    type: 'flowchart',
+    title: '全体処理フロー',
+    variant: 'overall',
+    note: 'Orchestrator は TypeScript 固定。LLM routing は子タスク単位。',
+  },
+  {
+    type: 'flowchart',
+    title: 'Wall-Bounce 協調フロー',
+    variant: 'wall-bounce',
+    note: 'parallel / sequential モード。Aggregator は Claude Opus が担当。',
+  },
+  {
+    type: 'two-col',
+    title: 'フォーク可能な専門プロジェクト',
+    leftTitle: '継承（コア）',
+    left: ['Wall-Bounce Engine', 'MCP 統合基盤', 'SSE / API パターン', 'Redis・Prometheus', '固定 Orchestrator'],
+    rightTitle: '差し替え（専門化）',
+    right: [
+      'InfraOps: 障害 KB / Runbook',
+      'LegalTech: e-Gov / 判例 / 規程',
+      'DevAssist: Context7 / コードベース',
+      'Research: NDL / 社内資料',
+      'forkProfile・辞書・disclaimer',
+    ],
+  },
+  { type: 'section', title: 'AS-IS', subtitle: '現状の正直な評価' },
+  {
+    type: 'table',
+    title: 'AS-IS: 実装済み vs ギャップ',
+    headers: ['領域', '状態', '備考'],
+    rows: [
+      ['Wall-Bounce コア', '✅ 実装済', 'parallel / sequential / Aggregator'],
+      ['マルチ LLM', '✅ 実装済', 'Gemini / Codex / Claude MCP'],
+      ['品質 Hard gate', '❌ 未実装', '閾値未満でも返却'],
+      ['confidence', '⚠️ 固定値', '参考表示のみ'],
+      ['Grounding 統合', '⚠️ 部分', 'RAG と WB 経路分離'],
+      ['APS (e-Gov/NDL)', '❌ 未実装', 'P5+ Phase 1–2'],
+      ['Codegen Agent WB 統合', '⚠️ 部分', 'MCP 単体は可'],
+    ],
+  },
+  {
+    type: 'content',
+    title: 'AS-IS 適合ユースケース',
+    bullets: [
+      '◎ 技術検討・ブレスト、実装案の壁打ち（PoC）',
+      '○ IT ログ分析補助、Drive RAG 併用 Q&A',
+      '△ コンプライアンス断定、法令解釈（disclaimer 必須）',
+      '× 法的効力を要する唯一の根拠',
+    ],
+    note: 'PoC と本番 SLA を区別してご利用ください。',
+  },
+  { type: 'section', title: 'To-Be', subtitle: 'P5+ ロードマップ' },
+  {
+    type: 'table',
+    title: 'P5+ フェーズ計画',
+    headers: ['Phase', '内容', '期間目安'],
+    rows: [
+      ['0', 'Hard gate、PromptAnalyzer、辞書 v0', '1〜1.5 ヶ月'],
+      ['1', 'Grounding 統合、Context7、e-Gov 法令 API', '1.5〜2 ヶ月'],
+      ['2', '独自 DB、NDL、hybrid RAG', '2〜3 ヶ月'],
+      ['3', 'Cipher verified、判例 Adapter', '1.5〜2 ヶ月'],
+      ['4', 'スケール、監査、SLA', '継続'],
+    ],
+  },
+  {
+    type: 'flowchart',
+    title: 'Grounding 統合フロー',
+    variant: 'grounding',
+    note: 'Tier 0（e-Gov / 社内 DB）と矛盾する claim は出力禁止。',
+  },
+  {
+    type: 'content',
+    title: 'Grounding 優先順位（Tier）',
+    bullets: [
+      'Tier 0: e-Gov 法令 API / 社内 DB 正本 — ファクト固定',
+      'Tier 1: NDL / Context7 / 判例 snippet — 準ファクト',
+      'Tier 2–3: 辞書 / Cipher / LLM 推論 — 補助・最低 weight',
+    ],
+  },
+  {
+    type: 'two-col',
+    title: '検証付きコード生成',
+    leftTitle: '3 モード',
+    left: ['Assist: 多 LLM 実装案', 'Agent: Write/Edit/Bash', 'Verified: test/lint/gate + CI'],
+    rightTitle: '期待効果（To-Be）',
+    right: [
+      '誤 API 参照: -40〜70%（Context7）',
+      '設計・実装矛盾: -25〜40%',
+      'Codex + Gemini + Sonnet 役割分担',
+    ],
+  },
+  {
+    type: 'flowchart',
+    title: 'コード生成 Verified フロー',
+    variant: 'codegen',
+    note: 'Verified パスのみ本番反映。Assist / Agent は PoC 段階で利用可。',
+  },
+  {
+    type: 'table',
+    title: '権威ソース（APS）',
+    headers: ['ソース', '公式 API', 'hallucination 低減'],
+    rows: [
+      ['e-Gov 法令 v2', '✅ あり', '条文文言: 極高'],
+      ['NDL Search', '✅ あり（申請要）', '文献メタ: 高'],
+      ['判例（裁判所）', '❌ なし', '事件メタ: 中（Adapter）'],
+      ['Context7', '✅ MCP', 'API/syntax: 高'],
+      ['独自 DB', '自社構築', '社内手順: 高'],
+    ],
+  },
+  {
+    type: 'table',
+    title: '提供パッケージ案',
+    headers: ['パッケージ', '構成', '想定顧客'],
+    rows: [
+      ['Core', 'Wall-Bounce + MCP + API', 'PoC / 実験'],
+      ['+ DevAssist', 'Context7 + Codegen Assist', '開発組織'],
+      ['+ InfraOps', '独自 DB + 辞書 + Cipher', 'SRE / HD'],
+      ['+ LegalTech', 'e-Gov + 判例 + 法律辞書', '法務・コンプライアンス IT'],
+      ['+ P5+ Full', 'gate + APS + 監査', 'エンタープライズ'],
+    ],
+  },
+  {
+    type: 'content',
+    title: 'ネクストステップ',
+    bullets: [
+      '1. ユースケース・フォーク方向の選定',
+      '2. AS-IS PoC（現行 Wall-Bounce API デモ）',
+      '3. Phase 0 共同 — Hard gate + 専門辞書 v0',
+      '4. KPI 合意 — citation 率、abstain 率、コスト',
+      '5. NDL 利用申請・法務 disclaimer 確認（LegalTech 時）',
+    ],
+  },
+  {
+    type: 'content',
+    title: '免責・リスク開示',
+    theme: 'light',
+    bullets: [
+      '本システムは AI 支援ツールであり、LegalTech は法律助言の代替ではありません。',
+      'AS-IS 段階では品質 gate 未実装のため、PoC と本番 SLA を区別してください。',
+      '判例は公式 API がなく、引用はメタデータ + 原文 snippet に限定します。',
+      'NDL 営利利用は事前申請が必要な場合があります。',
+      '詳細: docs/proposals/WALL_BOUNCE_PLATFORM_PROPOSAL.md',
+    ],
+  },
+  {
+    type: 'closing',
+    title: 'Thank You',
+    tagline: 'Wall-Bounce Core — Fork Ready for Your Domain',
+    team: 'TechSapo Development Team',
+  },
+];

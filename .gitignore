@@ -171,3 +171,7 @@ gpt-5-system-card.pdf
 
 # Embedded git repositories
 serena-mcp/
+
+# PPTX generator temp output & downloaded fonts
+scripts/pptx-gen/.tmp/
+scripts/pptx-gen/fonts/*.otf

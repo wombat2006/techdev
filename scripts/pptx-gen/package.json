@@ -1,0 +1,17 @@
+{
+  "name": "pptx-gen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "generate:proposal": "node generate-proposal-pptx.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "pptxgenjs": "^4.0.1",
+    "satori": "^0.26.0"
+  }
+}
