@@ -66,9 +66,10 @@ Each task block: **Purpose** → **Steps** → **Done when** → **Reflection me
 
 | Item | Status | Notes |
 |------|--------|-------|
-| `claude` WSL native | `[x]` | `npm install -g @anthropic-ai/claude-code`; OAuth via `~/.claude/.credentials.json` symlink |
-| `codex` WSL native | `[ ]` | Windows npm shim fails under WSL; install + `codex login` pending |
-| `agy` WSL native | `[~]` | `~/.local/bin/agy` v1.0.7; auth verify pending |
+| `claude` WSL native | `[x]` | Done on WSL before fork; verify in fork clone |
+| `codex` WSL native | `[ ]` | **After fork** — see [A-0.2](#a-02-codex-openai-subscription); Windows shim on PATH today |
+| `agy` WSL native | `[~]` | **After fork** — binary OK; auth verify in fork clone |
+| Fork `techdev-cursor` Day 0 | `[ ]` | [FORK_CURSOR § Fork bootstrap](./FORK_CURSOR.md#fork-bootstrap-mcp-implementation-ready) |
 | Cursor MCP registered | `[ ]` | Phase 1 not started |
 | Track A complete | `[ ]` | — |
 | Gate A→B passed | `[ ]` | — |
@@ -80,7 +81,23 @@ Each task block: **Purpose** → **Steps** → **Done when** → **Reflection me
 
 ## Track A — Cursor MCP only (TS-21)
 
+**Primary repo:** `techdev-cursor` fork — see [FORK_CURSOR.md](./FORK_CURSOR.md).  
 **Do not register Cursor MCP until A-0 sign-off is complete.**
+
+### Fork Day 0 (before MCP code)
+
+Complete in **`techdev-cursor`** clone — not upstream `techdev`. See [FORK_CURSOR § Fork bootstrap](./FORK_CURSOR.md#fork-bootstrap-mcp-implementation-ready).
+
+| # | Task | Done when |
+|---|------|-----------|
+| F1 | GitHub repo `techdev-cursor` + local clone + `upstream` remote | `[ ]` |
+| F2 | `git tag fork-base/5cc31f57` (or latest upstream doc commit) | `[ ]` |
+| F3 | `forkProfile.yaml` + `config/fork/*.json` stubs | `[ ]` |
+| F4 | Unified `config/cursor-mcp.template.json` + `techsapo-providers-mcp` npm script | `[ ]` |
+| F5 | README fork-primary banner | `[ ]` |
+| F6 | First push to `origin` (`techdev-cursor`) | `[ ]` |
+
+**Then:** Track A-0 (WSL CLI). **Codex WSL install + auth (A-0.2) runs after fork** — avoids mixing upstream git with CLI setup churn.
 
 ### A-0: WSL native install + authentication
 
@@ -132,6 +149,8 @@ Each task block: **Purpose** → **Steps** → **Done when** → **Reflection me
 ---
 
 #### A-0.2 Codex (OpenAI subscription)
+
+**When:** **After Fork Day 0** (F1–F6). Do not block fork bootstrap on Codex WSL migration.
 
 **Purpose:** GPT-5 / Codex peer provider on WSL for MCP spawn.
 
