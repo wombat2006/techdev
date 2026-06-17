@@ -14,39 +14,84 @@ The Wall-Bounce analysis system is the core capability that coordinates multiple
 - **Japanese responses**: Primary language for user-facing output
 - **Same-node transport**: stdio/MCP between orchestrator and providers; HTTP SSE for external clients only — [TECH_STACK_LLM_PROVIDER_TRANSPORT.md](./decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md)
 
+### Inference Profiles (Model, Effort, CoT, Temperature)
+
+All provider invocations SHOULD resolve an **`InferenceProfile`** before spawn/MCP call. Logic ADR: [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md) (TS-20).
+
+**Resolution order**: preset → TaskRouter / PromptAnalyzer default → optional per-request override.
+
+```typescript
+interface InferenceProfile {
+  model?: string;       // haiku | sonnet | opus | gpt-5-codex | gemini-2.5-flash | …
+  temperature?: number; // 0.0–1.0; keep low for code, law, aggregation
+  effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max' | 'minimal';
+  cot?: 'off' | 'brief' | 'full';  // Chain-Of-Thought — independent of effort
+}
+```
+
+#### Presets
+
+| Preset | Model (typical) | effort | temperature | cot | Use |
+|--------|-----------------|--------|-------------|-----|-----|
+| `fast` | Haiku / Flash | low / minimal | 0.2 | off | Short Q&A, routing |
+| `balanced` | Sonnet / gpt-5 | medium | 0.5 | brief | Default work |
+| `deep` | Sonnet / Pro | high | 0.3 | full | Design, review |
+| `critical` | Opus (aggregator) | max / high | 0.2 | brief | Synthesis only |
+
+**Peer providers** (Tier 1–3: `agy`, `codex`, `claude`) use TaskRouter-selected presets. **Aggregator** (Tier 4: Opus) uses preset `critical` with pinned overrides.
+
+#### CoT vs Thinking Effort vs SSE "thinking"
+
+| Knob | Controls |
+|------|----------|
+| **`effort`** | Provider reasoning budget (Claude `--effort`, Codex `reasoning_effort`) |
+| **`cot`** | Chain-Of-Thought policy: prompt template + how much reasoning appears in output |
+| **SSE thinking events** | UI progress stream; enabled when `cot !== 'off'`; not a replacement for `effort` |
+
+Examples: `effort: high` + `cot: off` → deep internal reasoning, concise answer. `effort: low` + `cot: brief` → fast pass with short rationale.
+
+Planned config: `config/inference-profiles.json`. API (To-Be): `profile` and optional `inference` per provider on analyze requests.
+
 ### LLM Provider Configuration
 
-#### OpenAI
+Provider adapters map `InferenceProfile` → native CLI/MCP flags. Static defaults below; runtime values come from profiles.
+
+#### OpenAI (Codex CLI / MCP)
+
 ```typescript
 // GPT-5 only — GPT-4/GPT-4o forbidden
-const openaiConfig = {
-  model: 'gpt-5', // ONLY GPT-5 allowed
-  temperature: 0.7,
-  max_tokens: 2000
+const openaiDefaults: InferenceProfile = {
+  model: 'gpt-5-codex',
+  temperature: 0.5,
+  effort: 'medium',           // reasoning_effort: minimal | medium | high
+  cot: 'brief'
 };
 ```
 
-#### Anthropic
+#### Anthropic (Claude Code CLI / MCP)
+
+Peer provider (Tier 3). Models: **Haiku, Sonnet, Opus** (aliases or full ids). OAuth / MAX via CLI — no direct API keys in code.
+
 ```typescript
-// SDK only — no API_KEY (MAX x5 Plan cost avoidance)
-import { Anthropic } from '@anthropic-ai/sdk';
-const anthropic = new Anthropic({
-  // SDK only; do not use direct API_KEY
-  apiKey: process.env.ANTHROPIC_SDK_KEY // SDK-only key
-});
+const claudeDefaults: InferenceProfile = {
+  model: 'claude-sonnet-4-5-20250929',
+  effort: 'medium',           // CLI: --effort low | medium | high | xhigh | max
+  cot: 'brief'
+};
+// CLI: claude --model sonnet --effort high --print "…"
 ```
 
-#### Google Gemini (via Antigravity CLI)
+#### Google (Antigravity CLI)
 
-Tier 1 provider. Models: **Gemini 2.5 Pro / Flash**. Spawn via **Antigravity CLI (`agy`)** (no embedded API keys). → [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)
+Tier 1. Models: **Gemini 2.5 Pro / Flash**. Spawn via **`agy`** (no embedded API keys). → [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)
 
 ```typescript
-const geminiConfig = {
-  model: 'gemini-2.5-flash', // or gemini-2.5-pro
-  temperature: 0.8,
-  maxTokens: 1500
+const agyDefaults: InferenceProfile = {
+  model: 'gemini-2.5-flash',
+  temperature: 0.3,
+  cot: 'brief'
 };
-// Execution: spawn('agy', …) — migration in progress (current code uses legacy gemini)
+// Execution: spawn('agy', ['--model', profile.model, …]) — migration in progress (legacy gemini in AS-IS code)
 ```
 
 ## Prompt Analysis (Planned — Phase 0)
@@ -236,19 +281,25 @@ const taskConfigs = {
     minProviders: 2,
     maxProviders: 2,
     confidenceThreshold: 0.7,
-    budgetTier: 'standard'
+    budgetTier: 'standard',
+    profile: 'fast' as const
   },
   premium: {
     minProviders: 3,
     maxProviders: 3,
     confidenceThreshold: 0.8,
-    budgetTier: 'premium'
+    budgetTier: 'premium',
+    profile: 'balanced' as const
   },
   critical: {
     minProviders: 3,
     maxProviders: 4,
     confidenceThreshold: 0.9,
-    budgetTier: 'unlimited'
+    budgetTier: 'unlimited',
+    profile: 'deep' as const,
+    aggregatorProfile: 'critical' as const  // Opus synthesis only
   }
 };
 ```
+
+Per-provider overrides: `{ inference: { 'claude-code': { model: 'haiku', effort: 'low', cot: 'off' } } }`. See [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md).

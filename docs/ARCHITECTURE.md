@@ -41,6 +41,8 @@ Multi-LLM orchestration engine ensuring quality through provider diversity.
 - `parallel`: Concurrent provider execution (default)
 - `sequential`: Wall-bounce chain with configurable depth (3-5)
 
+**Inference profiles (TS-20)**: Per-task control of model, thinking effort, CoT, and temperature via `InferenceProfile` presets — see [TECH_STACK_INFERENCE_PROFILES.md](./decisions/TECH_STACK_INFERENCE_PROFILES.md) and [WALL_BOUNCE_SYSTEM.md](./WALL_BOUNCE_SYSTEM.md#inference-profiles-model-effort-cot-temperature).
+
 ### 3. MCP Services Architecture
 
 Model Context Protocol integration for standardized LLM interactions.

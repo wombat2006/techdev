@@ -60,7 +60,8 @@
 | **decisions/TECH_STACK_AWS_PERIPHERAL.md** | AWS SES, S3, Secrets Manager, KMS (TS-13) | Architects / DevOps |
 | **decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md** | stdio/MCP same-node; HTTP SSE at API boundary (TS-17) | Architects / core devs |
 | **decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md** | Loose add-ons; cohesive Wall-Bounce core (TS-18) | Architects / leads |
-| **TECH_STACK_WORKSPACE.md** | Tech stack AS-IS inventory & decision backlog TS-01…19 | Architects / leads |
+| **decisions/TECH_STACK_INFERENCE_PROFILES.md** | Model, effort, CoT, temperature profiles (TS-20) | Architects / core devs |
+| **TECH_STACK_WORKSPACE.md** | Tech stack AS-IS inventory & decision backlog TS-01…20 | Architects / leads |
 
 ### Integration Guides
 | Document | Purpose | Audience |

@@ -2,9 +2,9 @@
 ## 技術提案書 — コア実装から専門プロジェクトへフォークする AI オーケストレーション基盤
 
 **文書種別**: 顧客向け技術提案（AS-IS / To-Be 正直開示版）  
-**版**: 1.2  
+**版**: 1.3  
 **日付**: 2026-06-17  
-**改訂**: 1.2 — ドキュメント監査反映（憲法・形態素解析・ADR 索引と整合）
+**改訂**: 1.3 — InferenceProfile（モデル・effort・CoT・temperature）方針を追記
 **機密区分**: 顧客提出用
 
 ---
@@ -139,7 +139,7 @@ TechSapo Core（フォーク元）
 
 | Phase | 内容 | 顧客価値 |
 |---|---|---|
-| **0** | Hard gate、PromptAnalyzer（**形態素解析**）、辞書 v0、**憲法ラウンド enforce** | 品質契約の開始 |
+| **0** | Hard gate、PromptAnalyzer（**形態素解析**）、辞書 v0、**憲法ラウンド enforce**、**InferenceProfile** | 品質契約の開始 |
 | **1** | Grounding 統合、Context7、e-Gov 法令 API | 条文・API 正確性 |
 | **2** | 独自 DB、NDL、hybrid RAG | 社内手順・文献 citation |
 | **3** | Cipher verified、判例 Adapter | 運用記憶・事例 |
@@ -152,6 +152,21 @@ TechSapo Core（フォーク元）
 - **実施タイミング**: プロンプト受信後、RAG / Grounding クエリ生成前（1 リクエスト 1 回）
 - **目的**: クエリ正規化、専門辞書照合、TaskRouter 特徴量、hybrid search 用 term 抽出
 - **詳細**: [WALL_BOUNCE_P5_ARCHITECTURE.md §7](../decisions/WALL_BOUNCE_P5_ARCHITECTURE.md#7-形態素解析の位置づけ)
+
+### InferenceProfile（Phase 0）
+
+子タスクおよび provider 呼び出しごとに **モデル・Thinking Effort・CoT（Chain-Of-Thought）・temperature** を統一スキーマで制御する。
+
+| パラメータ | 例 | 用途 |
+|------------|-----|------|
+| **model** | Haiku / Sonnet / Opus、GPT-5 Codex、Gemini Pro / Flash | コスト・能力の trade-off |
+| **effort** | low … max（Claude `--effort`、Codex `reasoning_effort`） | 推論深度 |
+| **cot** | off / brief / full | CoT の有無と出力露出（effort と独立） |
+| **temperature** | 0.2–0.5 | コード・法令は低、創造系のみ高 |
+
+Preset: `fast` / `balanced` / `deep` / `critical`（Opus 合成専用）。Claude Code / Codex / Antigravity は **同列 provider**。
+
+- **詳細**: [TECH_STACK_INFERENCE_PROFILES.md](../decisions/TECH_STACK_INFERENCE_PROFILES.md)
 
 ### Grounding 優先順位
 
@@ -177,7 +192,7 @@ TechSapo Core（フォーク元）
 ## 6. 固定 Orchestrator + フレキシブル子タスク
 
 - **固定**: フロー、Grounding Tier、gate、監査、合意ルール
-- **可変**: 子タスクごとの LLM（codegen→Codex、分析→Antigravity / Gemini 2.5 Pro、編集→Sonnet Agent）
+- **可変**: 子タスクごとの LLM と **InferenceProfile**（model / effort / CoT / temperature）
 - **Wall-Bounce**: 合意が必要な子タスクのみ（コスト最適化）
 
 ---
@@ -217,6 +232,7 @@ TechSapo Core（フォーク元）
 ## 付録
 
 - 内部 ADR: [`../decisions/WALL_BOUNCE_P5_ARCHITECTURE.md`](../decisions/WALL_BOUNCE_P5_ARCHITECTURE.md)
+- InferenceProfile: [`../decisions/TECH_STACK_INFERENCE_PROFILES.md`](../decisions/TECH_STACK_INFERENCE_PROFILES.md)
 - エージェント憲法: [`../CLAUDE.md`](../CLAUDE.md)
 - スライド: [`TechSapo_Wall_Bounce_Proposal.pptx`](./TechSapo_Wall_Bounce_Proposal.pptx)
 

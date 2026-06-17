@@ -13,12 +13,13 @@ Index of design decisions for TechSapo. Logic/rule ADRs are written in **English
 | TS-17 | [TECH_STACK_LLM_PROVIDER_TRANSPORT.md](./TECH_STACK_LLM_PROVIDER_TRANSPORT.md) | **Accepted** | stdio/MCP same-node; HTTP SSE at API boundary |
 | TS-18 | [TECH_STACK_CORE_VS_ADDON_COUPLING.md](./TECH_STACK_CORE_VS_ADDON_COUPLING.md) | **Accepted (direction)** | Loose add-ons; cohesive Wall-Bounce core |
 | TS-19 | [WALL_BOUNCE_P5_ARCHITECTURE.md §7](./WALL_BOUNCE_P5_ARCHITECTURE.md#7-形態素解析の位置づけ) | **Accepted (direction)** | Morphological analysis for PromptAnalyzer (Phase 0) |
+| TS-20 | [TECH_STACK_INFERENCE_PROFILES.md](./TECH_STACK_INFERENCE_PROFILES.md) | **Accepted (direction)** | InferenceProfile: model, effort, CoT, temperature |
 | — | [TECH_STACK_WORKSPACE.md](../TECH_STACK_WORKSPACE.md) | **Preparation** | Tech stack refinement workspace |
 | — | [_TEMPLATE_TECH_STACK.md](./_TEMPLATE_TECH_STACK.md) | Template | New stack decision template |
 
 ## Planned (backlog)
 
-Tech stack decisions will be added as `TECH_STACK_<topic>.md` when accepted. See workspace backlog TS-01 … TS-19.
+Tech stack decisions will be added as `TECH_STACK_<topic>.md` when accepted. See workspace backlog TS-01 … TS-20.
 
 ---
 

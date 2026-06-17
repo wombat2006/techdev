@@ -114,6 +114,44 @@ Key variables defined in `src/config/environment.ts`:
 - **Database**: MySQL2 for audit logs and monitoring data
 - **Monitoring**: Prometheus + Grafana stack in Docker containers
 
+### CLI inference knobs (subscription quota)
+
+Use provider CLIs directly to consume **subscription quota** (not Cursor Agent). Each CLI accepts model and reasoning controls mapped from [InferenceProfile](./decisions/TECH_STACK_INFERENCE_PROFILES.md) (TS-20).
+
+**Claude Code** (Anthropic MAX / OAuth — WSL: `~/.claude/.credentials.json` symlink from Windows):
+
+```bash
+unset ANTHROPIC_API_KEY
+claude --print --model haiku   --effort low    "Short classification task"
+claude --print --model sonnet  --effort medium "Implement InferenceProfile types"
+claude --print --model opus    --effort max    "Architecture trade-off synthesis"
+```
+
+CoT is controlled via profile `cot` (`off` | `brief` | `full`) in orchestrated calls; for manual CLI sessions, use explicit prompts (e.g. "think step by step" when `full` is desired) until adapter pass-through lands in Phase 0.
+
+**Codex** (OpenAI subscription — WSL-native install recommended):
+
+```bash
+# reasoning_effort via MCP / config: minimal | medium | high
+codex "Review wall-bounce-analyzer provider init"
+```
+
+**Antigravity** (`agy`):
+
+```bash
+agy --print --model gemini-2.5-flash "Summarize query"
+agy --print --model gemini-2.5-pro   "Deep analysis"
+```
+
+| Knob | Claude | Codex | agy |
+|------|--------|-------|-----|
+| Model | `--model` | config / CLI | `--model` |
+| Effort | `--effort low…max` | `reasoning_effort` | provider-specific |
+| CoT | profile `cot` → prompt policy | profile `cot` | profile `cot` |
+| Temperature | profile / settings | when supported | generation config |
+
+Peer providers: `claude`, `codex`, `agy`. Opus is **aggregator-only** (preset `critical`).
+
 ## 📁 Project Structure
 
 ```
