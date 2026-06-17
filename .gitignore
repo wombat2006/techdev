@@ -7,11 +7,13 @@ pnpm-debug.log*
 
 # Environment variables and secrets
 .env
+.env.*
+!.env.example
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-*.env
+.env.test
 
 # Build outputs
 dist/
@@ -58,9 +60,7 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-.env.test
+# dotenv — *.env は .env.example を誤除外しうるため個別指定に統一（上記参照）
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -75,7 +75,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# NOTE: public/ はフロントエンド資産で使用中 — 除外しない（旧 Gatsby 設定を削除）
 
 # vuepress build output
 .vuepress/dist
@@ -127,14 +127,15 @@ temp/
 # API Keys and Secrets (additional security)
 **/secrets/
 **/*secret*
-**/*key*
-**/*token*
 config/secrets.json
 config/keys.json
+# 証明書・秘密鍵（*.key は下の Certificate files でカバー）
+# 注意: **/*key* は monkey-patch.ts 等を誤除外するため使用しない
 
 # MCP Configuration (may contain sensitive data)
-~/.codex/
-~/.claude.json
+# リポジトリ外パス — git では無効だが意図のメモとして残す
+# ~/.codex/
+# ~/.claude.json
 
 # Local configuration overrides
 config/local.json
@@ -143,8 +144,12 @@ config/production.json
 
 # Database files
 *.db
+*.db-wal
+*.db-shm
+*.db-journal
 *.sqlite
 *.sqlite3
+data/
 
 # Backup files
 *.bak
