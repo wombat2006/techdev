@@ -176,7 +176,7 @@ Response to Wall-Bounce
 - **Vector Storage**: For RAG embeddings (future)
 
 ### LLM Integration
-- **CLI Tools**: `gemini`, `codex` command-line interfaces
+- **CLI Tools**: `agy` (Antigravity, Tier 1 Google), `codex` (OpenAI); legacy `gemini` spawn may remain until migration — [ANTIGRAVITY_CLI_MIGRATION.md](./ANTIGRAVITY_CLI_MIGRATION.md)
 - **SDK**: Anthropic SDK for internal calls
 - **MCP**: `@modelcontextprotocol/sdk`
 

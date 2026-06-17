@@ -52,11 +52,19 @@
 | **MONITORING_OPERATIONS.md** | Monitoring & metrics | Operations |
 | **API_REFERENCE.md** | API specifications | API consumers |
 
+### Architecture Decision Records
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| **decisions/README.md** | ADR index + stack decision template | All developers |
+| **decisions/WALL_BOUNCE_P5_ARCHITECTURE.md** | P5+ roadmap, Orchestrator, Grounding, morphological analysis | Architects / core devs |
+| **decisions/TECH_STACK_AWS_PERIPHERAL.md** | AWS SES, S3, Secrets Manager, KMS (TS-13) | Architects / DevOps |
+| **decisions/TECH_STACK_LLM_PROVIDER_TRANSPORT.md** | stdio/MCP same-node; HTTP SSE at API boundary (TS-17) | Architects / core devs |
+| **decisions/TECH_STACK_CORE_VS_ADDON_COUPLING.md** | Loose add-ons; cohesive Wall-Bounce core (TS-18) | Architects / leads |
+| **TECH_STACK_WORKSPACE.md** | Tech stack AS-IS inventory & decision backlog TS-01…19 | Architects / leads |
+
 ### Integration Guides
 | Document | Purpose | Audience |
 |----------|---------|----------|
-| **TECH_STACK_WORKSPACE.md** | Tech stack AS-IS inventory & decision backlog (prep) | Architects / leads |
-| **decisions/README.md** | ADR index + stack decision template | All developers |
 | **codex-mcp-implementation.md** | Codex MCP integration | Developers |
 | **mcp-integration-guide.md** | MCP protocol patterns | Integration engineers |
 | **gemini-api-migration-guide.md** | Gemini API / Antigravity 関連 | Developers |
